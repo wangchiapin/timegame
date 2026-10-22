@@ -321,19 +321,13 @@ if __name__ == '__main__':
             sc = pg.evaluate("App.score")
             check(sc < 100, '%s wrong-answers round finished (score=%s)' % (sub, sc))
 
-        print('== 綜合挑戰與排行榜')
-        pg.evaluate("renderStart()"); pg.evaluate("App.name='小明'")
+        print('== 綜合挑戰')
+        pg.evaluate("renderStart()"); pass
         pg.evaluate("startRound('all','mix','mix',true)")
         run_round(pg, True)
         check(pg.evaluate("App.score") == 200, 'mixed challenge perfect = 200')
         pg.wait_for_timeout(600)
-        sets = pg.evaluate("(window.__ops||[]).filter(o=>o.k==='set' && o.p.indexOf('timeBoard/')===0)")
-        check(len(sets) == 1 and sets[0]['d']['score'] == 200 and sets[0]['d']['name'] == '小明' and set(sets[0]['d'].keys()) == {'name', 'score', 'updatedAt'}, 'leaderboard write has name/score/updatedAt only: %s' % sets)
-        check('Ana' in pg.inner_text('#lbtop'), 'top-10 table shown on result screen')
-        adds = pg.evaluate("(window.__ops||[]).filter(o=>o.k==='add' && o.p==='plays')")
-        upds = pg.evaluate("(window.__ops||[]).filter(o=>o.k==='update')")
-        check(len(adds) >= 1 and adds[-1]['d']['game'] == 'time', 'plays start recorded with game id time')
-        check(len(upds) >= 1 and upds[-1]['d']['done'] is True, 'plays end recorded')
+        check(pg.evaluate("!document.body.innerHTML.includes('firebase')"), 'no firebase')
 
         print('== 設定組合（字形 × 語言 × 拼音）：每種都跑完一輪')
         combos = [('trad','es','pinyin'), ('simp','en','zhuyin'), ('trad','zh','both'), ('simp','es','off')]

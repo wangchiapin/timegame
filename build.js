@@ -6,7 +6,6 @@ const K = p => fs.readFileSync(path.join(KIT, p), 'utf8');
 const GAME_ID = 'time';
 
 const mute = K('mute.js').replace(/__GAME__/g, GAME_ID).replace(/__POS__/g, 'left:8px;bottom:22px').replace(/__MOUNT__/g, '');
-const plays = K('plays.js').replace('REPLACE_GAME_ID', GAME_ID);
 const main = ['01-core.js', '02-gen.js', '03-ui.js'].map(S).join('\n');
 
 const html = `<!doctype html>
@@ -34,7 +33,6 @@ ${K('voicehint.js')}
 <script>
 ${K('copyright.js')}
 </script>
-${plays}
 </body>
 </html>
 `;

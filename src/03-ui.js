@@ -16,7 +16,7 @@ const STR = {
   setRate:  L('語速', 'Voz', 'Voice'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
-  mixSub:   L('20 題，所有單元混在一起，可以進排行榜', '20 preguntas de todas las unidades; cuenta para la clasificación', '20 questions from every unit — counts for the leaderboard'),
+  mixSub:   L('20 題，所有單元混在一起，看看你的最高分', '20 preguntas de todas las unidades; mira tu mejor puntaje', '20 questions from every unit — see your best score'),
   mixUnit:  L('這個單元全部混合（10 題）', 'Mezclar toda la unidad (10 preguntas)', 'Mix this whole unit (10 questions)'),
   board:    L('排行榜', 'Clasificación', 'Leaderboard'),
   hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
@@ -158,8 +158,7 @@ function seg(key, opts, cur){
 function renderStart(){
   App.round = null; try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
-  h += `<div class="card"><div class="setrow"><label>${Lh(STR.nameL)}</label><input type="text" id="nm" maxlength="14" value="${esc(App.name)}" placeholder="${esc(zhOf(STR.namePh))}"></div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
+  h += `<div class="card"><div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', '中＋西'], ['en', '中＋英'], ['zh', '純中文']], Settings.lang)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', '拼音'], ['zhuyin', '注音'], ['both', '兩者'], ['off', '關']], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', '慢'], ['normal', '一般'], ['fast', '快']], Settings.rate)}</div>`;
@@ -170,9 +169,7 @@ function renderStart(){
     u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
     h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
   });
-  h += `<button class="btn wide" id="lb" style="margin-top:10px">🏆 ${esc(zhOf(STR.board))}${trOf(STR.board) ? ' · ' + esc(trOf(STR.board)) : ''}</button>`;
   root().innerHTML = h;
-  $('#nm').addEventListener('input', e => { App.name = e.target.value.trim().slice(0, 14); try{ localStorage.setItem('timegame.name', App.name); }catch(err){} });
   $$('[data-seg]').forEach(box => box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     const k = box.dataset.seg, v = b.dataset.v;
@@ -184,7 +181,6 @@ function renderStart(){
   $$('[data-sub]').forEach(b => b.addEventListener('click', () => startRound([b.dataset.sub], App.lv, b.dataset.sub, false)));
   $$('[data-unitmix]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.unitmix); startRound(u.subs.map(s => s[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
-  $('#lb').addEventListener('click', () => showBoard());
 }
 
 /* =====================  出題與作答  ===================== */
@@ -192,7 +188,6 @@ function startRound(spec, lv, label, isMix){
   const n = isMix ? 20 : 10;
   App.round = { spec, lv, label, isMix, n };
   App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
-  try{ window.HGPlays && HGPlays.start(label + ':' + lv, App.name); }catch(e){}
   renderQ();
 }
 function optHTML(o){
@@ -359,77 +354,16 @@ function answerMatch(){
 }
 
 /* =====================  結果與排行榜  ===================== */
-const LB = (function(){
-  const CFG = { apiKey:'AIzaSyC_YSDn2OH6_GKKwCq0d8QFNl3fYXzTC60', authDomain:'memorma-24dab.firebaseapp.com', projectId:'memorma-24dab', appId:'1:806709458465:web:f0d12acb2f911f2f165560' };
-  const V = '10.12.2', CDN = 'https://www.gstatic.com/firebasejs/' + V + '/', COL = 'timeBoard';
-  let readyP = null;
-  function ready(){
-    if (readyP) return readyP;
-    readyP = (async () => {
-      const A = await import(CDN + 'firebase-app.js'), Au = await import(CDN + 'firebase-auth.js'), F = await import(CDN + 'firebase-firestore.js');
-      const app = A.initializeApp(CFG, 'timeboard'), auth = Au.getAuth(app);
-      if (!auth.currentUser) await Au.signInAnonymously(auth); else await auth.authStateReady();
-      return { F, db:F.getFirestore(app), uid:auth.currentUser.uid };
-    })().catch(() => { readyP = null; return null; });
-    return readyP;
-  }
-  async function submit(name, score){
-    const L0 = await ready(); if (!L0) return false;
-    try{
-      const ref = L0.F.doc(L0.db, COL, L0.uid); let prev = -1;
-      try{ const s = await L0.F.getDoc(ref); if (s.exists()) prev = s.data().score; }catch(e){}
-      if (score <= prev) return true;
-      await L0.F.setDoc(ref, { name:String(name).slice(0, 14), score, updatedAt:L0.F.serverTimestamp() });
-      return true;
-    }catch(e){ return false; }
-  }
-  async function top(){
-    const L0 = await ready(); if (!L0) return null;
-    try{
-      const q = L0.F.query(L0.F.collection(L0.db, COL), L0.F.orderBy('score', 'desc'), L0.F.limit(10));
-      const s = await L0.F.getDocs(q);
-      return s.docs.map(d => d.data());
-    }catch(e){ return null; }
-  }
-  return { submit, top };
-})();
 function localBest(){ try{ return +localStorage.getItem('timegame.best') || 0; }catch(e){ return 0; } }
-function boardHTML(rows){
-  if (rows === null) return `<div class="note">${Lh(STR.lbFail)}</div>`;
-  if (!rows.length) return `<div class="note">${Lh(STR.lbEmpty)}</div>`;
-  return '<table class="board">' + rows.map((r, i) => `<tr><td style="width:34px">${i + 1}</td><td>${esc(r.name || '')}</td><td class="r">${esc(r.score)}</td></tr>`).join('') + '</table>';
-}
 function showResult(){
   const r = App.round, n = App.qs.length, max = n * 10, ratio = App.score / max;
   const msg = ratio >= 0.9 ? L('太棒了！', '¡Excelente!', 'Excellent!') : ratio >= 0.7 ? L('很好！', '¡Muy bien!', 'Well done!') : ratio >= 0.5 ? L('不錯，再練習一下。', 'Bien, practica un poco más.', 'Good, keep practicing.') : L('再試一次，你可以的！', 'Inténtalo otra vez, ¡puedes!', 'Try again, you can do it!');
-  try{ window.HGPlays && HGPlays.end({ score:App.score, secs:Math.round((Date.now() - App.t0) / 1000), name:App.name }); }catch(e){}
   if (App.score > localBest() && r.isMix){ try{ localStorage.setItem('timegame.best', String(App.score)); }catch(e){} }
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
-  if (r.isMix){
-    h += `<div class="card"><div id="lbsave" class="note">${App.name ? Lh(STR.loading) : Lh(STR.lbNeedName)}</div><div id="lbtop"></div></div>`;
-  }
+  if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
   root().innerHTML = h; window.scrollTo(0, 0);
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);
-  if (r.isMix){
-    (async () => {
-      let saved = false;
-      if (App.name) saved = await LB.submit(App.name, App.score);
-      const rows = await LB.top();
-      const a = $('#lbsave'), b = $('#lbtop'); if (!a || !b) return;
-      a.innerHTML = App.name ? (saved ? Lh(STR.lbSaved) : Lh(STR.lbFail)) : Lh(STR.lbNeedName);
-      b.innerHTML = boardHTML(rows);
-    })();
-  }
 }
-function showBoard(){
-  const ov = document.createElement('div'); ov.className = 'overlay';
-  ov.innerHTML = `<div class="panel"><h3>🏆 ${esc(zhOf(STR.board))} · ${esc(zhOf(STR.mix))}</h3><div id="bd" class="note">${Lh(STR.loading)}</div><div class="note">${Li(STR.best)}：${localBest()}</div><button class="btn wide" id="bclose">${Lh(STR.close)}</button></div>`;
-  document.body.appendChild(ov);
-  $('#bclose', ov).addEventListener('click', () => ov.remove());
-  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
-  LB.top().then(rows => { const b = $('#bd', ov); if (b) b.innerHTML = boardHTML(rows); });
-}
-
 renderStart();
