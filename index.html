@@ -1,0 +1,1650 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ebe5d6">
+<title>練習時間 · ¿Qué hora es?</title>
+<style>
+:root{
+  --bg:#ebe5d6; --card:#f6f2e8; --card2:#efe9db; --ink:#2b2a27; --sub:#6d675a; --line:#c4baa3;
+  --accent:#4c5a4b; --ok:#4f7a54; --okbg:#dfe9d6; --bad:#a8503c; --badbg:#f1dcd3; --hl:#e6d6a6; --red:#a8503c;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.5}
+body{min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{max-width:560px;margin:0 auto;padding:12px 14px 90px}
+h1,h2,h3{margin:0;font-weight:600}
+.small{font-size:13px;color:var(--sub)}
+.tr{display:block;font-size:13px;color:var(--sub);line-height:1.35;font-weight:400}
+.tr.inline{display:inline;margin-left:6px}
+
+/* 字＋拼音／注音 */
+.ch{display:inline-flex;flex-direction:column;align-items:center;margin:0 1px;vertical-align:bottom}
+.ch .h{line-height:1.25}
+.ch .ph{font-size:.5em;line-height:1.15;color:var(--sub);white-space:nowrap;min-height:1.15em;font-weight:400}
+.ch.np{margin:0}
+
+/* 版面 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;min-height:44px;text-align:center}
+.btn:active{background:var(--card2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#f6f2e8}
+.btn.primary:active{filter:brightness(.92)}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn.wide{width:100%}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+.seg button{flex:1;border:0;border-right:1px solid var(--line);background:transparent;padding:8px 4px;font-size:14px;min-height:40px}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--accent);color:#f6f2e8}
+.setrow{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center;margin:8px 0}
+.setrow label{font-size:13px;color:var(--sub);line-height:1.25}
+input[type=text]{width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit;background:#fbf9f3;color:var(--ink)}
+
+/* 開始畫面 */
+.title{text-align:center;padding:10px 0 4px}
+.title h1{font-size:30px;letter-spacing:.12em}
+.title .sub{color:var(--sub);font-size:14px;margin-top:2px}
+.mixbtn{display:block;width:100%;text-align:left;padding:14px;border:1px solid var(--accent);border-radius:10px;background:var(--card);margin:10px 0}
+.mixbtn b{font-size:19px}
+.unit{border:1px solid var(--line);border-radius:10px;background:var(--card);margin:8px 0;overflow:hidden}
+.unit>button.uh{width:100%;text-align:left;background:transparent;border:0;padding:12px 14px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.unit>button.uh b{font-size:17px}
+.unit .subs{display:none;border-top:1px solid var(--line);padding:6px 10px 10px;background:var(--card2)}
+.unit.open .subs{display:block}
+.unit .subs .btn{display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px}
+.unit .subs .btn.mixu{border-color:var(--accent)}
+.arrow{color:var(--sub);transition:transform .15s}
+.unit.open .arrow{transform:rotate(90deg)}
+
+/* 遊戲畫面 */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.bar .btn{min-height:38px;padding:6px 12px}
+.prog{height:5px;background:var(--card2);border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.prog i{display:block;height:100%;background:var(--accent)}
+.instr{font-size:14px;color:var(--sub)}
+.qline{font-size:26px;margin:6px 0 2px;text-align:center}
+.qline .tr{font-size:13px;margin-top:2px}
+.vis{margin:8px 0;text-align:center}
+.vis .datebox{display:inline-block;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 14px;font-size:19px;margin-bottom:6px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.opts.one{grid-template-columns:1fr}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 8px;min-height:64px;font-size:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.opt .badge{font-size:15px;color:var(--sub);font-variant-numeric:tabular-nums}
+.opt .tr{font-size:12px}
+.opt svg{width:100%;max-width:150px;height:auto}
+.opt:active{background:var(--card2)}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.opt.sel{background:var(--hl)}
+.opt[disabled]{cursor:default}
+.hearbar{display:flex;gap:8px;justify-content:center;margin:6px 0;flex-wrap:wrap}
+.peek{text-align:center;margin:6px 0;font-size:22px}
+.fb{border-radius:10px;padding:12px 14px;margin:10px 0;border:1px solid var(--line);background:var(--card)}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.bad{background:var(--badbg);border-color:var(--bad)}
+.fb .big{font-weight:600;font-size:17px}
+.fb .ans{font-size:22px;margin:4px 0}
+.fb .why{font-size:14px;margin-top:6px}
+.foot{display:flex;justify-content:center;margin-top:10px}
+.foot .btn{min-width:180px}
+
+/* 時鐘 */
+svg.clock{display:block;margin:6px auto;width:min(74vw,250px);height:auto;touch-action:none;user-select:none}
+svg.clock.mini{width:100%;max-width:140px;margin:0 auto}
+.digi{font-variant-numeric:tabular-nums;font-size:24px;letter-spacing:.04em}
+.dialread{text-align:center;margin:2px 0;color:var(--sub);font-size:14px}
+
+/* 月曆 */
+.cal{margin:6px auto;max-width:440px}
+.cal .ct{text-align:center;font-size:16px;margin-bottom:4px;color:var(--ink)}
+.cal table{width:100%;border-collapse:collapse;table-layout:fixed;background:var(--card)}
+.cal th{font-weight:500;font-size:14px;padding:4px 0;border:1px solid var(--line);background:var(--card2)}
+.cal th.we,.cal td.we .n{color:var(--red)}
+.cal td{border:1px solid var(--line);height:52px;vertical-align:top;padding:2px;position:relative;font-size:13px;text-align:left}
+.cal td.empty{background:var(--card2)}
+.cal td .n{font-variant-numeric:tabular-nums;font-size:13px;line-height:1.2}
+.cal td .lb{display:block;font-size:11px;line-height:1.2;margin-top:2px;color:var(--accent);word-break:break-all}
+.cal td.tap{cursor:pointer}
+.cal td.tap:active{background:var(--hl)}
+.cal td.today{outline:2px solid var(--red);outline-offset:-2px}
+.cal td.today::after{content:attr(data-today);position:absolute;right:2px;bottom:1px;font-size:10px;color:var(--red)}
+.cal td.mark .n{display:inline-block;min-width:24px;text-align:center;border:2px solid var(--ink);border-radius:50%;line-height:20px;height:24px}
+.cal td.sel{background:var(--hl)}
+.cal td.good{background:var(--okbg)}
+.cal td.wrong{background:var(--badbg)}
+.detail{margin:8px auto;max-width:440px;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:8px 12px;min-height:60px;font-size:17px;text-align:center}
+.detail .small{display:block}
+
+/* 年曆 */
+.ycal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px auto;max-width:460px}
+.ycal .mm{border:1px solid var(--line);background:var(--card);border-radius:6px;padding:3px 4px}
+.ycal .mm.cur{border:2px solid var(--red)}
+.ycal .mm .mt{font-size:12px;text-align:center;color:var(--ink);margin-bottom:1px}
+.ycal .mm.cur .mt{color:var(--red);font-weight:600}
+.ycal table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ycal td{font-size:8px;text-align:center;line-height:1.35;color:var(--sub);padding:0}
+.ycal td.t{color:#fff;background:var(--red);border-radius:50%}
+.ytitle{text-align:center;font-size:19px;margin:2px 0}
+
+/* 行程配對 */
+.match{margin:8px 0}
+.slot{display:flex;align-items:center;gap:8px;margin:6px 0}
+.slot .tm{flex:0 0 78px;text-align:center;border:1px solid var(--line);background:var(--card2);border-radius:8px;padding:6px 2px;font-size:19px;font-variant-numeric:tabular-nums;min-height:48px;display:flex;align-items:center;justify-content:center}
+.slot .tm svg{width:54px;height:54px}
+.slot .box{flex:1;min-height:52px;border:1px dashed var(--line);border-radius:8px;background:var(--card);padding:4px 6px;font-size:17px;display:flex;align-items:center;cursor:pointer}
+.slot .box.filled{border-style:solid}
+.slot .box.ok{background:var(--okbg);border-color:var(--ok)}
+.slot .box.bad{background:var(--badbg);border-color:var(--bad)}
+.cards{display:grid;grid-template-columns:1fr;gap:6px;margin-top:10px}
+.cardb{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:17px;text-align:left;min-height:48px}
+.cardb.sel{background:var(--hl);border-color:var(--ink)}
+.cardb.used{opacity:.35}
+.cardb .tr{font-size:12px}
+
+/* 結果 */
+.result{text-align:center}
+.result .score{font-size:54px;font-weight:600;margin:6px 0;font-variant-numeric:tabular-nums}
+.result .msg{margin:4px 0 12px}
+.board{width:100%;border-collapse:collapse;margin:8px 0}
+.board td,.board th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+.board td.r,.board th.r{text-align:right;font-variant-numeric:tabular-nums}
+.note{font-size:13px;color:var(--sub);margin:6px 0}
+.overlay{position:fixed;inset:0;background:rgba(43,42,39,.45);display:flex;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:20px 12px}
+.overlay .panel{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;width:100%;max-width:460px}
+@media (min-width:700px){#app{padding-top:24px}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ===== 一鍵靜音（只關音樂和音效，不影響念字的語音）— 每天一分鐘遊戲統一做法 ===== */
+(function(){
+  var KEY='hg.mute.time', MOUNT='', muted=false, masters=[];
+  try{ muted = localStorage.getItem(KEY)==='1'; }catch(e){}
+  /* 讓這個遊戲建立的所有 Web Audio 聲音，都先經過一個總音量；靜音＝總音量 0 */
+  try{
+    var BP = window.BaseAudioContext ? window.BaseAudioContext.prototype : (window.AudioContext||window.webkitAudioContext).prototype;
+    var desc = Object.getOwnPropertyDescriptor(BP,'destination');
+    if(desc && desc.get){
+      Object.defineProperty(BP,'destination',{configurable:true,get:function(){
+        var real = desc.get.call(this);
+        if(!this.__hgMaster){
+          try{ var g=this.createGain(); g.gain.value = muted?0:1; g.connect(real); this.__hgMaster=g; masters.push(g); }
+          catch(e){ return real; }
+        }
+        return this.__hgMaster;
+      }});
+    }
+  }catch(e){}
+  /* 備用的 <audio> 播放（例如 iPhone 的 Chrome）也一起靜音 */
+  try{
+    var op = HTMLMediaElement.prototype.play;
+    HTMLMediaElement.prototype.play = function(){ this.muted = muted; return op.apply(this, arguments); };
+  }catch(e){}
+  function apply(){ masters.forEach(function(g){ try{ g.gain.setValueAtTime(muted?0:1, g.context.currentTime); }catch(e){ g.gain.value = muted?0:1; } }); }
+  function build(){
+    if(document.getElementById('hgMute')) return;
+    var st=document.createElement('style');
+    st.textContent='#hgMute{position:fixed;left:8px;bottom:22px;z-index:2147483000;width:40px;height:40px;border-radius:50%;border:1px solid rgba(0,0,0,.28);background:rgba(255,255,255,.88);color:#222;font-size:19px;line-height:1;padding:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent}#hgMute:active{transform:scale(.94)}#hgMute.st{position:static;flex:0 0 40px;margin:0 0 0 8px}';
+    document.head.appendChild(st);
+    var b=document.createElement('button'); b.type='button'; b.id='hgMute';
+    function paint(){ b.textContent = muted?'🔇':'🔊'; b.setAttribute('aria-pressed', muted?'true':'false');
+      b.title = b.ariaLabel = muted ? '開啟音樂和音效 · Activar música y efectos' : '靜音（音樂和音效）· Silenciar música y efectos'; apply(); }
+    b.addEventListener('click',function(e){ e.stopPropagation(); muted=!muted; try{ localStorage.setItem(KEY, muted?'1':'0'); }catch(err){} paint(); });
+    b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
+    paint();
+    var anchor = MOUNT && document.querySelector(MOUNT);
+    if(anchor && anchor.parentNode){ b.className='st'; anchor.parentNode.insertBefore(b, anchor.nextSibling); } else document.body.appendChild(b);
+  }
+  if(document.body) build(); else document.addEventListener('DOMContentLoaded', build);
+})();
+/* ===== /一鍵靜音 ===== */
+
+</script>
+<script>
+'use strict';
+/* =====================================================================
+   練習時間 ¿Qué hora es?  —  核心：工具、共用設定、字典、拼音／注音、數字與日期的中文說法
+   ===================================================================== */
+
+/* ---------- 小工具 ---------- */
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const randInt = (a, b) => a + rnd(b - a + 1);
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = rnd(i + 1); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function sample(a, n){ return shuffle(a).slice(0, n); }
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const pad2 = n => (n < 10 ? '0' : '') + n;
+
+/* ============ 共用設定（和其他遊戲同一份 hanziGames.settings，來自 game-kit/parts/settings.js） ============ */
+const SETTINGS_KEY = 'hanziGames.settings';
+const SET_OPTS = { script:['trad','simp'], lang:['es','en','zh'], phon:['pinyin','zhuyin','both','off'], rate:['slow','normal','fast'] };
+const RATE_VALUE = { slow:0.45, normal:0.65, fast:0.85 };
+function writeSettings(o){
+  try{
+    let cur = {};
+    try{ cur = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; }catch(e){}
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(Object.assign(cur, { v:1, script:o.script, lang:o.lang, phon:o.phon, rate:o.rate })));
+  }catch(e){}
+}
+function readSettings(){
+  const out = { v:1, script:'trad', lang:'es', phon:'pinyin', rate:'normal' };
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); }catch(e){}
+  if (saved && typeof saved === 'object'){
+    Object.keys(SET_OPTS).forEach(k => { if (SET_OPTS[k].includes(saved[k])) out[k] = saved[k]; });
+  } else writeSettings(out);
+  return out;
+}
+const Settings = readSettings();
+
+/* ---------- 字典：字 拼音（台灣讀音）簡體 ---------- */
+const DICT_SRC = `
+零 líng
+一 yī
+二 èr
+兩 liǎng 两
+三 sān
+四 sì
+五 wǔ
+六 liù
+七 qī
+八 bā
+九 jiǔ
+十 shí
+點 diǎn 点
+分 fēn
+鐘 zhōng 钟
+秒 miǎo
+半 bàn
+整 zhěng
+小 xiǎo
+時 shí 时
+個 ge 个
+年 nián
+月 yuè
+日 rì
+號 hào 号
+星 xīng
+期 qí
+天 tiān
+上 shàng
+下 xià
+午 wǔ
+早 zǎo
+中 zhōng
+晚 wǎn
+前 qián
+後 hòu 后
+昨 zuó
+今 jīn
+明 míng
+去 qù
+這 zhè 这
+現 xiàn 现
+在 zài
+幾 jǐ 几
+是 shì
+哪 nǎ
+什 shén
+麼 me 么
+要 yào
+做 zuò
+的 de
+我 wǒ
+們 men 们
+有 yǒu
+了 le
+起 qǐ
+床 chuáng
+吃 chī
+餐 cān
+飯 fàn 饭
+班 bān
+回 huí
+家 jiā
+洗 xǐ
+澡 zǎo
+睡 shuì
+覺 jiào 觉
+看 kàn
+電 diàn 电
+視 shì 视
+功 gōng
+課 kè 课
+喝 hē
+咖 kā
+啡 fēi
+學 xué 学
+校 xiào
+運 yùn 运
+動 dòng 动
+牙 yá
+醫 yī 医
+開 kāi 开
+會 huì 会
+聚 jù
+面 miàn
+試 shì 试
+考 kǎo
+影 yǐng
+約 yuē 约
+爬 pá
+山 shān
+剪 jiǎn
+頭 tóu 头
+髮 fà 发
+生 shēng
+派 pài
+對 duì 对
+演 yǎn
+唱 chàng
+搬 bān
+逛 guàng
+街 jiē
+候 hòu
+千 qiān
+`;
+const DICT = {};
+DICT_SRC.trim().split('\n').forEach(l => { const p = l.trim().split(/\s+/); if (p.length >= 2) DICT[p[0]] = { py:p[1], s:p[2] || p[0] }; });
+
+/* 介面文字用的簡體對照（字典以外） */
+const S2_PAIRS = '說说 這这 麼么 時时 間间 點点 鐘钟 號号 選选 聽听 確确 請请 對对 錯错 讀读 話话 個个 從从 顯显 後后 過过 還还 與与 為为 會会 應应 該该 習习 練练 題题 單单 戲戏 難难 擇择 實实 際际 針针 撥拨 準准 備备 續续 結结 覺觉 學学 認认 識识 計计 設设 數数 據据 邊边 記记 錄录 歷历 讓让 們们 來来 寫写 圖图 語语 歡欢 鍵键 隱隐 藏藏 顯显 項项 純纯 體体 繁繁 簡简 兩两 進进 關关 開开 戰战 擊击 絡络 總总 綜综 合合 隨随 機机 鈴铃 響响 錶表 邏逻 輯辑 發发 義义 較较 讀读 與与 帶带 頁页 實实 張张 現现 驗验 勵励 親亲 當当 聯联 傳传 鍋锅 氣气 願愿 資资 較较 專专 動动 轉转 運运 稱称 員员 讚赞 剛刚 厲厉 對对 條条 無无 離离 費费 蘋苹 歲岁 網网 頭头 靜静 論论 長长 馬马 蟲虫 買买 賣卖 興兴 師师 業业 楊杨 劃划 臺台 灣湾 灣湾';
+const S2 = {};
+S2_PAIRS.split(/\s+/).forEach(p => { if (p.length === 2) S2[p[0]] = p[1]; });
+function toSimp(s){ let o = ''; for (const c of String(s)) o += S2[c] || (DICT[c] && DICT[c].s) || c; return o; }
+
+/* ---------- 多語文字 ---------- */
+function L(zh, es, en, zhS){ return { zh, es, en, zhS }; }
+function zhOf(l){ return Settings.script === 'simp' ? (l.zhS || toSimp(l.zh)) : l.zh; }
+function trOf(l){ return Settings.lang === 'es' ? (l.es || '') : Settings.lang === 'en' ? (l.en || '') : ''; }
+function Lh(l){ const t = trOf(l); return esc(zhOf(l)) + (t ? `<span class="tr">${esc(t)}</span>` : ''); }          // 中文＋下方翻譯
+function Li(l){ const t = trOf(l); return esc(zhOf(l)) + (t ? `<span class="tr inline">${esc(t)}</span>` : ''); }   // 同一行
+
+/* ---------- 拼音 → 注音 ---------- */
+const TONE_MAP = { 'ā':['a',1],'á':['a',2],'ǎ':['a',3],'à':['a',4],'ē':['e',1],'é':['e',2],'ě':['e',3],'è':['e',4],'ī':['i',1],'í':['i',2],'ǐ':['i',3],'ì':['i',4],
+  'ō':['o',1],'ó':['o',2],'ǒ':['o',3],'ò':['o',4],'ū':['u',1],'ú':['u',2],'ǔ':['u',3],'ù':['u',4],'ǖ':['ü',1],'ǘ':['ü',2],'ǚ':['ü',3],'ǜ':['ü',4] };
+function splitTone(s){ let tone = 0, base = ''; for (const ch of s){ const m = TONE_MAP[ch]; if (m){ base += m[0]; tone = m[1]; } else base += ch; } return { base:base.replace(/v/g, 'ü'), tone }; }
+const ZY_INI = { zh:'ㄓ', ch:'ㄔ', sh:'ㄕ', b:'ㄅ', p:'ㄆ', m:'ㄇ', f:'ㄈ', d:'ㄉ', t:'ㄊ', n:'ㄋ', l:'ㄌ', g:'ㄍ', k:'ㄎ', h:'ㄏ', j:'ㄐ', q:'ㄑ', x:'ㄒ', r:'ㄖ', z:'ㄗ', c:'ㄘ', s:'ㄙ' };
+const ZY_FIN = { a:'ㄚ', o:'ㄛ', e:'ㄜ', ai:'ㄞ', ei:'ㄟ', ao:'ㄠ', ou:'ㄡ', an:'ㄢ', en:'ㄣ', ang:'ㄤ', eng:'ㄥ', er:'ㄦ', i:'ㄧ', ia:'ㄧㄚ', ie:'ㄧㄝ', iao:'ㄧㄠ', iou:'ㄧㄡ', ian:'ㄧㄢ', in:'ㄧㄣ', iang:'ㄧㄤ', ing:'ㄧㄥ',
+  iong:'ㄩㄥ', u:'ㄨ', ua:'ㄨㄚ', uo:'ㄨㄛ', uai:'ㄨㄞ', uei:'ㄨㄟ', uan:'ㄨㄢ', uen:'ㄨㄣ', uang:'ㄨㄤ', ong:'ㄨㄥ', ueng:'ㄨㄥ', 'ü':'ㄩ', 'üe':'ㄩㄝ', 'üan':'ㄩㄢ', 'ün':'ㄩㄣ' };
+function py2zy(syl){
+  const { base, tone } = splitTone(String(syl).toLowerCase());
+  let ini = '', fin = base;
+  if (/^(zh|ch|sh)/.test(base)){ ini = base.slice(0, 2); fin = base.slice(2); }
+  else if (/^[bpmfdtnlgkhjqxrzcs]/.test(base)){ ini = base[0]; fin = base.slice(1); }
+  else if (base[0] === 'y'){ const r = base.slice(1); fin = r === 'i' ? 'i' : r[0] === 'u' ? 'ü' + r.slice(1) : r[0] === 'i' ? r : 'i' + r; }
+  else if (base[0] === 'w'){ const r = base.slice(1); fin = r === 'u' ? 'u' : 'u' + r; }
+  if (ini && 'jqx'.includes(ini) && fin[0] === 'u') fin = 'ü' + fin.slice(1);
+  if (ini){ if (fin === 'iu') fin = 'iou'; else if (fin === 'ui') fin = 'uei'; else if (fin === 'un') fin = 'uen'; }
+  let z = ZY_INI[ini] || '';
+  if (ini && 'zh ch sh r z c s'.split(' ').includes(ini) && fin === 'i') z += '';
+  else { const f = ZY_FIN[fin]; if (f === undefined) return syl; z += f; }
+  const mark = ['', '', 'ˊ', 'ˇ', 'ˋ'][tone];
+  return (tone === 0 ? '˙' : '') + z + mark;
+}
+
+/* ---------- 把一句中文拆成「字＋拼音」 ----------
+   寫法：字後面可以接 {拼音} 來指定這個字的讀音，例如  哪一{yì}天 */
+function parseLine(text){
+  const arr = Array.from(String(text)), out = [];
+  for (let i = 0; i < arr.length; i++){
+    const c = arr[i];
+    if (c === '{') continue;
+    const e = DICT[c];
+    const item = { c, py: e ? e.py : null, hz: !!e };
+    if (arr[i + 1] === '{'){ const j = arr.indexOf('}', i + 2); if (j > 0){ item.py = arr.slice(i + 2, j).join(''); item.hz = true; i = j; } }
+    out.push(item);
+  }
+  return out;
+}
+function plainZh(text){ return String(text).replace(/\{[^}]*\}/g, ''); }
+function lineHTML(text){
+  const simp = Settings.script === 'simp', ph = Settings.phon;
+  let o = '';
+  parseLine(text).forEach(it => {
+    const ch = simp ? (DICT[it.c] ? DICT[it.c].s : (S2[it.c] || it.c)) : it.c;
+    if (!it.hz || ph === 'off'){ o += `<span class="ch${it.hz ? '' : ' np'}"><span class="h">${esc(ch)}</span></span>`; return; }
+    const py = it.py, zy = py2zy(py);
+    let top = '', bot = '';
+    if (ph === 'pinyin') top = py;
+    else if (ph === 'zhuyin') bot = zy;
+    else { top = py; bot = zy; }
+    o += `<span class="ch">${ph === 'zhuyin' ? '' : `<span class="ph">${esc(top)}</span>`}<span class="h">${esc(ch)}</span>${bot ? `<span class="ph">${esc(bot)}</span>` : ''}</span>`;
+  });
+  return o;
+}
+
+/* ---------- 數字 ---------- */
+const DIGZ = '零一二三四五六七八九';
+function numZh(n){
+  if (n < 10) return DIGZ[n];
+  if (n < 20) return '十' + (n % 10 ? DIGZ[n % 10] : '');
+  const t = Math.floor(n / 10), u = n % 10;
+  return DIGZ[t] + '十' + (u ? DIGZ[u] : '');
+}
+const digitsZh = n => String(n).split('').map(c => DIGZ[+c]).join('');
+const hourZh = h => (h === 2 ? '兩' : numZh(h));
+const yearQtyZh = y => '二千零' + numZh(y % 100);     // 「二千零二十六」：把年份當成一般數字念（錯誤說法）
+
+/* ---------- 時間的中文說法 ----------
+   st = { half:true/false（30分用「半」）, zheng:true/false（整點加「整」）}；s 有值時一律把分、秒都說出來 */
+function tZh(h, m, s, st){
+  let t = hourZh(h) + '點';
+  if (s != null){
+    t += (m === 0 ? '零分' : m < 10 ? '零' + DIGZ[m] + '分' : numZh(m) + '分');
+    t += numZh(s) + '秒';
+    return t;
+  }
+  if (m === 0) return t + (st && st.zheng ? '整' : '');
+  if (m === 30 && st && st.half) return t + '半';
+  if (m < 10) return t + '零' + DIGZ[m] + '分';
+  return t + numZh(m) + '分';
+}
+const digital = (h, m, s) => h + ':' + pad2(m) + (s != null ? ':' + pad2(s) : '');
+const digital24 = (H, m) => pad2(H) + ':' + pad2(m);
+/* 時段：早上 6–11、中午 12、下午 13–17、晚上 18–23（凌晨等不常用的不出現） */
+function periodOf(H){ return H === 12 ? '中午' : H < 12 ? '早上' : H < 18 ? '下午' : '晚上'; }
+const h12 = H => (H % 12 === 0 ? 12 : H % 12);
+const ptZh = (H, m, st) => periodOf(H) + tZh(h12(H), m, null, st);
+
+/* ---------- 日期 ---------- */
+const WK_ZH = ['日', '一', '二', '三', '四', '五', '六'];
+const weekdayOf = (y, m, d) => new Date(y, m - 1, d).getDay();
+const dim = (y, m) => new Date(y, m, 0).getDate();
+function addDays(y, m, d, n){ const t = new Date(y, m - 1, d + n); return { y:t.getFullYear(), m:t.getMonth() + 1, d:t.getDate() }; }
+const wkZh = (dow, sun) => '星期' + (dow === 0 ? (sun || '天') : WK_ZH[dow]);
+const monthZh = m => numZh(m) + '月';
+const dayZh = (d, st) => numZh(d) + (st || '號');
+const yearZh = y => digitsZh(y) + '年';
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_ES = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const DAYS_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const WK_SHORT_ES = ['dom','lun','mar','mié','jue','vie','sáb'];
+const WK_SHORT_EN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+/* 外語（或純中文模式的阿拉伯數字）日期 */
+function fmtDate(y, m, d, withYear){
+  if (Settings.lang === 'es') return d + ' de ' + MONTHS_ES[m - 1] + (withYear ? ' de ' + y : '');
+  if (Settings.lang === 'en') return MONTHS_EN[m - 1] + ' ' + d + (withYear ? ', ' + y : '');
+  return (withYear ? y + '年' : '') + m + '月' + d + '日';
+}
+function fmtMonthTitle(y, m){
+  if (Settings.lang === 'es') return MONTHS_ES[m - 1] + ' de ' + y;
+  if (Settings.lang === 'en') return MONTHS_EN[m - 1] + ' ' + y;
+  return y + '年' + m + '月';
+}
+const dayName = dow => (Settings.lang === 'es' ? DAYS_ES[dow] : Settings.lang === 'en' ? DAYS_EN[dow] : '');
+const digDate = (y, m, d) => y + '/' + m + '/' + d;
+
+/* ---------- 說中文（瀏覽器語音，只選台灣／普通話） ---------- */
+function mandarinVoice(){
+  let vs = [];
+  try{ vs = (window.speechSynthesis && speechSynthesis.getVoices()) || []; }catch(e){}
+  const ok = v => { const l = String(v.lang || '').toLowerCase().replace(/_/g, '-'); if (l.indexOf('yue') === 0 || l.indexOf('zh-hk') === 0) return false; return l === 'zh' || l.indexOf('zh-') === 0 || l.indexOf('cmn') === 0; };
+  const c = vs.filter(ok);
+  return c.find(v => /tw/i.test(v.lang)) || c[0] || null;
+}
+function speak(text){
+  try{
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(plainZh(text));
+    const v = mandarinVoice();
+    if (v){ u.voice = v; u.lang = v.lang; } else u.lang = 'zh-TW';
+    u.rate = RATE_VALUE[Settings.rate] || 0.65;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* =====================================================================
+   出題：每個 gXxx(lv) 回傳一題，lv = 'easy' | 'mid' | 'hard'
+   題目格式：
+     { id, kind:'choice'|'dial'|'tap'|'match', instr:L, line:{zh,es,en}|null,
+       visual:{...}|null, audio:'要念的中文'|null, options:[{zh|svg, badge, gloss, ok, why, d, key}],
+       target, fb:{ ansZh, extra } }
+   ===================================================================== */
+
+/* ---------- 答錯時的說明 ---------- */
+const WHY = {
+  hourDur:  L('「點」是幾點；「小時」是一段時間。', 'Para decir la hora se usa 點; 小時 es una duración.', '點 tells the clock time; 小時 is a length of time.'),
+  minDur:   L('幾點幾分用「分」；「分鐘」是一段時間。', 'Para la hora se usa 分; 分鐘 es una duración.', 'Use 分 for the clock time; 分鐘 is a length of time.'),
+  two:      L('2 點要說「兩點」，不說「二點」。', 'Las 2 se dicen 兩點, no 二點.', 'Two o’clock is 兩點, not 二點.'),
+  swap:     L('時針（短）和分針（長）看反了。', 'Confundiste la manecilla corta (hora) con la larga (minutos).', 'You mixed up the short (hour) and long (minute) hands.'),
+  secUnit:  L('秒針的數字要說「秒」，不是「分」。', 'Los segundos se dicen 秒, no 分.', 'Seconds are 秒, not 分.'),
+  swapms:   L('分和秒說反了。', 'Cambiaste los minutos y los segundos.', 'You swapped the minutes and the seconds.'),
+  time:     L('這個時間和鐘面上的不一樣，再看一次。', 'Esa hora no coincide con la del reloj. Míralo otra vez.', 'That time does not match the clock. Look again.'),
+  heard:    L('聽起來很像，要再聽仔細一點。', 'Suena parecido; escucha con más atención.', 'It sounds similar — listen more carefully.'),
+  ge:       L('年、月、日（號）前面不加「個」。', 'No se pone 個 delante de 年, 月, 日 ni 號.', 'Do not put 個 before 年, 月, 日 or 號.'),
+  order:    L('中文的日期從大到小：年、月、日。', 'En chino la fecha va de mayor a menor: año, mes, día.', 'Chinese dates go from largest to smallest: year, month, day.'),
+  yearQty:  L('年份要一個數字一個數字念：二零二六年。', 'El año se lee dígito por dígito: 二零二六年.', 'A year is read digit by digit: 二零二六年.'),
+  val:      L('日期的數字不對，再看一次月曆。', 'Los números de la fecha no coinciden. Mira otra vez el calendario.', 'The numbers in the date do not match. Look at the calendar again.'),
+  weekWrong:L('星期不對，看一下月曆最上面的星期。', 'El día de la semana no es correcto; mira la cabecera del calendario.', 'The weekday is wrong; check the header of the calendar.'),
+  sevenWk:  L('星期天（星期日）不說「星期七」。', 'El domingo es 星期天 o 星期日, no 星期七.', 'Sunday is 星期天 or 星期日, never 星期七.'),
+  wk:       L('星期不對，再看一次月曆。', 'El día de la semana no es correcto. Mira otra vez el calendario.', 'That is not the right weekday. Look at the calendar again.'),
+  periodOrder:L('時段要放在前面：「早上七點」，不是「七點早上」。', 'El momento del día va primero: 早上七點, no 七點早上.', 'The part of the day comes first: 早上七點, not 七點早上.'),
+  periodWrong:L('時段不對，想一想這是白天還是晚上。', 'El momento del día no corresponde a esa hora.', 'That part of the day does not fit this time.'),
+  act:      L('聽到的行程不是這個，再聽一次。', 'No es la actividad que se oyó. Escucha otra vez.', 'That is not the activity you heard. Listen again.'),
+  weekShift:L('這是不同星期的同一天，要注意「上、這、下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上, 這, 下.', 'Same weekday, but a different week. Watch 上, 這 and 下.'),
+  dayShift: L('差了一天，再數一次。', 'Te equivocaste por un día; cuenta otra vez.', 'Off by one day; count again.'),
+  rel:      L('要從標著「今天」的那一格開始算。', 'Cuenta a partir del día marcado como «hoy».', 'Count from the day marked “today”.'),
+  month:    L('月份不對，再看一次年曆。', 'El mes no es correcto. Mira otra vez el calendario anual.', 'That is not the right month. Look at the year calendar again.'),
+  year:     L('年份不對，想一想今年是哪一年。', 'El año no es correcto. Piensa en qué año estamos.', 'That is not the right year. Think about which year it is now.'),
+  tap:      L('你點的不是這一天。', 'No es ese día.', 'That is not the day.'),
+  ev:       L('月曆上那一天不是這個行程。', 'Ese día del calendario no tiene esa actividad.', 'That day on the calendar has a different plan.')
+};
+
+/* ---------- 選項 ---------- */
+const okey = o => (o.key != null ? o.key : o.zh);
+function mkOptions(correct, wrongs, n){
+  n = n || 4;
+  const seen = new Set([okey(correct)]), out = [];
+  for (const w of wrongs){ const k = okey(w); if (seen.has(k)) continue; seen.add(k); out.push(Object.assign({ ok:false }, w)); if (out.length >= n - 1) break; }
+  return shuffle([Object.assign({}, correct, { ok:true }), ...out]);
+}
+const timeKey = (h, m, s) => h + ':' + m + ':' + (s == null ? '' : s);
+
+/* =====================  單元一：看時鐘  ===================== */
+function pickTime(lv, withSec){
+  const h = randInt(1, 12); let m, s = null;
+  if (lv === 'easy') m = pick([0, 30]);
+  else if (lv === 'mid') m = pick([0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]);
+  else m = Math.random() < 0.15 ? pick([0, 30]) : randInt(1, 59);
+  if (withSec && lv === 'hard' && Math.random() < 0.6){ s = pick([10, 15, 20, 25, 30, 35, 40, 45, 50, 55]); if (m === 0) m = randInt(1, 59); }
+  return { h, m, s };
+}
+const randStyle = () => ({ half:Math.random() < 0.5, zheng:Math.random() < 0.5 });
+
+function wrongTimes(h, m, s, lv){
+  const c = [];
+  const add = (h2, m2, s2, why) => {
+    h2 = ((h2 - 1 + 12) % 12) + 1;
+    if (m2 < 0 || m2 > 59 || (s2 != null && (s2 < 0 || s2 > 59))) return;
+    if (timeKey(h2, m2, s2) === timeKey(h, m, s)) return;
+    c.push({ h:h2, m:m2, s:s2, why:why || 'time' });
+  };
+  if (lv === 'easy'){
+    add(h + 1, m, s); add(h - 1, m, s); add(h + 2, m, s); add(h, m === 0 ? 30 : 0, s); add(h + 1, m === 0 ? 30 : 0, s); add(h - 1, m === 0 ? 30 : 0, s);
+    return c;
+  }
+  add(h + 1, m, s); add(h - 1, m, s); add(h + 2, m, s);
+  if (m % 5 === 0){ add(h, (m + 5) % 60, s); add(h, (m + 55) % 60, s); add(h, (m + 10) % 60, s); }
+  else { add(h, m + 1, s); add(h, m - 1, s); add(h, m + 2, s); add(h, m - 2, s); }
+  if (m % 5 === 0 && s == null){ const h2 = (m / 5) || 12, m2 = (h % 12) * 5; add(h2, m2, s, 'swap'); }
+  if (s != null){ add(h, m, (s + 5) % 60); add(h, m, (s + 55) % 60); if (m >= 10) add(h, s, m, 'swapms'); }
+  return c;
+}
+function formErrors(h, m, s, st){
+  const out = [], t = tZh(h, m, s, st);
+  if (s == null){
+    if (m === 0 || (m === 30 && st.half)) out.push({ zh:hourZh(h) + '小時' + (m === 30 ? '半' : (st.zheng ? '整' : '')), why:'hourDur' });
+    else out.push({ zh:hourZh(h) + '小時' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分', why:'hourDur' });
+    if (m !== 0 && !(m === 30 && st.half)) out.push({ zh:hourZh(h) + '點' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分鐘', why:'minDur' });
+  } else {
+    out.push({ zh:t.slice(0, -1) + '分', why:'secUnit' });
+  }
+  if (h === 2) out.push({ zh:t.replace('兩', '二'), why:'two' });
+  return out.filter(f => f.zh !== t);
+}
+
+function gClockChoice(lv){
+  const { h, m, s } = pickTime(lv, true), st = randStyle();
+  const correctZh = tZh(h, m, s, st);
+  const nForms = lv === 'easy' ? 1 : (Math.random() < 0.5 ? 1 : 2);
+  const wrongs = shuffle(formErrors(h, m, s, st)).slice(0, nForms);
+  shuffle(wrongTimes(h, m, s, lv)).forEach(w => wrongs.push({ zh:tZh(w.h, w.m, w.s, st), why:w.why, d:digital(w.h, w.m, w.s) }));
+  let guard = 0;
+  while (wrongs.length < 10 && guard++ < 30){ const r = pickTime(lv, s != null); if (timeKey(r.h, r.m, r.s) !== timeKey(h, m, s)) wrongs.push({ zh:tZh(r.h, r.m, r.s, st), why:'time', d:digital(r.h, r.m, r.s) }); }
+  return { id:'clockChoice', kind:'choice',
+    instr:L('看時鐘，選出正確的說法。', 'Mira el reloj y elige cómo se dice.', 'Look at the clock and choose the correct way to say it.'),
+    line:{ zh:'現在幾點？', es:'¿Qué hora es?', en:'What time is it?' },
+    visual:{ type:'clock', h, m, s },
+    options:mkOptions({ zh:correctZh, why:null, d:digital(h, m, s) }, wrongs),
+    fb:{ ansZh:correctZh, extra:digital(h, m, s) } };
+}
+
+function gClockSet(lv){
+  const { h, m } = pickTime(lv, false), st = randStyle();
+  const zh = tZh(h, m, null, st);
+  return { id:'clockSet', kind:'dial',
+    instr:L('請聽，然後把時針和分針撥到正確的位置。', 'Escucha y mueve las manecillas a la hora correcta.', 'Listen, then move the hands to the right time.'),
+    line:null, visual:{ type:'dial', h0:(h === 12 && m === 0) ? 6 : 12, m0:(h === 12 && m === 0) ? 30 : 0 },
+    audio:zh, peek:zh, target:{ h, m }, fb:{ ansZh:zh, extra:digital(h, m) } };
+}
+
+const HOUR_CONF = { 1:[7], 7:[1], 4:[10], 10:[4], 2:[12], 12:[2], 3:[8], 8:[3] };
+function confuseMin(m){
+  const c = [];
+  if (m >= 10){ const sw = (m % 10) * 10 + Math.floor(m / 10); if (sw < 60 && sw !== m) c.push(sw); }
+  if (m + 10 < 60) c.push(m + 10); if (m - 10 >= 0) c.push(m - 10);
+  if (m + 5 < 60) c.push(m + 5); if (m - 5 >= 0) c.push(m - 5);
+  if (m + 1 < 60) c.push(m + 1); if (m - 1 >= 0) c.push(m - 1);
+  return c;
+}
+function confTimes(h, m, s, lv){
+  const set = new Map();
+  const add = (h2, m2, s2) => {
+    h2 = ((h2 - 1 + 12) % 12) + 1;
+    if (m2 < 0 || m2 > 59 || (s2 != null && (s2 < 0 || s2 > 59))) return;
+    const k = timeKey(h2, m2, s2);
+    if (k === timeKey(h, m, s) || set.has(k)) return;
+    set.set(k, { h:h2, m:m2, s:s2 });
+  };
+  const hc = HOUR_CONF[h] || [];
+  const mcs = lv === 'easy' ? [m === 0 ? 30 : 0] : shuffle(confuseMin(m));
+  hc.forEach(x => add(x, m, s));
+  mcs.forEach(x => add(h, x, s));
+  if (hc.length && mcs.length) add(hc[0], mcs[0], s);
+  if (s != null) shuffle(confuseMin(s)).forEach(x => add(h, m, x));
+  add(h + 1, m, s); add(h - 1, m, s);
+  return shuffle([...set.values()]);
+}
+function gClockListen(lv){
+  const { h, m, s } = pickTime(lv, true), st = randStyle();
+  const zh = tZh(h, m, s, st);
+  const variant = Math.random() < 0.5 ? 'text' : 'clock';
+  let cands = confTimes(h, m, s, lv), guard = 0;
+  while (cands.length < 6 && guard++ < 30){ const r = pickTime(lv, s != null); if (timeKey(r.h, r.m, r.s) !== timeKey(h, m, s)) cands.push(r); }
+  let options;
+  if (variant === 'text'){
+    options = mkOptions({ zh, why:null, d:digital(h, m, s) }, cands.map(c => ({ zh:tZh(c.h, c.m, c.s, st), why:'heard', d:digital(c.h, c.m, c.s) })));
+  } else {
+    options = mkOptions({ key:'c' + timeKey(h, m, s), svg:clockSVG({ h, m, s, mini:true }), why:null, d:digital(h, m, s) },
+      cands.map(c => ({ key:'c' + timeKey(c.h, c.m, c.s), svg:clockSVG({ h:c.h, m:c.m, s:c.s, mini:true }), why:'heard', d:digital(c.h, c.m, c.s) })));
+  }
+  return { id:'clockListen', kind:'choice',
+    instr:variant === 'text' ? L('請聽，選出正確的時間。', 'Escucha y elige la hora correcta.', 'Listen and choose the correct time.')
+                             : L('請聽，選出正確的時鐘。', 'Escucha y elige el reloj correcto.', 'Listen and choose the correct clock.'),
+    line:null, visual:null, audio:zh, peek:zh, optClass:variant === 'clock' ? 'clk' : '',
+    options, fb:{ ansZh:zh, extra:digital(h, m, s) } };
+}
+
+/* =====================  單元二：日期和星期  ===================== */
+function randDate(){ const y = randInt(2024, 2029), m = randInt(1, 12), d = randInt(1, dim(y, m)); return { y, m, d }; }
+/* o: {st:'日'|'號', sun, year, week, weekText, order:'ymd'|'dmy'|'mdy', gem, ged, gey, qy} */
+function dateStr(y, m, d, o){
+  const Y = o.year ? (o.qy ? yearQtyZh(y) : digitsZh(y)) + (o.gey ? '個年' : '年') : '';
+  const M = numZh(m) + (o.gem ? '個月' : '月');
+  const D = numZh(d) + (o.ged ? '個' + o.st : o.st);
+  const core = o.order === 'dmy' ? D + M + Y : o.order === 'mdy' ? M + D + Y : Y + M + D;
+  const W = o.week ? (o.weekText || wkZh(weekdayOf(y, m, d), o.sun)) : '';
+  return core + W;
+}
+function gDateChoice(lv){
+  const { y, m, d } = randDate(), st = pick(['日', '號']), sun = pick(['天', '日']);
+  const withYear = lv !== 'easy', withWeek = lv === 'hard';
+  const base = { st, sun, year:withYear, week:withWeek, order:'ymd' };
+  const mk = (yy, mm, dd, o) => dateStr(yy, mm, dd, Object.assign({}, base, o || {}));
+  const correct = mk(y, m, d);
+  const grp = { order:[], ge:[], qty:[], val:[], wk:[] };
+  grp.order.push({ zh:mk(y, m, d, { order:'dmy' }), why:'order' });
+  if (withYear) grp.order.push({ zh:mk(y, m, d, { order:'mdy' }), why:'order' });
+  [{ gem:true }, { ged:true }].concat(withYear ? [{ gey:true }] : []).forEach(g => grp.ge.push({ zh:mk(y, m, d, g), why:'ge' }));
+  if (withYear) grp.qty.push({ zh:mk(y, m, d, { qy:true }), why:'yearQty' });
+  [d - 1, d + 1, d - 2, d + 2].filter(x => x >= 1 && x <= dim(y, m)).forEach(x => grp.val.push({ zh:mk(y, m, x), why:'val' }));
+  [m - 1, m + 1].filter(x => x >= 1 && x <= 12).forEach(x => grp.val.push({ zh:mk(y, x, Math.min(d, dim(y, x))), why:'val' }));
+  if (withYear) [y - 1, y + 1].forEach(x => grp.val.push({ zh:mk(x, m, d), why:'val' }));
+  if (d <= 12 && d !== m) grp.val.push({ zh:mk(y, d, m), why:'val' });
+  if (withWeek) shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== weekdayOf(y, m, d))).slice(0, 2).forEach(x => grp.wk.push({ zh:mk(y, m, d, { weekText:wkZh(x, sun) }), why:'weekWrong' }));
+  const chosen = [pick(grp.order), pick(grp.ge)];
+  const third = lv === 'easy' ? ['val'] : lv === 'mid' ? ['qty', 'val'] : ['qty', 'val', 'wk', 'wk'];
+  const tg = pick(third); chosen.push(pick(grp[tg].length ? grp[tg] : grp.val));
+  const extra = shuffle([].concat(grp.val, grp.ge, grp.order, grp.qty, grp.wk));
+  return { id:'dateChoice', kind:'choice',
+    instr:L('看月曆上圈起來的日子，選出正確的中文說法。', 'Mira el día marcado en el calendario y elige cómo se dice en chino.', 'Look at the circled day and choose the correct Chinese.'),
+    line:{ zh:'這一{yì}天是什麼時候{hou}？', es:'¿Qué fecha es este día?', en:'What date is this day?' },
+    visual:{ type:'cal', y, m, mark:d, datebox:fmtDate(y, m, d, withYear), mode:'none', cap:true },
+    options:mkOptions({ zh:correct, why:null }, chosen.concat(extra)),
+    fb:{ ansZh:correct, extra:fmtDate(y, m, d, true) + '（' + dayName(weekdayOf(y, m, d)) + '）' } };
+}
+
+function gWeekdayChoice(lv){
+  const { y, m, d } = randDate(), dow = weekdayOf(y, m, d), sun = pick(['天', '日']);
+  const correct = wkZh(dow, sun);
+  const wrongs = shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== dow)).map(x => ({ zh:wkZh(x, sun), why:'wk' }));
+  if (lv !== 'easy' && Math.random() < (dow === 0 ? 0.9 : 0.4)) wrongs.unshift({ zh:'星期七', why:'sevenWk' });
+  return { id:'weekdayChoice', kind:'choice',
+    instr:L('看月曆上圈起來的日子，選出星期幾。', 'Mira el día marcado y elige qué día de la semana es.', 'Look at the circled day and choose the weekday.'),
+    line:{ zh:'這一{yì}天是星期幾？', es:'¿Qué día de la semana es?', en:'Which day of the week is it?' },
+    visual:{ type:'cal', y, m, mark:d, datebox:fmtDate(y, m, d, true), mode:'none', cap:true },
+    options:mkOptions({ zh:correct, why:null }, wrongs),
+    fb:{ ansZh:correct, extra:fmtDate(y, m, d, true) } };
+}
+
+const MON_CONF = { 12:[2, 11], 2:[12], 10:[4, 11], 4:[10], 7:[1, 11], 1:[7, 11], 11:[1, 10, 12], 3:[8], 8:[3], 5:[9], 9:[5], 6:[], };
+function gDateListen(lv){
+  const { y, m, d } = randDate(), st = pick(['日', '號']), sun = pick(['天', '日']);
+  const withYear = lv !== 'easy', withWeek = lv === 'hard';
+  const base = { st, sun, year:withYear, week:withWeek, order:'ymd' };
+  const mk = (yy, mm, dd) => dateStr(yy, mm, dd, base);
+  const zh = mk(y, m, d);
+  const N = dim(y, m), cand = new Map();
+  const add = (yy, mm, dd) => { if (mm < 1 || mm > 12 || dd < 1 || dd > dim(yy, mm)) return; const k = yy + '/' + mm + '/' + dd; if (k === y + '/' + m + '/' + d || cand.has(k)) return; cand.set(k, { y:yy, m:mm, d:dd }); };
+  (MON_CONF[m] || []).forEach(x => add(y, x, Math.min(d, dim(y, x))));
+  if (d >= 10) add(y, m, (d % 10) * 10 + Math.floor(d / 10));
+  [10, -10, 1, -1, 2, -2].forEach(x => add(y, m, d + x));
+  [m + 1, m - 1].forEach(x => add(y, x, Math.min(d, N)));
+  if (withYear) [1, -1].forEach(x => add(y + x, m, d));
+  const cs = shuffle([...cand.values()]);
+  return { id:'dateListen', kind:'choice',
+    instr:L('請聽，選出正確的日期。', 'Escucha y elige la fecha correcta.', 'Listen and choose the correct date.'),
+    line:null, visual:null, audio:zh, peek:zh,
+    options:mkOptions({ zh, why:null, d:digDate(y, m, d) }, cs.map(c => ({ zh:mk(c.y, c.m, c.d), why:'heard', d:digDate(c.y, c.m, c.d) }))),
+    fb:{ ansZh:zh, extra:fmtDate(y, m, d, true) } };
+}
+
+/* =====================  單元三：一天的行程  ===================== */
+/* hours 都避開 11、17、18 點，免得「早上／中午」「下午／晚上」有兩種都說得通的說法 */
+const DAILY = [
+  { short:'起床',   es:'levantarse',        en:'get up',          hours:[6, 7, 8] },
+  { short:'吃早餐', es:'desayunar',         en:'have breakfast',  hours:[7, 8, 9] },
+  { short:'上班',   es:'ir al trabajo',     en:'go to work',      hours:[8, 9] },
+  { short:'上課',   es:'tener clase',       en:'have class',      hours:[9, 10, 14, 15] },
+  { short:'吃午飯', es:'almorzar',          en:'have lunch',      hours:[12, 13] },
+  { short:'喝咖啡', es:'tomar café',        en:'drink coffee',    hours:[10, 14, 15] },
+  { short:'做功課', es:'hacer la tarea',    en:'do homework',     hours:[14, 15, 16, 20] },
+  { short:'回家',   es:'volver a casa',     en:'go home',         hours:[16, 19] },
+  { short:'運動',   es:'hacer ejercicio',   en:'exercise',        hours:[7, 19, 20] },
+  { short:'吃晚飯', es:'cenar',             en:'have dinner',     hours:[19, 20] },
+  { short:'看電視', es:'ver la tele',       en:'watch TV',        hours:[20, 21] },
+  { short:'洗澡',   es:'ducharse',          en:'take a shower',   hours:[21, 22] },
+  { short:'睡覺',   es:'dormir',            en:'sleep',           hours:[22, 23] },
+  { short:'去學校', es:'ir a la escuela',   en:'go to school',    hours:[7, 8] }
+];
+const schedMins = lv => (lv === 'easy' ? [0] : lv === 'mid' ? [0, 30] : [0, 10, 20, 30, 40, 50]);
+function pickSchedule(n, lv, withPeriod){
+  const res = [], key = r => (withPeriod ? r.H * 100 + r.m : h12(r.H) * 100 + r.m);
+  for (const a of shuffle(DAILY)){
+    if (res.length >= n) break;
+    const r = { a, H:pick(a.hours), m:pick(schedMins(lv)) };
+    if (res.some(x => key(x) === key(r))) continue;
+    res.push(r);
+  }
+  return res.sort((p, q) => p.H * 60 + p.m - (q.H * 60 + q.m));
+}
+const schedZh = (a, H, m, withPeriod) => '我' + (withPeriod ? periodOf(H) : '') + tZh(h12(H), m, null, { half:true, zheng:false }) + a.short;
+const schedLabel = (H, m, withPeriod) => (withPeriod ? digital24(H, m) : digital(h12(H), m));
+
+function gSchedMatch(lv){
+  const withPeriod = lv !== 'easy', n = lv === 'easy' ? 3 : lv === 'mid' ? 4 : 5;
+  const items = pickSchedule(n, lv, withPeriod);
+  const slots = items.map(it => ({ label:schedLabel(it.H, it.m, withPeriod) }));
+  const cards = shuffle(items.map((it, i) => ({ zh:schedZh(it.a, it.H, it.m, withPeriod), slot:i, gloss:L('', it.a.es, it.a.en) })));
+  return { id:'schedMatch', kind:'match',
+    instr:L('把每一句話放到正確的時間。先點句子，再點時間。', 'Pon cada frase en su hora. Toca la frase y luego la hora.', 'Put each sentence at the right time. Tap a sentence, then a time.'),
+    line:null, visual:null, slots, cards, dbg:{ items:items.map(it => ({ short:it.a.short, H:it.H, m:it.m })), withPeriod },
+    fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), extra:null } };
+}
+function gSchedListen(lv){
+  const withPeriod = lv !== 'easy';
+  const it = pickSchedule(1, lv, withPeriod)[0], { a, H, m } = it;
+  const zh = schedZh(a, H, m, withPeriod), lab = schedLabel(H, m, withPeriod);
+  const card = (act, HH, mm, why) => ({ key:act.short + '|' + schedLabel(HH, mm, withPeriod), zh:act.short, badge:schedLabel(HH, mm, withPeriod), gloss:L('', act.es, act.en), why, d:act.short + ' ' + schedLabel(HH, mm, withPeriod) });
+  const wrongs = [];
+  const flip = m === 0 ? 30 : 0;
+  [[H + 1, m], [H - 1, m], [H, flip], [H + 2, m]].forEach(([HH, mm]) => { if (HH >= 6 && HH <= 23 && (withPeriod || h12(HH) !== h12(H) || mm !== m)) wrongs.push(card(a, HH, mm, 'heard')); });
+  const others = shuffle(DAILY.filter(x => x.short !== a.short));
+  others.slice(0, 2).forEach(o => wrongs.push(card(o, H, m, 'act')));
+  others.slice(2, 4).forEach(o => wrongs.push(card(o, pick(o.hours), pick(schedMins(lv)), 'act')));
+  const picked = shuffle(wrongs);
+  // 至少一個「同一個行程、不同時間」，一個「同一個時間、不同行程」
+  const sameAct = picked.filter(w => w.zh === a.short), otherAct = picked.filter(w => w.zh !== a.short);
+  const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
+  return { id:'schedListen', kind:'choice',
+    instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
+    line:null, visual:null, audio:zh, peek:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
+    options:mkOptions(card(a, H, m, null), wr),
+    fb:{ ansZh:zh, extra:lab } };
+}
+
+const PERIOD_HOURS = [6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23];
+function gPeriodChoice(lv){
+  const H = pick(PERIOD_HOURS), m = pick(schedMins(lv)), st = { half:true, zheng:Math.random() < 0.5 };
+  const correct = ptZh(H, m, st), hh = h12(H);
+  const wrongs = [];
+  wrongs.push({ zh:tZh(hh, m, null, st) + periodOf(H), why:'periodOrder' });
+  ['早上', '下午', '晚上', '中午'].filter(p => p !== periodOf(H) && (p !== '中午' || H === 12 ? true : false)).forEach(p => wrongs.push({ zh:p + tZh(hh, m, null, st), why:'periodWrong' }));
+  [H + 1, H - 1].filter(x => x >= 6 && x <= 23).forEach(x => wrongs.push({ zh:ptZh(x, m, st), why:'time', d:digital24(x, m) }));
+  const order = wrongs.filter(w => w.why === 'periodOrder'), pw = shuffle(wrongs.filter(w => w.why === 'periodWrong')), tm = shuffle(wrongs.filter(w => w.why === 'time'));
+  const wr = [].concat(order, pw.slice(0, 1), tm.slice(0, 1), pw.slice(1), tm.slice(1));
+  return { id:'periodChoice', kind:'choice',
+    instr:L('看數字時間，選出正確的中文說法（含早上、中午、下午、晚上）。', 'Mira la hora en números y elige cómo se dice (con mañana, mediodía, tarde o noche).', 'Look at the digital time and choose how to say it (with morning, noon, afternoon or evening).'),
+    line:null, visual:{ type:'digital', text:digital24(H, m) },
+    options:mkOptions({ zh:correct, why:null, d:digital24(H, m) }, wr),
+    fb:{ ansZh:correct, extra:digital24(H, m) } };
+}
+
+/* =====================  單元四：月曆行事曆  ===================== */
+/* 時間都避開 11、17、18 點；day: wk＝星期一到五，we＝週末，any＝都可以 */
+const EVENTS = [
+  { id:'dentist',  label:'牙醫',   doZh:'看牙醫',     fut:'要去看牙醫',   past:'去看牙醫了',   es:'ir al dentista',               en:'go to the dentist',      esP:'fui al dentista',               enP:'went to the dentist',    times:[[10,0],[10,30],[14,0],[15,30],[16,0]], day:'wk' },
+  { id:'meeting',  label:'開會',   doZh:'開會',       fut:'要開會',       past:'開會了',       es:'tener una reunión',            en:'have a meeting',         esP:'tuve una reunión',              enP:'had a meeting',          times:[[9,0],[10,0],[14,0],[15,0]], day:'wk' },
+  { id:'dinner',   label:'聚餐',   doZh:'聚餐',       fut:'要去聚餐',     past:'去聚餐了',     es:'ir a una cena con amigos',     en:'go to a group dinner',   esP:'fui a una cena con amigos',     enP:'went to a group dinner', times:[[19,0],[19,30],[20,0]], day:'any' },
+  { id:'interview',label:'面試',   doZh:'面試',       fut:'要面試',       past:'面試了',       es:'tener una entrevista',         en:'have an interview',      esP:'tuve una entrevista',           enP:'had an interview',       times:[[9,0],[10,30],[14,0]], day:'wk' },
+  { id:'exam',     label:'考試',   doZh:'考試',       fut:'要考試',       past:'考試了',       es:'tener un examen',              en:'have an exam',           esP:'tuve un examen',                enP:'had an exam',            times:[[9,0],[10,0],[13,30],[14,0]], day:'wk' },
+  { id:'movie',    label:'看電影', doZh:'看電影',     fut:'要去看電影',   past:'去看電影了',   es:'ir al cine',                   en:'go to the movies',       esP:'fui al cine',                   enP:'went to the movies',     times:[[13,0],[15,0],[19,0],[19,30],[20,30]], day:'any' },
+  { id:'date',     label:'約會',   doZh:'約會',       fut:'要去約會',     past:'去約會了',     es:'tener una cita',               en:'go on a date',           esP:'tuve una cita',                 enP:'went on a date',         times:[[12,0],[19,0],[20,0]], day:'any' },
+  { id:'hiking',   label:'爬山',   doZh:'爬山',       fut:'要去爬山',     past:'去爬山了',     es:'ir de excursión a la montaña', en:'go hiking',              esP:'fui de excursión a la montaña', enP:'went hiking',            times:[[6,0],[7,0],[8,0]], day:'we' },
+  { id:'haircut',  label:'剪髮',   doZh:'剪頭髮',     fut:'要去剪頭髮',   past:'去剪頭髮了',   es:'cortarme el pelo',             en:'get a haircut',          esP:'me corté el pelo',              enP:'got a haircut',          times:[[10,0],[15,0],[16,0]], day:'any' },
+  { id:'birthday', label:'生日',   doZh:'生日派對',   fut:'要去生日派對', past:'去生日派對了', es:'ir a una fiesta de cumpleaños',en:'go to a birthday party', esP:'fui a una fiesta de cumpleaños',enP:'went to a birthday party', times:[[19,0],[19,30]], day:'we' },
+  { id:'concert',  label:'演唱會', doZh:'看演唱會',   fut:'要去看演唱會', past:'去看演唱會了', es:'ir a un concierto',            en:'go to a concert',        esP:'fui a un concierto',            enP:'went to a concert',      times:[[19,0],[19,30]], day:'we' },
+  { id:'moving',   label:'搬家',   doZh:'搬家',       fut:'要搬家',       past:'搬家了',       es:'mudarme',                      en:'move house',             esP:'me mudé',                       enP:'moved house',            times:[[8,0],[9,0]], day:'we' },
+  { id:'doctor',   label:'醫生',   doZh:'看醫生',     fut:'要去看醫生',   past:'去看醫生了',   es:'ir al médico',                 en:'see the doctor',         esP:'fui al médico',                 enP:'saw the doctor',         times:[[9,0],[10,0],[14,30],[16,0]], day:'wk' },
+  { id:'class',    label:'上課',   doZh:'上課',       fut:'要上課',       past:'上課了',       es:'tener clase',                  en:'have class',             esP:'tuve clase',                    enP:'had class',              times:[[8,0],[9,0],[10,0],[13,30],[15,0]], day:'wk' },
+  { id:'shopping', label:'逛街',   doZh:'逛街',       fut:'要去逛街',     past:'去逛街了',     es:'ir de compras',                en:'go shopping',            esP:'fui de compras',                enP:'went shopping',          times:[[14,0],[15,30]], day:'we' },
+  { id:'gym',      label:'運動',   doZh:'運動',       fut:'要去運動',     past:'去運動了',     es:'hacer ejercicio',              en:'exercise',               esP:'hice ejercicio',                enP:'exercised',              times:[[6,30],[19,0],[20,0]], day:'any' }
+];
+const nEvents = lv => (lv === 'easy' ? 5 : lv === 'mid' ? 8 : 11);
+function makeMonth(n){
+  const y = randInt(2025, 2028), m = randInt(1, 12), N = dim(y, m);
+  const free = new Set(Array.from({ length:N }, (_, i) => i + 1)), out = [];
+  shuffle(EVENTS).slice(0, n).forEach(ev => {
+    let pool = [...free].filter(d => { const w = weekdayOf(y, m, d); return ev.day === 'any' || (ev.day === 'wk' ? (w >= 1 && w <= 5) : (w === 0 || w === 6)); });
+    if (!pool.length) pool = [...free];
+    const day = pick(pool); free.delete(day);
+    const t = pick(ev.times);
+    out.push({ day, ev, h:t[0], mi:t[1] });
+  });
+  return { y, m, events:out.sort((a, b) => a.day - b.day) };
+}
+function calVisual(mo, mode, extra){
+  const labels = {}, details = {};
+  mo.events.forEach(e => {
+    labels[e.day] = e.ev.label;
+    const dow = weekdayOf(mo.y, mo.m, e.day);
+    details[e.day] = { head:monthZh(mo.m) + dayZh(e.day, '號') + '　' + wkZh(dow, '天'), body:ptZh(e.h, e.mi, { half:true, zheng:false }) + '　' + e.ev.doZh, gloss:L('', e.ev.es, e.ev.en) };
+  });
+  return Object.assign({ type:'cal', y:mo.y, m:mo.m, mode, labels, details }, extra || {});
+}
+function gCalFindDay(lv){
+  const mo = makeMonth(nEvents(lv)), e = pick(mo.events);
+  return { id:'calFindDay', kind:'tap',
+    instr:L('看月曆，點出正確的日子，再按「確定」。', 'Mira el calendario, toca el día correcto y pulsa «Confirmar».', 'Look at the calendar, tap the right day, then press “Confirm”.'),
+    line:{ zh:e.ev.label + '是哪一{yì}天？', es:'¿Qué día es: ' + e.ev.es + '?', en:'Which day: ' + e.ev.en + '?' },
+    visual:calVisual(mo, 'pick'), target:{ y:mo.y, m:mo.m, d:e.day },
+    fb:{ ansZh:monthZh(mo.m) + dayZh(e.day, '號'), extra:fmtDate(mo.y, mo.m, e.day, true) } };
+}
+function gCalWhatDo(lv){
+  const mo = makeMonth(nEvents(lv)), e = pick(mo.events), st = '號';
+  const opt = x => ({ key:x.ev.id, zh:x.ev.doZh, gloss:L('', x.ev.es, x.ev.en), why:'ev', d:x.ev.doZh });
+  return { id:'calWhatDo', kind:'choice',
+    instr:L('看月曆，選出那一天要做什麼。', 'Mira el calendario y elige qué hay que hacer ese día.', 'Look at the calendar and choose what happens that day.'),
+    line:{ zh:monthZh(mo.m) + dayZh(e.day, st) + '要做什麼？', es:'¿Qué hay que hacer el ' + fmtDate(mo.y, mo.m, e.day, false) + '?', en:'What is on ' + fmtDate(mo.y, mo.m, e.day, false) + '?' },
+    visual:calVisual(mo, 'none'),
+    options:mkOptions(Object.assign(opt(e), { why:null }), shuffle(mo.events.filter(x => x !== e)).map(opt)),
+    fb:{ ansZh:e.ev.doZh, extra:fmtDate(mo.y, mo.m, e.day, true) } };
+}
+function gCalWhatTime(lv){
+  const mo = makeMonth(nEvents(lv)), e = pick(mo.events), st = { half:true, zheng:false };
+  const correct = ptZh(e.h, e.mi, st), flip = e.mi === 0 ? 30 : 0, wrongs = [];
+  [[e.h + 1, e.mi], [e.h - 1, e.mi], [e.h, flip], [e.h + 2, e.mi], [e.h - 2, e.mi], [e.h + 1, flip]].forEach(([H, mm]) => {
+    if (H >= 6 && H <= 23) wrongs.push({ zh:ptZh(H, mm, st), why:'time', d:digital24(H, mm) });
+  });
+  return { id:'calWhatTime', kind:'choice',
+    instr:L('點月曆上的日子看行程，再選出正確的時間。', 'Toca un día del calendario para ver el plan y elige la hora correcta.', 'Tap a day on the calendar to see the plan, then choose the right time.'),
+    line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
+    visual:calVisual(mo, 'view'),
+    options:mkOptions({ zh:correct, why:null, d:digital24(e.h, e.mi) }, shuffle(wrongs)),
+    fb:{ ansZh:correct, extra:digital24(e.h, e.mi) + '　' + fmtDate(mo.y, mo.m, e.day, true) } };
+}
+
+/* =====================  單元五：星期和日期推算  ===================== */
+const REL_DAYS = { '-2':'前天', '-1':'昨天', '0':'今天', '1':'明天', '2':'後天' };
+const REL_DAYS_L = { '-2':['anteayer', 'the day before yesterday'], '-1':['ayer', 'yesterday'], '0':['hoy', 'today'], '1':['mañana', 'tomorrow'], '2':['pasado mañana', 'the day after tomorrow'] };
+function randToday(){
+  for (;;){
+    const y = randInt(2025, 2028), m = randInt(1, 12), d = randInt(8, 22), w = weekdayOf(y, m, d);
+    if (w >= 1 && w <= 5) return { y, m, d, w };
+  }
+}
+const sameMonth = (a, t) => a.y === t.y && a.m === t.m;
+function todayVisual(T, extra){ return Object.assign({ type:'cal', y:T.y, m:T.m, today:T.d, mode:'none' }, extra || {}); }
+function dateOpt(t, why){ return { zh:monthZh(t.m) + dayZh(t.d, '號'), why:why || 'val', d:fmtDate(t.y, t.m, t.d, false) }; }
+
+function gRelDay(lv){
+  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2], off = pick(offs);
+  const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
+  const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
+  const lt = REL_DAYS_L[String(off)];
+  const instr = L('看月曆上標示「今天」的那一格，選出正確的答案。', 'Mira el día marcado como «hoy» y elige la respuesta correcta.', 'Find the day marked “today” and choose the right answer.');
+  const sun = pick(['天', '日']);
+  let options, line, ansZh;
+  if (askWeek){
+    const dow = weekdayOf(tg.y, tg.m, tg.d); ansZh = wkZh(dow, sun);
+    const wr = shuffle([-2, -1, 0, 1, 2].filter(x => x !== off)).map(x => { const t = addDays(T.y, T.m, T.d, x); return { zh:wkZh(weekdayOf(t.y, t.m, t.d), sun), why:'rel' }; });
+    shuffle([0, 1, 2, 3, 4, 5, 6]).forEach(x => wr.push({ zh:wkZh(x, sun), why:'wk' }));
+    options = mkOptions({ zh:ansZh, why:null }, wr);
+    line = { zh:word + '是星期幾？', es:'¿Qué día de la semana es ' + lt[0] + '?', en:'What day of the week is ' + lt[1] + '?' };
+  } else {
+    ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
+    const wr = [];
+    [-2, -1, 0, 1, 2].filter(x => x !== off).forEach(x => wr.push(dateOpt(addDays(T.y, T.m, T.d, x), 'rel')));
+    [7, -7].forEach(x => wr.push(dateOpt(addDays(tg.y, tg.m, tg.d, x), 'weekShift')));
+    options = mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, shuffle(wr));
+    line = { zh:word + '是幾月幾號？', es:'¿Qué fecha es ' + lt[0] + '?', en:'What is the date ' + lt[1] + '?' };
+  }
+  return { id:'relDay', kind:'choice', instr, line, visual:todayVisual(T), options,
+    fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
+}
+
+const REL_WEEK = { '-1':['上', 'la semana pasada', 'last week'], '0':['這', 'esta semana', 'this week'], '1':['下', 'la próxima semana', 'next week'] };
+function gRelWeek(lv){
+  for (let g = 0; g < 200; g++){
+    const T = randToday(), wOff = pick(lv === 'easy' ? [0, 1] : [-1, 0, 1]), X = randInt(1, 5);
+    if (wOff === 0 && X === T.w) continue;
+    const mondayOff = -((T.w + 6) % 7);
+    const tg = addDays(T.y, T.m, T.d, mondayOff + wOff * 7 + (X - 1));
+    if (!sameMonth(T, tg)) continue;
+    const word = REL_WEEK[String(wOff)][0] + wkZh(X, '天');
+    const wr = [];
+    const sh = (n, why) => { const t = addDays(tg.y, tg.m, tg.d, n); if (sameMonth(T, t)) wr.push(dateOpt(t, why)); };
+    sh(7, 'weekShift'); sh(-7, 'weekShift'); sh(1, 'dayShift'); sh(-1, 'dayShift'); sh(2, 'dayShift'); sh(-2, 'dayShift');
+    const order = shuffle(wr), wk = order.filter(x => x.why === 'weekShift'), ds = order.filter(x => x.why === 'dayShift');
+    const wrongs = [].concat(wk.slice(0, 1), ds.slice(0, 1), order);
+    const ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
+    return { id:'relWeek', kind:'choice',
+      instr:L('看月曆上標示「今天」的那一格，選出正確的日期。', 'Mira el día marcado como «hoy» y elige la fecha correcta.', 'Find the day marked “today” and choose the right date.'),
+      line:{ zh:word + '是幾月幾號？', es:'¿Qué fecha es el ' + DAYS_ES[X] + ' de ' + REL_WEEK[String(wOff)][1] + '?', en:'What is the date of ' + DAYS_EN[X] + ' ' + REL_WEEK[String(wOff)][2] + '?' },
+      visual:todayVisual(T), options:mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, wrongs),
+      fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
+  }
+  return gRelDay(lv);
+}
+
+function gYearView(lv){
+  const cross = lv === 'hard' && Math.random() < 0.5;
+  const y = randInt(2025, 2028), m = cross ? pick([1, 12]) : randInt(2, 11), d = randInt(1, 28);
+  const kinds = lv === 'easy' ? ['pm', 'nm'] : lv === 'mid' ? ['pm', 'nm', 'ly', 'ny'] : ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'];
+  let kind = pick(kinds);
+  if (cross){ kind = m === 1 ? pick(['pm', 'ly']) : pick(['nm', 'ny']); }
+  const vis = { type:'ycal', y, m, d };
+  const base = { id:'yearView', kind:'choice',
+    instr:L('看年曆（紅框是這個月），選出正確的答案。', 'Mira el calendario anual (el marco rojo es este mes) y elige la respuesta.', 'Look at the year calendar (the red frame is this month) and choose the answer.'),
+    visual:vis };
+  if (kind === 'pm' || kind === 'nm'){
+    const t = kind === 'pm' ? m - 1 : m + 1, tm = ((t - 1 + 12) % 12) + 1;
+    const wr = shuffle([tm - 1, tm + 1, tm + 2, tm - 2, m].map(x => ((x - 1 + 12) % 12) + 1).filter(x => x !== tm)).map(x => ({ zh:monthZh(x), why:x === m ? 'rel' : 'month' }));
+    const ansZh = monthZh(tm);
+    return Object.assign(base, {
+      line:{ zh:(kind === 'pm' ? '上' : '下') + '個月是幾月？', es:kind === 'pm' ? '¿Qué mes es el mes pasado?' : '¿Qué mes es el próximo mes?', en:kind === 'pm' ? 'What month is last month?' : 'What month is next month?' },
+      options:mkOptions({ zh:ansZh, why:null }, wr), fb:{ ansZh, extra:fmtDate(y, m, d, true) + (cross ? (kind === 'pm' ? '（上個月是去年）' : '（下個月是明年）') : '') } });
+  }
+  const dy = { ly:-1, ny:1, l2:-2, n2:2 }[kind], ty = y + dy, ansZh = yearZh(ty);
+  const word = { ly:'去年', ny:'明年', l2:'前年', n2:'後年' }[kind];
+  const tr = { ly:['el año pasado', 'last year'], ny:['el próximo año', 'next year'], l2:['hace dos años', 'the year before last'], n2:['dentro de dos años', 'the year after next'] }[kind];
+  const wr = [{ zh:yearQtyZh(ty) + '年', why:'yearQty' }, { zh:digitsZh(ty) + '個年', why:'ge' }];
+  [-2, -1, 0, 1, 2].filter(x => x !== dy).forEach(x => wr.push({ zh:yearZh(y + x), why:x === 0 ? 'rel' : 'year' }));
+  return Object.assign(base, {
+    line:{ zh:word + '是幾年？', es:'¿Qué año es ' + tr[0] + '?', en:'What year is ' + tr[1] + '?' },
+    options:mkOptions({ zh:ansZh, why:null }, wr), fb:{ ansZh, extra:fmtDate(y, m, d, true) } });
+}
+
+/* =====================  單元六：聽力點日期  ===================== */
+function tapQuestion(T, tg, zh, whenTrans, ev, past){
+  const trEs = whenTrans[0] + ', ' + (past ? ev.esP : 'voy a ' + ev.es) + '.';
+  const trEn = whenTrans[1] + ', ' + (past ? 'I ' + ev.enP : 'I’m going to ' + ev.en) + '.';
+  return { id:'tap', kind:'tap',
+    instr:L('請聽，然後點月曆上正確的日子，再按「確定」。', 'Escucha, toca el día correcto del calendario y pulsa «Confirmar».', 'Listen, tap the right day on the calendar, then press “Confirm”.'),
+    line:null, visual:todayVisual(T, { mode:'pick' }), audio:zh, peek:zh, target:{ y:tg.y, m:tg.m, d:tg.d },
+    fb:{ ansZh:monthZh(tg.m) + dayZh(tg.d, '號'), extra:fmtDate(tg.y, tg.m, tg.d, true), trans:{ es:trEs, en:trEn } } };
+}
+function gTapAbs(lv){
+  const T = randToday(), ev = pick(EVENTS), N = dim(T.y, T.m);
+  let d; do { d = randInt(1, N); } while (d === T.d);
+  const past = d < T.d, st = pick(['日', '號']);
+  const zh = monthZh(T.m) + dayZh(d, st) + '我' + (past ? ev.past : ev.fut);
+  const q = tapQuestion(T, { y:T.y, m:T.m, d }, zh, ['El ' + fmtDate(T.y, T.m, d, false), 'On ' + fmtDate(T.y, T.m, d, false)], ev, past);
+  q.id = 'tapAbs'; return q;
+}
+function gTapRelDay(lv){
+  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2]);
+  const tg = addDays(T.y, T.m, T.d, off), past = off < 0, lt = REL_DAYS_L[String(off)];
+  const zh = REL_DAYS[String(off)] + '我' + (past ? ev.past : ev.fut);
+  const q = tapQuestion(T, tg, zh, [lt[0][0].toUpperCase() + lt[0].slice(1), lt[1][0].toUpperCase() + lt[1].slice(1)], ev, past);
+  q.id = 'tapRelDay'; return q;
+}
+function gTapRelWeek(lv){
+  for (let g = 0; g < 200; g++){
+    const T = randToday(), ev = pick(EVENTS), wOff = pick(lv === 'easy' ? [0, 1] : [-1, 0, 1]), X = randInt(1, 5);
+    if (wOff === 0 && X === T.w) continue;
+    const tg = addDays(T.y, T.m, T.d, -((T.w + 6) % 7) + wOff * 7 + (X - 1));
+    if (!sameMonth(T, tg)) continue;
+    const past = (tg.d < T.d), zh = REL_WEEK[String(wOff)][0] + wkZh(X, '天') + '我' + (past ? ev.past : ev.fut);
+    const q = tapQuestion(T, tg, zh, ['El ' + DAYS_ES[X] + ' de ' + REL_WEEK[String(wOff)][1], DAYS_EN[X] + ' ' + REL_WEEK[String(wOff)][2]], ev, past);
+    q.id = 'tapRelWeek'; return q;
+  }
+  return gTapRelDay(lv);
+}
+
+/* =====================  單元清單  ===================== */
+const GEN = { clockChoice:gClockChoice, clockSet:gClockSet, clockListen:gClockListen,
+  dateChoice:gDateChoice, weekdayChoice:gWeekdayChoice, dateListen:gDateListen,
+  schedMatch:gSchedMatch, schedListen:gSchedListen, periodChoice:gPeriodChoice,
+  calFindDay:gCalFindDay, calWhatDo:gCalWhatDo, calWhatTime:gCalWhatTime,
+  relDay:gRelDay, relWeek:gRelWeek, yearView:gYearView,
+  tapAbs:gTapAbs, tapRelDay:gTapRelDay, tapRelWeek:gTapRelWeek };
+const UNITS = [
+  { id:'u1', t:L('單元一　看時鐘', 'Unidad 1 · Leer el reloj', 'Unit 1 · Reading the clock'),
+    subs:[['clockChoice', L('看時鐘選說法', 'Mira el reloj y elige', 'Look and choose')], ['clockSet', L('聽時間撥指針', 'Escucha y mueve las manecillas', 'Listen and set the hands')], ['clockListen', L('聽時間選答案', 'Escucha y elige', 'Listen and choose')]] },
+  { id:'u2', t:L('單元二　日期和星期', 'Unidad 2 · Fecha y día de la semana', 'Unit 2 · Dates and weekdays'),
+    subs:[['dateChoice', L('看日期選中文', 'De la fecha al chino', 'From date to Chinese')], ['weekdayChoice', L('星期幾？', '¿Qué día de la semana?', 'Which weekday?')], ['dateListen', L('聽日期選答案', 'Escucha la fecha y elige', 'Listen to the date')]] },
+  { id:'u3', t:L('單元三　一天的行程', 'Unidad 3 · El horario del día', 'Unit 3 · A day’s schedule'),
+    subs:[['schedMatch', L('行程配對時間', 'Une cada actividad con su hora', 'Match plans to times')], ['schedListen', L('聽行程選答案', 'Escucha la actividad y elige', 'Listen to the plan')], ['periodChoice', L('早上、中午、下午、晚上', 'Mañana, mediodía, tarde, noche', 'Morning, noon, afternoon, evening')]] },
+  { id:'u4', t:L('單元四　月曆行事曆', 'Unidad 4 · Calendario de actividades', 'Unit 4 · Calendar plans'),
+    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')]] },
+  { id:'u5', t:L('單元五　星期和日期推算', 'Unidad 5 · Calcular días y fechas', 'Unit 5 · Working out days'),
+    subs:[['relDay', L('昨天、今天、明天', 'Ayer, hoy, mañana', 'Yesterday, today, tomorrow')], ['relWeek', L('上星期、這星期、下星期', 'La semana pasada, esta, la próxima', 'Last, this, next week')], ['yearView', L('年曆：上個月、下個月、去年、明年', 'Año: mes pasado, próximo, año pasado…', 'Year view: last/next month, last/next year')]] },
+  { id:'u6', t:L('單元六　聽力點日期', 'Unidad 6 · Escucha y señala el día', 'Unit 6 · Listen and tap the day'),
+    subs:[['tapAbs', L('聽幾月幾號', 'Escucha la fecha', 'Listen to the date')], ['tapRelDay', L('聽昨天、明天、後天', 'Escucha ayer, mañana…', 'Listen to yesterday, tomorrow…')], ['tapRelWeek', L('聽上星期、下星期', 'Escucha la semana pasada / próxima', 'Listen to last / next week')]] }
+];
+const ALL_IDS = Object.keys(GEN);
+function makeQuestions(spec, lv, n){
+  /* spec: 'all' 或 一串題型 id；lv: 'easy'|'mid'|'hard'|'mix' */
+  const ids = spec === 'all' ? ALL_IDS : spec;
+  const out = []; let bag = [];
+  while (out.length < n){
+    if (!bag.length) bag = shuffle(ids);
+    const id = bag.pop();
+    const L2 = lv === 'mix' ? pick(['easy', 'mid', 'mid', 'hard']) : lv;
+    const q = GEN[id](L2); q.lv = L2; out.push(q);
+  }
+  return out;
+}
+
+/* =====================================================================
+   畫面：時鐘、月曆、各題型互動、結果與排行榜
+   ===================================================================== */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const sc = s => (Settings.script === 'simp' ? toSimp(s) : s);
+
+const STR = {
+  title:    L('練習時間', 'Practica la hora y la fecha', 'Practice time and dates'),
+  sub:      L('時鐘、日期、月曆，一起練習中文怎麼說', 'Reloj, fechas y calendario en chino', 'Clocks, dates and calendars in Chinese'),
+  nameL:    L('名字', 'Nombre', 'Name'),
+  namePh:   L('輸入你的名字', 'Escribe tu nombre', 'Enter your name'),
+  setScript:L('字形', 'Escritura', 'Script'),
+  setLang:  L('介面語言', 'Idioma', 'Language'),
+  setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
+  setRate:  L('語速', 'Voz', 'Voice'),
+  setLv:    L('難度', 'Nivel', 'Level'),
+  mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
+  mixSub:   L('20 題，所有單元混在一起，可以進排行榜', '20 preguntas de todas las unidades; cuenta para la clasificación', '20 questions from every unit — counts for the leaderboard'),
+  mixUnit:  L('這個單元全部混合（10 題）', 'Mezclar toda la unidad (10 preguntas)', 'Mix this whole unit (10 questions)'),
+  board:    L('排行榜', 'Clasificación', 'Leaderboard'),
+  hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
+  peek:     L('看文字', 'Ver el texto', 'Show text'),
+  confirm:  L('確定', 'Confirmar', 'Confirm'),
+  next:     L('下一題', 'Siguiente', 'Next'),
+  seeResult:L('看結果', 'Ver resultado', 'See result'),
+  right:    L('✔ 答對了！', '✔ ¡Correcto!', '✔ Correct!'),
+  wrong:    L('✘ 答錯了', '✘ Incorrecto', '✘ Not quite'),
+  correctIs:L('正確答案', 'Respuesta correcta', 'Correct answer'),
+  youChose: L('你選的是', 'Elegiste', 'You chose'),
+  tapHint:  L('點一天，看那天的行程', 'Toca un día para ver el plan', 'Tap a day to see its plan'),
+  noPlan:   L('這一天沒有行程', 'Ese día no hay planes', 'Nothing planned that day'),
+  again:    L('再玩一次', 'Jugar otra vez', 'Play again'),
+  home:     L('回主畫面', 'Volver al inicio', 'Back to start'),
+  score:    L('分', 'pts', 'pts'),
+  today:    L('今天', 'Hoy', 'Today'),
+  best:     L('我的最高分', 'Mi mejor puntaje', 'My best score'),
+  loading:  L('讀取中…', 'Cargando…', 'Loading…'),
+  lbFail:   L('排行榜暫時連不上', 'La clasificación no está disponible ahora', 'The leaderboard is unavailable right now'),
+  lbEmpty:  L('還沒有人上榜，你當第一名吧！', 'Aún no hay nadie. ¡Sé el primero!', 'Nobody yet — be the first!'),
+  lbNeedName:L('輸入名字才會記錄到排行榜', 'Escribe tu nombre para entrar en la clasificación', 'Enter your name to be on the leaderboard'),
+  lbSaved:  L('已記錄到排行榜', 'Guardado en la clasificación', 'Saved to the leaderboard'),
+  close:    L('關閉', 'Cerrar', 'Close'),
+  correctSent:L('正確的配對', 'Emparejamiento correcto', 'Correct matches'),
+  hintLine: L('先點一句話，再點一個時間', 'Toca una frase y luego una hora', 'Tap a sentence, then a time')
+};
+const T = k => Lh(STR[k]);
+const Ti = k => Li(STR[k]);
+
+/* ---------- 狀態 ---------- */
+const App = { name:'', lv:'mid', open:null, round:null, qs:[], i:0, score:0, right:0, t0:0, cur:null, answered:false, sel:null, dial:null, match:null };
+try{ App.name = localStorage.getItem('timegame.name') || ''; const l = localStorage.getItem('timegame.lv'); if (['easy', 'mid', 'hard'].includes(l)) App.lv = l; }catch(e){}
+const root = () => $('#app');
+
+/* ---------- 音效（有靜音鈕，見 mute.js） ---------- */
+let _ac = null;
+function sfx(ok){
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    if (!_ac) _ac = new AC();
+    if (_ac.state === 'suspended') _ac.resume();
+    const t = _ac.currentTime, notes = ok ? [[660, 0], [880, 0.09]] : [[220, 0], [170, 0.12]];
+    notes.forEach(([f, d]) => {
+      const o = _ac.createOscillator(), g = _ac.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t + d); g.gain.exponentialRampToValueAtTime(0.16, t + d + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.16);
+      o.connect(g); g.connect(_ac.destination); o.start(t + d); o.stop(t + d + 0.18);
+    });
+  }catch(e){}
+}
+
+/* =====================  時鐘  ===================== */
+function clockSVG(o){
+  const { h, m, s } = o, hasS = s != null;
+  const pt = (a, len) => { const r = a * Math.PI / 180; return [(100 + len * Math.sin(r)).toFixed(2), (100 - len * Math.cos(r)).toFixed(2)]; };
+  let g = '<circle cx="100" cy="100" r="95" fill="#fbf8f0" stroke="#2b2a27" stroke-width="2"/>';
+  for (let i = 0; i < 60; i++){
+    const big = i % 5 === 0, a = i * 6, p1 = pt(a, 94), p2 = pt(a, big ? 85 : 90);
+    g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#2b2a27" stroke-width="${big ? 2 : 1}"/>`;
+  }
+  let nums = '';
+  for (let n = 1; n <= 12; n++){ const p = pt(n * 30, 70); nums += `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" font-size="17" fill="#2b2a27" stroke="#fbf8f0" stroke-width="3" paint-order="stroke" font-family="system-ui,sans-serif">${n}</text>`; }
+  const hA = (h % 12) * 30 + m * 0.5 + (hasS ? s / 120 : 0), mA = m * 6 + (hasS ? s * 0.1 : 0);
+  const hp = pt(hA, 48), mp = pt(mA, 74);
+  g += nums;
+  g += `<line class="hh" x1="100" y1="100" x2="${hp[0]}" y2="${hp[1]}" stroke="#2b2a27" stroke-width="6" stroke-linecap="round"/>`;
+  g += `<line class="mh" x1="100" y1="100" x2="${mp[0]}" y2="${mp[1]}" stroke="#2b2a27" stroke-width="3.5" stroke-linecap="round"/>`;
+  if (hasS){
+    const sp = pt(s * 6, 82), st = pt(s * 6 + 180, 16);
+    g += `<line x1="${st[0]}" y1="${st[1]}" x2="${sp[0]}" y2="${sp[1]}" stroke="#a8503c" stroke-width="1.6" stroke-linecap="round"/>`;
+  }
+  g += `<circle cx="100" cy="100" r="4.5" fill="${hasS ? '#a8503c' : '#2b2a27'}"/>`;
+  return `<svg viewBox="0 0 200 200" class="clock${o.mini ? ' mini' : ''}" ${o.dial ? 'id="dial"' : ''} role="img" aria-label="clock">${g}</svg>`;
+}
+function setHands(svg, h, m){
+  const pt = (a, len) => { const r = a * Math.PI / 180; return [(100 + len * Math.sin(r)).toFixed(2), (100 - len * Math.cos(r)).toFixed(2)]; };
+  const hp = pt((h % 12) * 30 + m * 0.5, 48), mp = pt(m * 6, 74), hh = $('.hh', svg), mh = $('.mh', svg);
+  hh.setAttribute('x2', hp[0]); hh.setAttribute('y2', hp[1]); mh.setAttribute('x2', mp[0]); mh.setAttribute('y2', mp[1]);
+}
+function bindDial(svg, st, readout){
+  let drag = null;
+  const ang = e => {
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 200 - 100, y = (e.clientY - r.top) / r.height * 200 - 100;
+    let a = Math.atan2(x, -y) * 180 / Math.PI; if (a < 0) a += 360;
+    return { a, r:Math.hypot(x, y) };
+  };
+  const apply = p => {
+    if (drag === 'm') st.m = Math.round(p.a / 6) % 60;
+    else { let hh = Math.round((p.a - st.m * 0.5) / 30); hh = ((hh % 12) + 12) % 12; st.h = hh === 0 ? 12 : hh; }
+    setHands(svg, st.h, st.m); if (readout) readout.textContent = digital(st.h, st.m);
+  };
+  svg.addEventListener('pointerdown', e => { if (App.answered) return; const p = ang(e); drag = p.r > 60 ? 'm' : 'h'; try{ svg.setPointerCapture(e.pointerId); }catch(err){} apply(p); e.preventDefault(); });
+  svg.addEventListener('pointermove', e => { if (drag && !App.answered) apply(ang(e)); });
+  const end = () => { drag = null; };
+  svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
+}
+
+/* =====================  月曆  ===================== */
+function calHTML(v){
+  const { y, m } = v, N = dim(y, m), first = new Date(y, m - 1, 1).getDay();
+  let h = `<div class="cal"><div class="ct">${esc(fmtMonthTitle(y, m))}</div><table><thead><tr>`;
+  WK_ZH.forEach((w, i) => { h += `<th class="${i === 0 || i === 6 ? 'we' : ''}">${w}</th>`; });
+  h += '</tr></thead><tbody>';
+  let d = 1 - first;
+  for (let r = 0; r < 6 && d <= N; r++){
+    h += '<tr>';
+    for (let c = 0; c < 7; c++, d++){
+      if (d < 1 || d > N){ h += '<td class="empty"></td>'; continue; }
+      const tappable = v.mode === 'pick' || (v.mode === 'view' && v.details && v.details[d]);
+      const cls = [(c === 0 || c === 6) ? 'we' : '', v.today === d ? 'today' : '', v.mark === d ? 'mark' : '', tappable ? 'tap' : ''].filter(Boolean).join(' ');
+      h += `<td class="${cls}" data-d="${d}"${v.today === d ? ` data-today="${esc(sc('今天'))}"` : ''}><span class="n">${d}</span>${v.labels && v.labels[d] ? `<span class="lb">${esc(sc(v.labels[d]))}</span>` : ''}</td>`;
+    }
+    h += '</tr>';
+  }
+  return h + '</tbody></table></div>';
+}
+function ycalHTML(v){
+  const todayTxt = (Settings.lang === 'es' ? 'Hoy: ' : Settings.lang === 'en' ? 'Today: ' : sc('今天：')) + fmtDate(v.y, v.m, v.d, true);
+  let h = `<div class="datebox">${esc(todayTxt)}</div><div class="ytitle">${esc(Settings.lang === 'zh' ? v.y + '年' : String(v.y))}</div><div class="ycal">`;
+  for (let m = 1; m <= 12; m++){
+    const N = dim(v.y, m), first = new Date(v.y, m - 1, 1).getDay();
+    h += `<div class="mm${m === v.m ? ' cur' : ''}"><div class="mt">${esc(sc(monthZh(m)))}</div><table>`;
+    let d = 1 - first;
+    for (let r = 0; r < 6 && d <= N; r++){
+      h += '<tr>';
+      for (let c = 0; c < 7; c++, d++){ h += (d < 1 || d > N) ? '<td></td>' : `<td class="${m === v.m && d === v.d ? 't' : ''}">${d}</td>`; }
+      h += '</tr>';
+    }
+    h += '</table></div>';
+  }
+  return h + '</div>';
+}
+
+/* =====================  開始畫面  ===================== */
+function seg(key, opts, cur){
+  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${esc(zhOf(L(l)))}</button>`).join('') + '</div>';
+}
+function renderStart(){
+  App.round = null; try{ speechSynthesis.cancel(); }catch(e){}
+  let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
+  h += `<div class="card"><div class="setrow"><label>${Lh(STR.nameL)}</label><input type="text" id="nm" maxlength="14" value="${esc(App.name)}" placeholder="${esc(zhOf(STR.namePh))}"></div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', '中＋西'], ['en', '中＋英'], ['zh', '純中文']], Settings.lang)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', '拼音'], ['zhuyin', '注音'], ['both', '兩者'], ['off', '關']], Settings.phon)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', '慢'], ['normal', '一般'], ['fast', '快']], Settings.rate)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', [['easy', '簡單'], ['mid', '普通'], ['hard', '困難']], App.lv)}</div></div>`;
+  h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
+  UNITS.forEach(u => {
+    h += `<div class="unit${App.open === u.id ? ' open' : ''}" data-u="${u.id}"><button class="uh"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button><div class="subs">`;
+    u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
+    h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
+  });
+  h += `<button class="btn wide" id="lb" style="margin-top:10px">🏆 ${esc(zhOf(STR.board))}${trOf(STR.board) ? ' · ' + esc(trOf(STR.board)) : ''}</button>`;
+  root().innerHTML = h;
+  $('#nm').addEventListener('input', e => { App.name = e.target.value.trim().slice(0, 14); try{ localStorage.setItem('timegame.name', App.name); }catch(err){} });
+  $$('[data-seg]').forEach(box => box.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const k = box.dataset.seg, v = b.dataset.v;
+    if (k === 'lv'){ App.lv = v; try{ localStorage.setItem('timegame.lv', v); }catch(err){} }
+    else { Settings[k] = v; writeSettings(Settings); }
+    renderStart();
+  }));
+  $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
+  $$('[data-sub]').forEach(b => b.addEventListener('click', () => startRound([b.dataset.sub], App.lv, b.dataset.sub, false)));
+  $$('[data-unitmix]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.unitmix); startRound(u.subs.map(s => s[0]), App.lv, u.id, false); }));
+  $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
+  $('#lb').addEventListener('click', () => showBoard());
+}
+
+/* =====================  出題與作答  ===================== */
+function startRound(spec, lv, label, isMix){
+  const n = isMix ? 20 : 10;
+  App.round = { spec, lv, label, isMix, n };
+  App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
+  try{ window.HGPlays && HGPlays.start(label + ':' + lv, App.name); }catch(e){}
+  renderQ();
+}
+function optHTML(o){
+  let h = '';
+  if (o.svg) h += o.svg;
+  if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
+  if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
+  if (o.gloss){ const t = trOf(o.gloss); if (t) h += `<span class="tr">${esc(t)}</span>`; }
+  return h;
+}
+function renderQ(){
+  const q = App.qs[App.i], n = App.qs.length;
+  App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></div></div>`;
+  h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
+  h += `<div class="instr">${Lh(q.instr)}</div>`;
+  if (q.line){
+    const t = Settings.lang === 'es' ? q.line.es : Settings.lang === 'en' ? q.line.en : '';
+    h += `<div class="qline">${lineHTML(q.line.zh)}${t ? `<span class="tr">${esc(t)}</span>` : ''}</div>`;
+  }
+  const v = q.visual;
+  h += '<div class="vis">';
+  if (v){
+    if (v.type === 'clock') h += clockSVG(v);
+    else if (v.type === 'dial'){ h += clockSVG({ h:v.h0, m:v.m0, dial:true }) + `<div class="dialread" id="dialread">${digital(v.h0, v.m0)}</div>`; }
+    else if (v.type === 'digital') h += `<div class="digi" style="font-size:46px">${esc(v.text)}</div>`;
+    else if (v.type === 'cal'){
+      if (v.datebox) h += `<div class="datebox">${esc(v.datebox)}</div>`;
+      h += calHTML(v);
+      if (v.mode === 'view') h += `<div class="detail" id="detail"><span class="small">${esc(zhOf(STR.tapHint))}${trOf(STR.tapHint) ? ' · ' + esc(trOf(STR.tapHint)) : ''}</span></div>`;
+    }
+    else if (v.type === 'ycal') h += ycalHTML(v);
+  }
+  h += '</div>';
+  if (q.audio){
+    h += `<div class="hearbar"><button class="btn" id="hear">${Lh(STR.hear)}</button><button class="btn" id="peek">${Lh(STR.peek)}</button></div><div class="peek" id="peekBox" hidden>${lineHTML(q.peek)}</div>`;
+  }
+  if (q.kind === 'choice'){
+    const long = q.options.some(o => o.zh && o.zh.replace(/\{[^}]*\}/g, '').length > 5);
+    const cls = (q.optClass === 'cardopt' || long) ? 'opts one' : 'opts';
+    h += `<div class="${cls}">` + q.options.map((o, i) => `<button class="opt" data-i="${i}">${optHTML(o)}</button>`).join('') + '</div>';
+  } else if (q.kind === 'match'){
+    h += `<div class="match"><div class="small" style="text-align:center">${esc(zhOf(STR.hintLine))}${trOf(STR.hintLine) ? ' · ' + esc(trOf(STR.hintLine)) : ''}</div><div id="slots"></div><div class="cards" id="cards"></div></div>`;
+  }
+  if (q.kind !== 'choice') h += `<div class="foot"><button class="btn primary" id="confirm" disabled>${Lh(STR.confirm)}</button></div>`;
+  h += '<div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div>';
+  root().innerHTML = h;
+  window.scrollTo(0, 0);
+  $('#home').addEventListener('click', renderStart);
+  if (q.audio){
+    $('#hear').addEventListener('click', () => speak(q.audio));
+    $('#peek').addEventListener('click', () => { const b = $('#peekBox'); b.hidden = !b.hidden; });
+    setTimeout(() => { if (App.cur === q && !App.answered) speak(q.audio); }, 350);
+  }
+  if (q.kind === 'choice') $$('.opt').forEach(b => b.addEventListener('click', () => answerChoice(+b.dataset.i)));
+  else if (q.kind === 'dial'){
+    App.dial = { h:q.visual.h0, m:q.visual.m0 };
+    bindDial($('#dial'), App.dial, $('#dialread'));
+    $('#confirm').disabled = false;
+    $('#confirm').addEventListener('click', answerDial);
+  } else if (q.kind === 'tap') bindCal(q);
+  else if (q.kind === 'match') initMatch(q);
+  if (q.visual && q.visual.type === 'cal' && q.visual.mode === 'view') bindCal(q);
+}
+
+function showFeedback(ok, q, chosen, extraHTML){
+  App.answered = true;
+  if (ok){ App.score += 10; App.right++; }
+  sfx(ok);
+  let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="big">${Lh(ok ? STR.right : STR.wrong)}</div>`;
+  if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
+  if (!ok && chosen && chosen.why && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
+  if (extraHTML) h += extraHTML;
+  if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
+  h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
+  if (q.fb.extra) h += `<div class="small">${esc(q.fb.extra)}</div>`;
+  if (q.fb.trans){ const t = Settings.lang === 'es' ? q.fb.trans.es : Settings.lang === 'en' ? q.fb.trans.en : ''; if (t) h += `<div class="small">${esc(t)}</div>`; }
+  h += '</div>';
+  $('#fb').innerHTML = h;
+  $('#home').nextElementSibling.nextElementSibling.querySelector('b').textContent = App.score;
+  const last = App.i >= App.qs.length - 1, nb = $('#next');
+  nb.innerHTML = Lh(last ? STR.seeResult : STR.next); nb.hidden = false;
+  nb.onclick = () => { if (last) showResult(); else { App.i++; renderQ(); } };
+  const cf = $('#confirm'); if (cf) cf.disabled = true;
+  nb.scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+
+function answerChoice(i){
+  if (App.answered) return;
+  const q = App.cur, o = q.options[i];
+  $$('.opt').forEach((b, k) => { b.disabled = true; if (q.options[k].ok) b.classList.add('ok'); else if (k === i) b.classList.add('bad'); });
+  showFeedback(!!o.ok, q, o);
+}
+function answerDial(){
+  if (App.answered) return;
+  const q = App.cur, st = App.dial, tg = q.target;
+  const dm = Math.abs(st.m - tg.m), diff = Math.min(dm, 60 - dm);
+  const ok = st.h === tg.h && diff <= 2;
+  const mine = digital(st.h, st.m);
+  showFeedback(ok, q, ok ? null : { d:mine, why:null }, `<div style="text-align:center">${clockSVG({ h:tg.h, m:tg.m, mini:true })}</div>`);
+}
+
+/* ---------- 月曆點選 ---------- */
+function bindCal(q){
+  const v = q.visual;
+  $$('.cal td[data-d]').forEach(td => td.addEventListener('click', () => {
+    const d = +td.dataset.d;
+    if (v.mode === 'view'){
+      const det = v.details[d], box = $('#detail');
+      if (!box) return;
+      $$('.cal td').forEach(x => x.classList.remove('sel')); td.classList.add('sel');
+      if (!det){ box.innerHTML = `<span class="small">${esc(zhOf(STR.noPlan))}</span>`; return; }
+      const t = trOf(det.gloss);
+      box.innerHTML = `<div>${lineHTML(det.head)}</div><div>${lineHTML(det.body)}</div>${t ? `<span class="small">${esc(t)}</span>` : ''}`;
+      return;
+    }
+    if (App.answered) return;
+    $$('.cal td').forEach(x => x.classList.remove('sel')); td.classList.add('sel');
+    App.sel = d; $('#confirm').disabled = false;
+  }));
+  if (q.kind === 'tap') $('#confirm').addEventListener('click', answerTap);
+}
+function answerTap(){
+  if (App.answered || App.sel == null) return;
+  const q = App.cur, tg = q.target, ok = App.sel === tg.d;
+  $$('.cal td[data-d]').forEach(td => { td.classList.remove('sel'); if (+td.dataset.d === tg.d) td.classList.add('good'); else if (!ok && +td.dataset.d === App.sel) td.classList.add('wrong'); });
+  showFeedback(ok, q, ok ? null : { d:fmtDate(tg.y, tg.m, App.sel, false), why:'tap' });
+}
+
+/* ---------- 行程配對 ---------- */
+function initMatch(q){
+  App.match = { placed:q.slots.map(() => null), selCard:null };
+  drawMatch(q);
+  $('#confirm').addEventListener('click', answerMatch);
+}
+function drawMatch(q){
+  const st = App.match, done = App.answered;
+  $('#slots').innerHTML = q.slots.map((s, i) => {
+    const ci = st.placed[i], card = ci != null ? q.cards[ci] : null;
+    return `<div class="slot"><div class="tm">${esc(s.label)}</div><div class="box${card ? ' filled' : ''}${done && card ? (card.slot === i ? ' ok' : ' bad') : ''}" data-slot="${i}">${card ? lineHTML(card.zh) : ''}</div></div>`;
+  }).join('');
+  $('#cards').innerHTML = q.cards.map((c, i) => {
+    const used = st.placed.includes(i), t = trOf(c.gloss);
+    return `<button class="cardb${st.selCard === i ? ' sel' : ''}${used ? ' used' : ''}" data-card="${i}"${used || done ? ' disabled' : ''}>${lineHTML(c.zh)}${t ? `<span class="tr">${esc(t)}</span>` : ''}</button>`;
+  }).join('');
+  if (!done){
+    $$('[data-card]').forEach(b => b.addEventListener('click', () => { st.selCard = st.selCard === +b.dataset.card ? null : +b.dataset.card; drawMatch(q); }));
+    $$('[data-slot]').forEach(b => b.addEventListener('click', () => {
+      const i = +b.dataset.slot;
+      if (st.selCard != null){ const prev = st.placed[i]; st.placed[i] = st.selCard; st.selCard = null; void prev; }
+      else if (st.placed[i] != null) st.placed[i] = null;
+      drawMatch(q);
+    }));
+    $('#confirm').disabled = st.placed.some(x => x == null);
+  }
+}
+function answerMatch(){
+  if (App.answered) return;
+  const q = App.cur, st = App.match;
+  const ok = st.placed.every((ci, i) => ci != null && q.cards[ci].slot === i);
+  showFeedback(ok, q, null);     // 這裡會把 App.answered 設成 true
+  drawMatch(q);                  // 再重畫一次，把對錯的顏色畫出來
+}
+
+/* =====================  結果與排行榜  ===================== */
+const LB = (function(){
+  const CFG = { apiKey:'AIzaSyC_YSDn2OH6_GKKwCq0d8QFNl3fYXzTC60', authDomain:'memorma-24dab.firebaseapp.com', projectId:'memorma-24dab', appId:'1:806709458465:web:f0d12acb2f911f2f165560' };
+  const V = '10.12.2', CDN = 'https://www.gstatic.com/firebasejs/' + V + '/', COL = 'timeBoard';
+  let readyP = null;
+  function ready(){
+    if (readyP) return readyP;
+    readyP = (async () => {
+      const A = await import(CDN + 'firebase-app.js'), Au = await import(CDN + 'firebase-auth.js'), F = await import(CDN + 'firebase-firestore.js');
+      const app = A.initializeApp(CFG, 'timeboard'), auth = Au.getAuth(app);
+      if (!auth.currentUser) await Au.signInAnonymously(auth); else await auth.authStateReady();
+      return { F, db:F.getFirestore(app), uid:auth.currentUser.uid };
+    })().catch(() => { readyP = null; return null; });
+    return readyP;
+  }
+  async function submit(name, score){
+    const L0 = await ready(); if (!L0) return false;
+    try{
+      const ref = L0.F.doc(L0.db, COL, L0.uid); let prev = -1;
+      try{ const s = await L0.F.getDoc(ref); if (s.exists()) prev = s.data().score; }catch(e){}
+      if (score <= prev) return true;
+      await L0.F.setDoc(ref, { name:String(name).slice(0, 14), score, updatedAt:L0.F.serverTimestamp() });
+      return true;
+    }catch(e){ return false; }
+  }
+  async function top(){
+    const L0 = await ready(); if (!L0) return null;
+    try{
+      const q = L0.F.query(L0.F.collection(L0.db, COL), L0.F.orderBy('score', 'desc'), L0.F.limit(10));
+      const s = await L0.F.getDocs(q);
+      return s.docs.map(d => d.data());
+    }catch(e){ return null; }
+  }
+  return { submit, top };
+})();
+function localBest(){ try{ return +localStorage.getItem('timegame.best') || 0; }catch(e){ return 0; } }
+function boardHTML(rows){
+  if (rows === null) return `<div class="note">${Lh(STR.lbFail)}</div>`;
+  if (!rows.length) return `<div class="note">${Lh(STR.lbEmpty)}</div>`;
+  return '<table class="board">' + rows.map((r, i) => `<tr><td style="width:34px">${i + 1}</td><td>${esc(r.name || '')}</td><td class="r">${esc(r.score)}</td></tr>`).join('') + '</table>';
+}
+function showResult(){
+  const r = App.round, n = App.qs.length, max = n * 10, ratio = App.score / max;
+  const msg = ratio >= 0.9 ? L('太棒了！', '¡Excelente!', 'Excellent!') : ratio >= 0.7 ? L('很好！', '¡Muy bien!', 'Well done!') : ratio >= 0.5 ? L('不錯，再練習一下。', 'Bien, practica un poco más.', 'Good, keep practicing.') : L('再試一次，你可以的！', 'Inténtalo otra vez, ¡puedes!', 'Try again, you can do it!');
+  try{ window.HGPlays && HGPlays.end({ score:App.score, secs:Math.round((Date.now() - App.t0) / 1000), name:App.name }); }catch(e){}
+  if (App.score > localBest() && r.isMix){ try{ localStorage.setItem('timegame.best', String(App.score)); }catch(e){} }
+  let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
+  if (r.isMix){
+    h += `<div class="card"><div id="lbsave" class="note">${App.name ? Lh(STR.loading) : Lh(STR.lbNeedName)}</div><div id="lbtop"></div></div>`;
+  }
+  h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
+  root().innerHTML = h; window.scrollTo(0, 0);
+  $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
+  $('#home2').addEventListener('click', renderStart);
+  if (r.isMix){
+    (async () => {
+      let saved = false;
+      if (App.name) saved = await LB.submit(App.name, App.score);
+      const rows = await LB.top();
+      const a = $('#lbsave'), b = $('#lbtop'); if (!a || !b) return;
+      a.innerHTML = App.name ? (saved ? Lh(STR.lbSaved) : Lh(STR.lbFail)) : Lh(STR.lbNeedName);
+      b.innerHTML = boardHTML(rows);
+    })();
+  }
+}
+function showBoard(){
+  const ov = document.createElement('div'); ov.className = 'overlay';
+  ov.innerHTML = `<div class="panel"><h3>🏆 ${esc(zhOf(STR.board))} · ${esc(zhOf(STR.mix))}</h3><div id="bd" class="note">${Lh(STR.loading)}</div><div class="note">${Li(STR.best)}：${localBest()}</div><button class="btn wide" id="bclose">${Lh(STR.close)}</button></div>`;
+  document.body.appendChild(ov);
+  $('#bclose', ov).addEventListener('click', () => ov.remove());
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  LB.top().then(rows => { const b = $('#bd', ov); if (b) b.innerHTML = boardHTML(rows); });
+}
+
+renderStart();
+
+</script>
+<script>
+/* ===== 找不到中文聲音的提示（每天一分鐘遊戲統一做法）===== */
+(function(){
+  var shown=false;
+  function cfg(){ var s={}; try{ s=JSON.parse(localStorage.getItem('hanziGames.settings')||'{}')||{}; }catch(e){} return s; }
+  function isMandarin(v){ var l=String((v&&v.lang)||'').toLowerCase().replace(/_/g,'-'); if(l.indexOf('yue')===0||l.indexOf('zh-hk')===0) return false; return l==='zh'||l.indexOf('zh-')===0||l.indexOf('cmn')===0; }
+  var T={
+    none:{ zh:['這個裝置找不到中文（台灣）語音，聽不到念的內容。請到手機設定安裝「中文（台灣）」語音，或換一個裝置。','这个装置找不到中文（台湾）语音，听不到念的内容。请到手机设置安装「中文（台湾）」语音，或换一个装置。'],
+           es:'No se encontró una voz de chino (Taiwán) en este dispositivo, así que no se oirá el audio. Instala la voz «chino (Taiwán)» en los ajustes del móvil o usa otro dispositivo.',
+           en:'No Chinese (Taiwan) voice was found on this device, so you won’t hear the audio. Install the “Chinese (Taiwan)” voice in your phone settings, or use another device.' },
+    nosynth:{ zh:['這個瀏覽器不支援語音，聽不到念的內容。請換一個瀏覽器（例如 Chrome、Safari）。','这个浏览器不支持语音，听不到念的内容。请换一个浏览器（例如 Chrome、Safari）。'],
+           es:'Este navegador no admite voz, así que no se oirá el audio. Usa otro navegador (por ejemplo Chrome o Safari).',
+           en:'This browser does not support speech, so you won’t hear the audio. Try another browser (for example Chrome or Safari).' }
+  };
+  function show(kind){
+    if(shown||document.getElementById('hgVoiceHint')) return; shown=true;
+    var s=cfg(), lang=s.lang||'es', simp=s.script==='simp', t=T[kind];
+    var st=document.createElement('style');
+    st.textContent='#hgVoiceHint{position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:2147482999;width:min(94vw,520px);box-sizing:border-box;display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:12px;background:#fff6dc;border:1px solid #d8b24a;color:#5b4410;font:13px/1.4 system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif;box-shadow:0 2px 10px rgba(0,0,0,.25)}#hgVoiceHint .m{flex:1}#hgVoiceHint .m small{display:block;font-size:11px;opacity:.85;margin-top:2px}#hgVoiceHint button{border:0;background:transparent;color:inherit;font-size:16px;line-height:1;padding:0 2px;cursor:pointer}';
+    document.head.appendChild(st);
+    var d=document.createElement('div'); d.id='hgVoiceHint'; d.setAttribute('role','status');
+    var m=document.createElement('div'); m.className='m';
+    var zh=document.createElement('div'); zh.textContent = simp ? t.zh[1] : t.zh[0]; m.appendChild(zh);
+    if(lang!=='zh'){ var sm=document.createElement('small'); sm.textContent = lang==='en' ? t.en : t.es; m.appendChild(sm); }
+    var x=document.createElement('button'); x.type='button'; x.textContent='✕'; x.setAttribute('aria-label','Close');
+    x.addEventListener('click',function(){ d.remove(); });
+    d.appendChild(m); d.appendChild(x); document.body.appendChild(d);
+  }
+  function check(){
+    try{
+      if(!window.speechSynthesis){ show('nosynth'); return; }
+      var vs=window.speechSynthesis.getVoices()||[];
+      if(vs.length && !vs.some(isMandarin)) show('none');   // 清單是空的時（有些手機一開始就是空的）先不判斷
+    }catch(e){}
+  }
+  function start(){
+    check();
+    try{ window.speechSynthesis.addEventListener('voiceschanged', check); }catch(e){}
+    setTimeout(check,1500); setTimeout(check,4000);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+/* ===== /找不到中文聲音的提示 ===== */
+
+</script>
+<script>
+/* ===== 版權說明 ===== */
+(function(){
+  if(window.__hgCopy)return; window.__hgCopy=1;
+  function mk(){
+    if(document.getElementById('hgCopy'))return;
+    var d=document.createElement('div'); d.id='hgCopy';
+    d.textContent='© 2026 @cadadiaunosminutos_ben_chino ｜ 保留所有權利 / Todos los derechos reservados';
+    d.style.cssText='position:fixed;left:48px;right:48px;bottom:calc(2px + env(safe-area-inset-bottom,0px));text-align:center;font:10px/1.3 system-ui,-apple-system,"Noto Sans TC",sans-serif;color:rgba(120,120,120,.85);pointer-events:none;user-select:none;z-index:1;';
+    document.body.appendChild(d);
+  }
+  if(document.body)mk(); else document.addEventListener('DOMContentLoaded',mk);
+})();
+/* ===== /版權說明 ===== */
+
+</script>
+<script>
+/* ===== 遊玩紀錄（hgPlays）— 每個遊戲共用，貼在 </body> 前 =====
+   用法：
+     HGPlays.visit();                       // 頁面打開時（本檔會自動呼叫一次）
+     HGPlays.start('easy', '小明');         // 真的開始玩一局（關卡／難度、暱稱都可省略）
+     HGPlays.end({score: 120, name: '小明'}); // 這一局正常結算（score、name 可省略）
+   沒呼叫 end 的那一局，後台就會顯示「沒玩完」。
+   寫到 memorma 專案：plays（每局）、visits（每台裝置每天每遊戲一筆）。
+   任何錯誤都靜默，不影響遊戲。 */
+(function () {
+  var GAME = 'time';          // ← 每個遊戲改成自己的代號（英文小寫、底線）
+  var NAME_GETTER = null;                // ← 可選：function(){ return 目前暱稱或'' }
+  var CFG = { apiKey: 'AIzaSyC_YSDn2OH6_GKKwCq0d8QFNl3fYXzTC60', authDomain: 'memorma-24dab.firebaseapp.com',
+              projectId: 'memorma-24dab', appId: '1:806709458465:web:f0d12acb2f911f2f165560' };
+  var V = '10.12.2', CDN = 'https://www.gstatic.com/firebasejs/' + V + '/';
+  var cur = null, readyP = null, lib = null;
+
+  function gid() { try { return (HG.gameFn ? HG.gameFn() : GAME) || GAME; } catch (e) { return GAME; } } // taiwan-life 這類共用引擎的遊戲可改寫 HGPlays.gameFn
+  function day() { // 以台灣時間（UTC+8）算「哪一天」，方便老師對帳
+    var d = new Date(Date.now() + 8 * 3600e3);
+    return d.toISOString().slice(0, 10);
+  }
+  function ls(k, v) {
+    try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) {}
+    return null;
+  }
+  function ready() {
+    if (readyP) return readyP;
+    readyP = (async function () {
+      var A = await import(CDN + 'firebase-app.js');
+      var Au = await import(CDN + 'firebase-auth.js');
+      var F = await import(CDN + 'firebase-firestore.js');
+      var app = A.initializeApp(CFG, 'hgplays');
+      var auth = Au.getAuth(app);
+      if (!auth.currentUser) await Au.signInAnonymously(auth);
+      else await auth.authStateReady();
+      lib = { F: F, db: F.getFirestore(app), uid: auth.currentUser.uid };
+      return lib;
+    })().catch(function () { readyP = null; return null; });
+    return readyP;
+  }
+  function getName(n) {
+    if (n) return String(n).slice(0, 36);
+    try { if (NAME_GETTER) return String(NAME_GETTER() || '').slice(0, 36); } catch (e) {}
+    return '';
+  }
+
+  var HG = window.HGPlays = {
+    /* 每台裝置每天、每個遊戲只算一次訪客 */
+    visit: function () {
+      var g = gid(), d = day(), key = 'hg.visit.' + g;
+      if (ls(key) === d) return;
+      ready().then(function (L) {
+        if (!L) return;
+        var id = d + '_' + g + '_' + L.uid;
+        return L.F.setDoc(L.F.doc(L.db, 'visits', id), { game: g, day: d, uid: L.uid, at: L.F.serverTimestamp() })
+          .then(function () { ls(key, d); });
+      }).catch(function () {});
+    },
+    /* 真的開始玩一局 */
+    start: function (level, name) {
+      var mine = cur = { id: null, level: level == null ? '' : String(level).slice(0, 30) };
+      ready().then(function (L) {
+        if (!L) return;
+        var data = { game: gid(), level: mine.level, uid: L.uid, name: getName(name), day: day(),
+                     startedAt: L.F.serverTimestamp(), done: false };
+        return L.F.addDoc(L.F.collection(L.db, 'plays'), data).then(function (ref) {
+          mine.id = ref.id; if (mine.pendingEnd) HG._finish(mine, mine.pendingEnd);
+        });
+      }).catch(function () {});
+    },
+    /* 這一局正常結算 */
+    end: function (info) {
+      var mine = cur; if (!mine || mine.ended) return; mine.ended = true; info = info || {};
+      if (mine.id) HG._finish(mine, info); else mine.pendingEnd = info; // 開始的寫入還沒回來就先記著
+    },
+    _finish: function (mine, info) {
+      ready().then(function (L) {
+        if (!L || !mine.id) return;
+        var u = { done: true, endedAt: L.F.serverTimestamp(),
+                  secs: Math.max(0, Math.min(86400, Math.round(Number(info.secs != null ? info.secs : (Date.now() - (mine.t0 || Date.now())) / 1000) || 0))) };
+        var s = Number(info.score); if (isFinite(s) && info.score != null) u.score = Math.max(-1e9, Math.min(1e9, Math.round(s)));
+        var n = getName(info.name); if (n) u.name = n;
+        return L.F.updateDoc(L.F.doc(L.db, 'plays', mine.id), u);
+      }).catch(function () {});
+    }
+  };
+  var _s = HG.start; HG.start = function (l, n) { _s(l, n); if (cur) cur.t0 = Date.now(); };
+  setTimeout(function () { HG.visit(); }, 2500);   // 等遊戲載完再記訪客
+})();
+</script>
+
+</body>
+</html>
