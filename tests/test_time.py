@@ -169,9 +169,25 @@ LOGIC_JS = r'''
       q.options.filter(o => !o.ok).forEach(o => { const e2 = EVENTS.find(e => e.doZh === o.zh); if (q.visual.labels[dd] === e2.label) E(tag + ' wrong is also that day'); });
     }
     if (id === 'calWhatTime'){
-      const lab = q.line.zh.split('是')[0], day = Object.keys(q.visual.labels).find(d => q.visual.labels[d] === lab);
-      if (!q.visual.details[day].body.startsWith(c.zh + '　')) E(tag + ' time mismatch ' + q.visual.details[day].body + ' vs ' + c.zh);
-      q.options.filter(o => !o.ok).forEach(o => { if (q.visual.details[day].body.startsWith(o.zh + '　')) E(tag + ' wrong is valid'); });
+      const D = q.dbg, today = D.days.find(x => x.day === D.day), tg = today.items.find(x => x.label === D.label && x.h === D.h && x.mi === D.mi);
+      if (!tg) E(tag + ' target missing in its day');
+      if (q.visual.labels[D.day] !== D.label) E(tag + ' cell label must be the asked event');
+      if (!q.visual.plus[D.day]) E(tag + ' cell needs plus');
+      if (q.line.zh !== D.label + '是幾點？') E(tag + ' line');
+      const nTarget = D.days.reduce((s, x) => s + x.items.filter(i => i.label === D.label).length, 0); if (nTarget !== 1) E(tag + ' asked event must appear exactly once in month: ' + nTarget);
+      D.days.forEach(x => {
+        if (x.items.length < 2 || x.items.length > 3) E(tag + ' items per day ' + x.items.length);
+        if (new Set(x.items.map(i => i.h)).size !== x.items.length) E(tag + ' same hour in one day');
+        const det = q.visual.details[x.day].items; if (det.length !== x.items.length) E(tag + ' detail count');
+        det.forEach(it => { if (!/^\d\d:\d\d$/.test(it.t)) E(tag + ' detail time must be digits ' + it.t); });
+        if (!q.visual.labels[x.day] || !x.items.some(i => i.label === q.visual.labels[x.day])) E(tag + ' cell label not in its day');
+        for (let k = 1; k < det.length; k++) if (det[k - 1].t >= det[k].t) E(tag + ' detail not sorted');
+      });
+      const day = q.visual.details[D.day].items; if (!day.some(it => it.t === digital24(D.h, D.mi))) E(tag + ' target time not in detail');
+      const st = { half:true, zheng:false };
+      if (c.zh !== ptZh(D.h, D.mi, st)) E(tag + ' correct ' + c.zh);
+      q.options.filter(o => !o.ok).forEach(o => { if (o.zh === c.zh) E(tag + ' wrong equals correct'); });
+      if (today.items.length > 1 && !q.options.some(o => !o.ok && o.why === 'otherEv')) E(tag + ' no same-day trap option');
     }
     if (id === 'relDay'){
       const { y, m, today } = q.visual, T = new Date(y, m - 1, today), w = T.getDay();

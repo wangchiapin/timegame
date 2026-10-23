@@ -201,3 +201,7 @@ button.gear{font-size:20px;line-height:1}
 .qline .ln{display:block;white-space:nowrap;font-size:clamp(16px,5vw,22px)}
 .qline .ln.q{font-size:inherit;white-space:normal}
 .qline .qsep{display:block;width:60%;margin:4px auto 4px;border-top:1px solid var(--line)}
+
+.cal td .lb .plus{font-weight:700;margin-left:1px}
+.detail .plan{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;column-gap:.7em;margin:2px 0}
+.detail .plan .small{display:inline;font-size:13px}

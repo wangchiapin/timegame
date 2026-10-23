@@ -130,7 +130,7 @@ function calHTML(v){
       if (d < 1 || d > N){ h += '<td class="empty"></td>'; continue; }
       const tappable = v.mode === 'pick' || (v.mode === 'view' && v.details && v.details[d]);
       const cls = [(c === 0 || c === 6) ? 'we' : '', v.today === d ? 'today' : '', v.mark === d ? 'mark' : '', tappable ? 'tap' : ''].filter(Boolean).join(' ');
-      h += `<td class="${cls}" data-d="${d}"${v.today === d ? ` data-today="${esc(sc('今天'))}"` : ''}><span class="n">${d}</span>${v.labels && v.labels[d] ? `<span class="lb">${esc(sc(v.labels[d]))}</span>` : ''}</td>`;
+      h += `<td class="${cls}" data-d="${d}"${v.today === d ? ` data-today="${esc(sc('今天'))}"` : ''}><span class="n">${d}</span>${v.labels && v.labels[d] ? `<span class="lb">${esc(sc(v.labels[d]))}${v.plus && v.plus[d] ? '<span class="plus">＋</span>' : ''}</span>` : ''}</td>`;
     }
     h += '</tr>';
   }
@@ -339,6 +339,10 @@ function bindCal(q){
       if (!box) return;
       $$('.cal td').forEach(x => x.classList.remove('sel')); td.classList.add('sel');
       if (!det){ box.innerHTML = `<span class="small">${esc(zhOf(STR.noPlan))}</span>`; return; }
+      if (det.items){
+        box.innerHTML = det.items.map(it => { const tt = trOf(it.gloss); return `<div class="plan">${timeChunk(it.t)}<span>${lineHTML(it.zh)}</span>${tt ? `<span class="small">${esc(tt)}</span>` : ''}</div>`; }).join('');
+        return;
+      }
       const t = trOf(det.gloss);
       box.innerHTML = `<div>${lineHTML(det.head)}</div><div>${lineHTML(det.body)}</div>${t ? `<span class="small">${esc(t)}</span>` : ''}`;
       return;

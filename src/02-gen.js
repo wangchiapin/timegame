@@ -26,6 +26,7 @@ const WHY = {
   pmAm:     L('早上、中午、下午、晚上要和 24 小時制對起來：下午三點是 15:00。', 'Mañana, mediodía, tarde y noche se corresponden con el reloj de 24 horas: 下午三點 son las 15:00.', 'Morning, noon, afternoon and evening map to the 24-hour clock: 下午三點 is 15:00.'),
   periodWrong:L('時段不對，想一想這是白天還是晚上。', 'El momento del día no corresponde a esa hora.', 'That part of the day does not fit this time.'),
   heard:    L('', '', ''),   // 聽力選錯：不顯示說明（畫面上已有「你選的是…」和正確答案）
+  otherEv:  L('那是同一天另一個行程的時間。', 'Esa es la hora de otro plan del mismo día.', 'That is the time of another plan on the same day.'),
   act:      L('聽到的行程不是這個，再聽一次。', 'No es la actividad que se oyó. Escucha otra vez.', 'That is not the activity you heard. Listen again.'),
   weekShift:L('這是不同星期的同一天，要注意「上、這、下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上, 這, 下.', 'Same weekday, but a different week. Watch 上, 這 and 下.'),
   dayShift: L('差了一天，再數一次。', 'Te equivocaste por un día; cuenta otra vez.', 'Off by one day; count again.'),
@@ -347,7 +348,7 @@ const EVENTS = [
   { id:'birthday', label:'生日',   doZh:'生日派對',   fut:'要去生日派對', past:'去生日派對了', es:'ir a una fiesta de cumpleaños',en:'go to a birthday party', esP:'fui a una fiesta de cumpleaños',enP:'went to a birthday party', times:[[19,0],[19,30]], day:'we' },
   { id:'concert',  grp:'sing', label:'演唱會', doZh:'看演唱會',   fut:'要去看演唱會', past:'去看演唱會了', es:'ir a un concierto',            en:'go to a concert',        esP:'fui a un concierto',            enP:'went to a concert',      times:[[19,0],[19,30]], day:'we' },
   { id:'moving',   label:'搬家',   doZh:'搬家',       fut:'要搬家',       past:'搬家了',       es:'mudarme',                      en:'move house',             esP:'me mudé',                       enP:'moved house',            times:[[8,0],[9,0]], day:'we' },
-  { id:'doctor',   label:'醫生',   doZh:'看醫生',     fut:'要去看醫生',   past:'去看醫生了',   es:'ir al médico',                 en:'see the doctor',         esP:'fui al médico',                 enP:'saw the doctor',         times:[[9,0],[10,0],[14,30],[16,0]], day:'wk' },
+  { id:'doctor',   label:'看醫生',   doZh:'看醫生',     fut:'要去看醫生',   past:'去看醫生了',   es:'ir al médico',                 en:'see the doctor',         esP:'fui al médico',                 enP:'saw the doctor',         times:[[9,0],[10,0],[14,30],[16,0]], day:'wk' },
   { id:'shopping', label:'逛街',   doZh:'逛街',       fut:'要去逛街',     past:'去逛街了',     es:'ir de compras',                en:'go shopping',            esP:'fui de compras',                enP:'went shopping',          times:[[14,0],[15,30]], day:'we' },
   { id:'gym',      grp:'sport', label:'運動',   doZh:'運動',       fut:'要去運動',     past:'去運動了',     es:'hacer ejercicio',              en:'exercise',               esP:'hice ejercicio',                enP:'exercised',              times:[[6,30],[19,0],[20,0]], day:'any' },
   { id:'zhclass', label:'上中文課', doZh:'上中文課', fut:'要上中文課', past:'上中文課了', es:'tener clase de chino', en:'have a Chinese class', esP:'tuve clase de chino', enP:'had a Chinese class', times:[[9,0],[10,0],[14,0],[19,0],[20,0]], day:'any' },
@@ -414,18 +415,48 @@ function gCalWhatDo(lv){
     options:mkOptions(Object.assign(opt(e), { why:null }), shuffle(mo.events.filter(x => x !== e)).map(opt)),
     fb:{ ansZh:e.ev.doZh, extra:fmtDate(mo.y, mo.m, e.day, true) } };
 }
+/* 這一題專用：有行程的每一天排 2–3 個行程（時間都不同），月曆格子只寫其中一個，旁邊加＋ */
+const dayOk = (ev, w) => ev.day === 'any' || (ev.day === 'wk' ? (w >= 1 && w <= 5) : (w === 0 || w === 6));
+function makeMultiMonth(nDays){
+  const y = randInt(2025, 2028), m = randInt(1, 12), N = dim(y, m);
+  const usedId = new Set(), usedGrp = new Set(), days = [];
+  for (const d of shuffle(Array.from({ length:N }, (_, i) => i + 1))){
+    if (days.length >= nDays) break;
+    const w = weekdayOf(y, m, d), want = pick([2, 3]), evs = [], hours = new Set(), grpDay = new Set();
+    for (const ev of shuffle(EVENTS)){
+      if (evs.length >= want) break;
+      if (usedId.has(ev.id) || !dayOk(ev, w)) continue;
+      if (ev.grp && (usedGrp.has(ev.grp) || grpDay.has(ev.grp))) continue;
+      const ts = shuffle(ev.times).filter(t => !hours.has(t[0]));
+      if (!ts.length) continue;
+      hours.add(ts[0][0]); evs.push({ ev, h:ts[0][0], mi:ts[0][1] }); if (ev.grp) grpDay.add(ev.grp);
+    }
+    if (evs.length < 2) continue;
+    evs.forEach(x => usedId.add(x.ev.id)); grpDay.forEach(x => usedGrp.add(x));
+    days.push({ day:d, evs:evs.sort((a, b) => a.h * 60 + a.mi - (b.h * 60 + b.mi)) });
+  }
+  return { y, m, days:days.sort((a, b) => a.day - b.day) };
+}
 function gCalWhatTime(lv){
-  const mo = makeMonth(nEvents(lv)), e = pick(mo.events), st = { half:true, zheng:false };
-  const correct = ptZh(e.h, e.mi, st), flip = e.mi === 0 ? 30 : 0, wrongs = [];
-  [[e.h + 1, e.mi], [e.h - 1, e.mi], [e.h, flip], [e.h + 2, e.mi], [e.h - 2, e.mi], [e.h + 1, flip]].forEach(([H, mm]) => {
-    if (H >= 6 && H <= 23) wrongs.push({ zh:ptZh(H, mm, st), why:'time', d:digital24(H, mm) });
+  const mo = makeMultiMonth(lv === 'easy' ? 3 : lv === 'hard' ? 5 : 4), D = pick(mo.days), e = pick(D.evs), st = { half:true, zheng:false };
+  const labels = {}, plus = {}, details = {};
+  mo.days.forEach(dd => {
+    const prim = dd === D ? e : pick(dd.evs);
+    labels[dd.day] = prim.ev.label; plus[dd.day] = true;
+    details[dd.day] = { items:dd.evs.map(x => ({ t:digital24(x.h, x.mi), zh:x.ev.doZh, gloss:L('', x.ev.es, x.ev.en) })) };
   });
+  const correct = ptZh(e.h, e.mi, st), flip = e.mi === 0 ? 30 : 0, generic = [];
+  [[e.h + 1, e.mi], [e.h - 1, e.mi], [e.h, flip], [e.h + 2, e.mi], [e.h - 2, e.mi], [e.h + 1, flip]].forEach(([H, mm]) => {
+    if (H >= 6 && H <= 23) generic.push({ zh:ptZh(H, mm, st), why:'time', d:digital24(H, mm) });
+  });
+  const others = D.evs.filter(x => x !== e).map(x => ({ zh:ptZh(x.h, x.mi, st), why:'otherEv', d:digital24(x.h, x.mi) }));
   return { id:'calWhatTime', kind:'choice',
-    instr:L('點月曆上的日子看行程，再選出正確的時間。', 'Toca un día del calendario para ver el plan y elige la hora correcta.', 'Tap a day on the calendar to see the plan, then choose the right time.'),
+    instr:L('點月曆上的日子看行程（＋代表還有其他行程），再選出正確的時間。', 'Toca un día del calendario para ver los planes (＋ = hay más planes) y elige la hora correcta.', 'Tap a day to see its plans (＋ = more plans) and choose the right time.'),
     line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
-    visual:calVisual(mo, 'view'),
-    options:mkOptions({ zh:correct, why:null, d:digital24(e.h, e.mi) }, shuffle(wrongs)),
-    fb:{ ansZh:correct, extra:digital24(e.h, e.mi) + '　' + fmtDate(mo.y, mo.m, e.day, true) } };
+    visual:{ type:'cal', y:mo.y, m:mo.m, mode:'view', labels, details, plus },
+    dbg:{ day:D.day, label:e.ev.label, h:e.h, mi:e.mi, days:mo.days.map(dd => ({ day:dd.day, items:dd.evs.map(x => ({ label:x.ev.label, h:x.h, mi:x.mi })) })) },
+    options:mkOptions({ zh:correct, why:null, d:digital24(e.h, e.mi) }, shuffle(others).concat(shuffle(generic))),
+    fb:{ ansZh:correct, extra:digital24(e.h, e.mi) + '　' + fmtDate(mo.y, mo.m, D.day, true) } };
 }
 
 /* =====================  單元五：星期和日期推算  ===================== */
