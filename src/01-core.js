@@ -195,18 +195,39 @@ function parseLine(text){
   return out;
 }
 function plainZh(text){ return String(text).replace(/\{[^}]*\}/g, ''); }
+/* 日期、時間的詞後面空一小格，方便學生斷詞：二零二六年 五月 二十日 五點 十五分
+   只在「數字＋年月日號點分秒」和幾個固定詞（今天、下午、星期一…）後面加；只影響畫面，不改文字，語音和比對不受影響 */
+const GAP_NUM = '零一二三四五六七八九十兩百千';
+const GAP_WORDS = /大後天|後天|前天|今天|明天|昨天|今年|明年|去年|早上|上午|中午|下午|晚上|星期[一二三四五六七日天]/g;
+function gapAfter(items){
+  const arr = items.map(it => it.c), n = arr.length, set = new Set();
+  const isNum = c => c !== undefined && (GAP_NUM.includes(c) || /\d/.test(c));
+  for (let i = 0; i < n; i++){
+    const c = arr[i], p = arr[i - 1], nx = arr[i + 1];
+    let ok = false;
+    if ('年日號點秒'.includes(c)) ok = isNum(p);
+    else if (c === '月') ok = isNum(p) || (p === '個' && isNum(arr[i - 2]));
+    else if (c === '分') ok = isNum(p) && nx !== '鐘';
+    if (ok) set.add(i);
+  }
+  const str = arr.join(''); let m; GAP_WORDS.lastIndex = 0;
+  while ((m = GAP_WORDS.exec(str))) set.add(m.index + m[0].length - 1);
+  return [...set].filter(i => i < n - 1 && !/[，。？！、：；,.?!:;\s（）()「」]/.test(arr[i + 1]) && !'半鐘'.includes(arr[i + 1]));
+}
 function lineHTML(text){
   const simp = Settings.script === 'simp', ph = Settings.phon;
   let o = '';
-  parseLine(text).forEach(it => {
+  const items = parseLine(text), gaps = new Set(gapAfter(items));
+  items.forEach((it, idx) => {
+    const gp = gaps.has(idx) ? ' gap' : '';
     const ch = simp ? (DICT[it.c] ? DICT[it.c].s : (S2[it.c] || it.c)) : it.c;
-    if (!it.hz || ph === 'off'){ o += `<span class="ch${it.hz ? '' : ' np'}"><span class="h">${esc(ch)}</span></span>`; return; }
+    if (!it.hz || ph === 'off'){ o += `<span class="ch${it.hz ? '' : ' np'}${gp}"><span class="h">${esc(ch)}</span></span>`; return; }
     const py = it.py, zy = py2zy(py);
     let top = '', bot = '';
     if (ph === 'pinyin') top = py;
     else if (ph === 'zhuyin') bot = zy;
     else { top = py; bot = zy; }
-    o += `<span class="ch">${ph === 'zhuyin' ? '' : `<span class="ph">${esc(top)}</span>`}<span class="h">${esc(ch)}</span>${bot ? `<span class="ph">${esc(bot)}</span>` : ''}</span>`;
+    o += `<span class="ch${gp}">${ph === 'zhuyin' ? '' : `<span class="ph">${esc(top)}</span>`}<span class="h">${esc(ch)}</span>${bot ? `<span class="ph">${esc(bot)}</span>` : ''}</span>`;
   });
   return o;
 }

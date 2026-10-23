@@ -250,7 +250,7 @@ function renderQ(){
   }
   h += '</div>';
   if (q.audio){
-    h += `<div class="hearbar"><button class="btn" id="hear">${Lh(STR.hear)}</button><button class="btn" id="peek">${Lh(STR.peek)}</button></div><div class="peek" id="peekBox" hidden>${lineHTML(q.peek)}</div>`;
+    h += `<div class="hearbar"><button class="btn" id="hear">${Lh(STR.hear)}</button>${q.peek ? `<button class="btn" id="peek">${Lh(STR.peek)}</button>` : ''}</div>${q.peek ? `<div class="peek" id="peekBox" hidden>${lineHTML(q.peek)}</div>` : ''}`;
   }
   if (q.kind === 'choice'){
     const long = q.options.some(o => o.zh && o.zh.replace(/\{[^}]*\}/g, '').length > 5);
@@ -268,7 +268,7 @@ function renderQ(){
   $('#gearq').addEventListener('click', openSettings);
   if (q.audio){
     $('#hear').addEventListener('click', () => speak(q.audio));
-    $('#peek').addEventListener('click', () => { const b = $('#peekBox'); b.hidden = !b.hidden; });
+    if ($('#peek')) $('#peek').addEventListener('click', () => { const b = $('#peekBox'); b.hidden = !b.hidden; });
     setTimeout(() => { if (App.cur === q && !App.answered) speak(q.audio); }, 350);
   }
   if (q.kind === 'choice') $$('.opt').forEach(b => b.addEventListener('click', () => answerChoice(+b.dataset.i)));

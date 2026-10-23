@@ -18,6 +18,8 @@ h1,h2,h3{margin:0;font-weight:600}
 .ch .h{line-height:1.25}
 .ch .ph{font-size:.5em;line-height:1.15;color:var(--sub);white-space:nowrap;min-height:1.15em;font-weight:400}
 .ch.np{margin:0}
+.ch.gap{margin-right:.5em}
+.ch.np.gap{margin-right:.5em}
 
 /* 版面 */
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
