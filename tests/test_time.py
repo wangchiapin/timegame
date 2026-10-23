@@ -100,12 +100,15 @@ LOGIC_JS = r'''
       const dayCh = new Set(q.options.map(o => o.zh.replace(/星期[天日一二三四五六七]/g, '').includes('號') ? '號' : '日')); if (dayCh.size !== 1) E(tag + ' options mix 日 and 號 styles');
     }
     if (id === 'weekdayChoice'){
-      const { y, m, mark: d } = q.visual, valid = wkSet(weekdayOf(y, m, d));
+      const { y, m, d, st } = q.dbg, valid = wkSet(weekdayOf(y, m, d));
       if (!valid.has(c.zh)) E(tag + ' correct invalid ' + c.zh);
+      if (q.visual.mark !== undefined) E(tag + ' calendar must not be circled');
+      if (q.line.zh !== numZh(m) + '月' + numZh(d) + st + '是星期幾？') E(tag + ' bad line ' + q.line.zh);
       q.options.filter(o => !o.ok).forEach(o => { if (valid.has(o.zh)) E(tag + ' wrong valid ' + o.zh); });
       const sundays = q.options.filter(o => o.zh === '星期天' || o.zh === '星期日'); if (sundays.length > 1) E(tag + ' both 天 and 日');
     }
     if (id === 'dateListen'){
+      if (q.peek) E(tag + ' dateListen must have no peek');
       if (c.zh !== q.audio) E(tag + ' correct != audio');
       q.options.filter(o => !o.ok).forEach(o => { if (o.zh === q.audio) E(tag + ' wrong==audio'); });
     }

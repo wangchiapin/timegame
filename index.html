@@ -745,21 +745,22 @@ function gDateChoice(lv){
   return { id:'dateChoice', kind:'choice',
     instr:L('看月曆上圈起來的日子，選出正確的中文說法。', 'Mira el día marcado en el calendario y elige cómo se dice en chino.', 'Look at the circled day and choose the correct Chinese.'),
     line:{ zh:'這一{yì}天是什麼時候{hou}？', es:'¿Qué fecha es este día?', en:'What date is this day?' },
-    visual:{ type:'cal', y, m, mark:d, datebox:fmtDate(y, m, d, withYear), mode:'none', cap:true },
+    visual:{ type:'cal', y, m, mark:d, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, chosen.concat(extra)),
     fb:{ ansZh:correct, extra:fmtDate(y, m, d, true) + '（' + dayName(weekdayOf(y, m, d)) + '）' } };
 }
 
 function gWeekdayChoice(lv){
-  const { y, m, d } = randDate(), dow = weekdayOf(y, m, d), sun = pick(['天', '日']);
+  const { y, m, d } = randDate(), dow = weekdayOf(y, m, d), sun = pick(['天', '日']), st = pick(['日', '號']);
   const correct = wkZh(dow, sun);
   const wrongs = shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== dow)).map(x => ({ zh:wkZh(x, sun), why:'wk' }));
   if (lv !== 'easy' && Math.random() < (dow === 0 ? 0.9 : 0.4)) wrongs.unshift({ zh:'星期七', why:'sevenWk' });
   return { id:'weekdayChoice', kind:'choice',
-    instr:L('看月曆上圈起來的日子，選出星期幾。', 'Mira el día marcado y elige qué día de la semana es.', 'Look at the circled day and choose the weekday.'),
-    line:{ zh:'這一{yì}天是星期幾？', es:'¿Qué día de la semana es?', en:'Which day of the week is it?' },
-    visual:{ type:'cal', y, m, mark:d, datebox:fmtDate(y, m, d, true), mode:'none', cap:true },
+    instr:L('看月曆，找到題目問的日子，選出星期幾。', 'Mira el calendario, busca el día de la pregunta y elige qué día de la semana es.', 'Find the day in the calendar and choose the weekday.'),
+    line:{ zh:numZh(m) + '月' + numZh(d) + st + '是星期幾？', es:'¿Qué día de la semana es el ' + d + ' de ' + MONTHS_ES[m - 1] + '?', en:'What day of the week is ' + MONTHS_EN[m - 1] + ' ' + d + '?' },
+    visual:{ type:'cal', y, m, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, wrongs),
+    dbg:{ y, m, d, st },
     fb:{ ansZh:correct, extra:fmtDate(y, m, d, true) } };
 }
 
@@ -780,7 +781,7 @@ function gDateListen(lv){
   const cs = shuffle([...cand.values()]);
   return { id:'dateListen', kind:'choice',
     instr:L('請聽，選出正確的日期。', 'Escucha y elige la fecha correcta.', 'Listen and choose the correct date.'),
-    line:null, visual:null, audio:zh, peek:zh,
+    line:null, visual:null, audio:zh,
     options:mkOptions({ zh, why:null, d:digDate(y, m, d) }, cs.map(c => ({ zh:mk(c.y, c.m, c.d), why:'heard', d:digDate(c.y, c.m, c.d) }))),
     fb:{ ansZh:zh, extra:fmtDate(y, m, d, true) } };
 }
