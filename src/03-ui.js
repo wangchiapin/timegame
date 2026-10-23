@@ -18,8 +18,7 @@ const STR = {
   setRate:  L('語速', 'Voz', 'Voice'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
-  mixSub:   L('20 題，所有單元混在一起，看看你的最高分', '20 preguntas de todas las unidades; mira tu mejor puntaje', '20 questions from every unit — see your best score'),
-  mixUnit:  L('這個單元全部混合（10 題）', 'Mezclar toda la unidad (10 preguntas)', 'Mix this whole unit (10 questions)'),
+  mixSub:   L('50 題，五個單元混合', '50 preguntas de las cinco unidades', '50 questions from all five units'),
   board:    L('排行榜', 'Clasificación', 'Leaderboard'),
   hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
   peek:     L('看文字', 'Ver el texto', 'Show text'),
@@ -36,7 +35,6 @@ const STR = {
   home:     L('回主畫面', 'Volver al inicio', 'Back to start'),
   score:    L('分', 'pts', 'pts'),
   today:    L('今天', 'Hoy', 'Today'),
-  best:     L('我的最高分', 'Mi mejor puntaje', 'My best score'),
   loading:  L('讀取中…', 'Cargando…', 'Loading…'),
   lbFail:   L('排行榜暫時連不上', 'La clasificación no está disponible ahora', 'The leaderboard is unavailable right now'),
   lbEmpty:  L('還沒有人上榜，你當第一名吧！', 'Aún no hay nadie. ¡Sé el primero!', 'Nobody yet — be the first!'),
@@ -195,22 +193,18 @@ function renderStart(){
   h += `<button class="lvchip" id="lvchip">${Li(STR.setLv)}：${Li(LV_OPTS().find(x => x[0] === App.lv)[1])} ⚙</button>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
-    h += `<div class="unit${App.open === u.id ? ' open' : ''}" data-u="${u.id}"><button class="uh"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button><div class="subs">`;
-    u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
-    h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
+    h += `<div class="unit" data-u="${u.id}"><button class="uh" data-ustart="${u.id}"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button></div>`;
   });
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
-  $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
-  $$('[data-sub]').forEach(b => b.addEventListener('click', () => startRound([b.dataset.sub], App.lv, b.dataset.sub, false)));
-  $$('[data-unitmix]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.unitmix); startRound(u.subs.map(s => s[0]), App.lv, u.id, false); }));
+  $$('[data-ustart]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.ustart); startRound(u.subs.map(x => x[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
 }
 
 /* =====================  出題與作答  ===================== */
-function startRound(spec, lv, label, isMix){
-  const n = isMix ? 20 : 10;
+function startRound(spec, lv, label, isMix, nOver){
+  const n = nOver || (isMix ? 50 : 25);
   App.round = { spec, lv, label, isMix, n };
   App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
   renderQ();
@@ -305,7 +299,7 @@ function renderQ(){
 
 function showFeedback(ok, q, chosen, extraHTML){
   App.answered = true;
-  if (ok){ App.score += 10; App.right++; }
+  if (ok){ App.right++; App.score = Math.round(App.right * 100 / App.round.n); }
   sfx(ok);
   let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="fbh big">${Li(ok ? STR.right : STR.wrong)}</div><div class="fbb">`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
@@ -413,13 +407,10 @@ function answerMatch(){
 }
 
 /* =====================  結果與排行榜  ===================== */
-function localBest(){ try{ return +localStorage.getItem('timegame.best') || 0; }catch(e){ return 0; } }
 function showResult(){
-  const r = App.round, n = App.qs.length, max = n * 10, ratio = App.score / max;
+  const r = App.round, n = App.qs.length, max = 100, ratio = App.score / max;
   const msg = ratio >= 0.9 ? L('太棒了！', '¡Excelente!', 'Excellent!') : ratio >= 0.7 ? L('很好！', '¡Muy bien!', 'Well done!') : ratio >= 0.5 ? L('不錯，再練習一下。', 'Bien, practica un poco más.', 'Good, keep practicing.') : L('再試一次，你可以的！', 'Inténtalo otra vez, ¡puedes!', 'Try again, you can do it!');
-  if (App.score > localBest() && r.isMix){ try{ localStorage.setItem('timegame.best', String(App.score)); }catch(e){} }
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
-  if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h; window.scrollTo(0, 0);

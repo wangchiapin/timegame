@@ -247,7 +247,7 @@ LOGIC_JS = r'''
   }
   // makeQuestions
   try {
-    const a = makeQuestions('all', 'mix', 20), ids = new Set(a.map(x => x.id)); if (a.length !== 20) E('mix length');
+    const a = makeQuestions('all', 'mix', 50), ids = new Set(a.map(x => x.id)); if (a.length !== 50) E('mix length');
     for (const sid of Object.keys(GEN)) for (const lv of ['easy','mid','hard']) for (let r = 0; r < 60; r++){ const qs = makeQuestions([sid], lv, 10), sg = qs.map(qSig); if (new Set(sg).size !== sg.length) { E('dup in round ' + sid + ' ' + lv); break; } }
     const b = makeQuestions(['clockChoice','clockSet'], 'mid', 10); if (b.length !== 10 || new Set(b.map(x => x.id)).size !== 2) E('makeQuestions subset');
   } catch (e) { E('makeQuestions THROW ' + e.message); }
@@ -342,19 +342,19 @@ if __name__ == '__main__':
         check(pg.evaluate("Settings.phon") == 'zhuyin' and pg.evaluate("App.lv") == 'easy' and pg.evaluate("App.round.lv") == 'hard', 'in-game gear changes settings; level only for next round')
         pg.evaluate("Settings.phon='pinyin'; writeSettings(Settings); App.lv='mid'; renderStart()")
 
-        pg.evaluate("startRound(['dateListen'], 'easy', 'dateListen', false)")
+        pg.evaluate("startRound(['dateListen'], 'easy', 'dateListen', false, 10)")
         check(pg.evaluate("!document.querySelector('#peek') && !document.querySelector('#peekBox') && !!document.querySelector('#hear')") and 'undefined' not in pg.evaluate("document.body.innerText"), 'dateListen: no 看文字 button, no undefined, 聽 button present')
         pg.evaluate("renderStart()")
         for sub, lvl in [('schedListen','easy'),('clockListen','easy')]:
             pk = []
             for _ in range(30):
-                pg.evaluate("startRound(['%s'], '%s', '%s', false)" % (sub, lvl, sub))
+                pg.evaluate("startRound(['%s'], '%s', '%s', false, 10)" % (sub, lvl, sub))
                 pk.append(pg.evaluate("[App.cur.options[0].svg ? 'clock' : 'text', !!document.querySelector('#peek')]"))
             if sub == 'schedListen':
                 check(all(not x[1] for x in pk), 'schedListen: never a 看文字 button')
             else:
                 check(all(x[1] == (x[0] == 'clock') for x in pk) and any(x[0]=='text' for x in pk) and any(x[0]=='clock' for x in pk), 'clockListen: 看文字 only on the clock-face version')
-        pg.evaluate("startRound(['schedListen'], 'easy', 's', false)")
+        pg.evaluate("startRound(['schedListen'], 'easy', 's', false, 10)")
         check(pg.evaluate("[...document.querySelectorAll('.opt .zrow')].length >= 4 && [...document.querySelectorAll('.opt .zrow')].every(r => /^\\d{1,2}:\\d\\d$/.test(r.children[0].textContent.replace(/\\s/g,'')) && r.children[1].textContent.replace(/\\s/g,'').length > 0)"), 'schedListen cards: time comes first, same order as Chinese, in the same character format')
         pg.evaluate("renderStart()")
         print('== 月曆行程 30 種')
@@ -395,7 +395,7 @@ if __name__ == '__main__':
             for sub in ALL_SUBS:
                 pg.evaluate("renderStart()")
                 pg.evaluate("App.lv='%s'" % lv)
-                pg.evaluate("startRound(['%s'], '%s', '%s', false)" % (sub, lv, sub))
+                pg.evaluate("startRound(['%s'], '%s', '%s', false, 10)" % (sub, lv, sub))
                 run_round(pg, True)
                 sc = pg.evaluate("App.score")
                 if sc != 100:
@@ -404,13 +404,13 @@ if __name__ == '__main__':
 
         print('== 鐘錶風格 ＋ 日出日落色帶')
         for sub in ALL_SUBS:
-            pg.evaluate("startRound(['%s'], 'mid', '%s', false)" % (sub, sub)); pg.wait_for_timeout(50)
+            pg.evaluate("startRound(['%s'], 'mid', '%s', false, 10)" % (sub, sub)); pg.wait_for_timeout(50)
             r = pg.evaluate("""() => { const b = document.querySelector('.tod'); return b ? { h:b.getBoundingClientRect().height, cls:document.documentElement.className, hasMk:!!b.querySelector('.mk') } : null; }""")
             check(r and abs(r['h'] - 30) < 1 and r['hasMk'] and r['cls'].startswith('tod-'), '%s: 30px band + marker + html class (%s)' % (sub, r))
         for hh, cl in [(7, 'tod-morning'), (13, 'tod-afternoon'), (21, 'tod-night'), (3, 'tod-night'), (12, 'tod-afternoon'), (19, 'tod-night')]:
             check(pg.evaluate("todClass(%d)" % hh) == cl, 'todClass(%d)=%s' % (hh, cl))
-        pg.evaluate("startRound(['schedListen'], 'mid', 's', false)")
-        pg.evaluate("startRound(['yearView'], 'mid', 'y', false)"); pg.wait_for_timeout(50)
+        pg.evaluate("startRound(['schedListen'], 'mid', 's', false, 10)")
+        pg.evaluate("startRound(['yearView'], 'mid', 'y', false, 10)"); pg.wait_for_timeout(50)
         for _ in range(12):
             if pg.evaluate("!!document.querySelector('.ycal')"): break
             pg.evaluate("document.querySelector('#next') && !document.querySelector('#next').hidden && document.querySelector('#next').click()")
@@ -431,27 +431,27 @@ if __name__ == '__main__':
         check(r['hasDbl'], 'hard has 上上/下下星期')
         check('前年' in r['yh'] and '後年' in r['yh'], 'hard year has 前年/後年 (%s)' % r['yh'])
         check(r['say'], 'tap question feedback shows the spoken sentence')
-        pg.evaluate("startRound(['tapAbs'], 'mid', 't', false)"); pg.wait_for_timeout(50)
+        pg.evaluate("startRound(['tapAbs'], 'mid', 't', false, 10)"); pg.wait_for_timeout(50)
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("!!document.querySelector('.fb .say')"), 'tap feedback renders .say')
 
         print('== 所有聽力題答完都顯示念的句子')
         for sub in ['clockListen', 'dateListen', 'schedListen', 'tapAbs', 'tapRelDay', 'tapRelWeek', 'clockSet']:
-            pg.evaluate("startRound(['%s'], 'mid', 'q', false)" % sub); pg.wait_for_timeout(50)
+            pg.evaluate("startRound(['%s'], 'mid', 'q', false, 10)" % sub); pg.wait_for_timeout(50)
             has_audio = pg.evaluate("!!document.querySelector('#hear')")
             answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
             say = pg.evaluate("(document.querySelector('.fb .say')||{}).innerText||''")
             if has_audio: check(len(say) > 1, '%s shows spoken sentence after answer (%r)' % (sub, say[:20]))
-        pg.evaluate("startRound(['relDay'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        pg.evaluate("startRound(['relDay'], 'mid', 'q', false, 10)"); pg.wait_for_timeout(50)
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("!document.querySelector('.fb .say')"), 'non-listening question shows no .say')
 
         print('== 答案欄位：標題條 ＋ 紙卡；配對題清單')
-        pg.evaluate("startRound(['schedMatch'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        pg.evaluate("startRound(['schedMatch'], 'mid', 'q', false, 10)"); pg.wait_for_timeout(50)
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         r = pg.evaluate("({ h:!!document.querySelector('.fb .fbh'), n:document.querySelectorAll('.fb .fbr').length, m:App.cur.slots.length, tm:[...document.querySelectorAll('.fb .fbr .tm')].map(e=>e.innerText).join() === App.cur.slots.map(s=>s.label).join() })")
         check(r['h'] and r['n'] == r['m'] and r['tm'], 'match feedback: header bar + one row per slot, times in order (%s)' % r)
-        pg.evaluate("startRound(['relDay'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        pg.evaluate("startRound(['relDay'], 'mid', 'q', false, 10)"); pg.wait_for_timeout(50)
         answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("document.querySelector('.fb.ok .fbh') && !document.querySelector('.fb .fbr')"), 'ok feedback: green header, no list')
 
@@ -459,16 +459,40 @@ if __name__ == '__main__':
         u = pg.evaluate("UNITS.map(x => [x.id, x.subs.map(s => s[0])])")
         check(len(u) == 5 and [x[0] for x in u] == ['u1','u2','u3','u4','u5'], 'five units (%s)' % [x[0] for x in u])
         d = dict(u)
-        check('tapAbs' in d['u4'] and 'tapRelDay' in d['u5'] and 'tapRelWeek' in d['u5'], 'tap questions moved into u4/u5')
+        check('tapAbs' in d['u4'] and 'yearView' in d['u4'] and 'tapRelDay' in d['u5'] and 'tapRelWeek' in d['u5'] and 'yearView' not in d['u5'], 'tapAbs+yearView in u4, tapRelDay/Week in u5')
         check(sorted(sum(d.values(), [])) == sorted(pg.evaluate("Object.keys(GEN)")), 'every question type is in exactly one unit')
         r = pg.evaluate("""() => { const o = {}; for (const lv of ['easy','mid','hard']) for (const g of ['relDay','tapRelDay']){ const s = new Set(); for (let k = 0; k < 500; k++){ const q = GEN[g](lv); const z = q.line ? q.line.zh : q.audio; const m = z.match(/^(大前天|大後天|前天|後天|昨天|明天)/); if (m) s.add(m[1]); } o[lv + '/' + g] = [...s].sort().join(); } return o; }""")
         check(all(v == '明天,昨天' for k, v in r.items() if k.startswith('easy')), 'easy 昨天/明天 only: %s' % r)
         check(all(v == '前天,後天,明天,昨天' for k, v in r.items() if k.startswith('mid')), 'mid adds 前天/後天: %s' % r)
         check(all(len(v.split(',')) == 6 for k, v in r.items() if k.startswith('hard')), 'hard has all six: %s' % r)
 
+        print('== 標題銘牌與設定面板風格')
+        pg.evaluate("renderStart()")
+        r = pg.evaluate("""() => { const h = getComputedStyle(document.querySelector('.title h1')); const g = getComputedStyle(document.querySelector('#gear')); return { hbg:h.backgroundColor, bw:h.borderTopWidth, round:g.borderTopLeftRadius }; }""")
+        check(r['bw'] == '2px' and r['hbg'] != 'rgba(0, 0, 0, 0)' and r['round'] in ('50%', '21px'), 'title plate + round gear knob (%s)' % r)
+        pg.evaluate("openSettings()")
+        r = pg.evaluate("""() => { const h3 = getComputedStyle(document.querySelector('.overlay .panel h3')); const on = getComputedStyle(document.querySelector('.overlay .seg button.on')); const off = getComputedStyle(document.querySelector('.overlay .seg button:not(.on)')); return { h3:h3.backgroundColor, on:on.backgroundColor, off:off.color, n:document.querySelectorAll('.overlay .seg').length }; }""")
+        check(r['n'] == 5 and r['h3'] != 'rgba(0, 0, 0, 0)' and r['on'] != r['h3'], 'settings: dark header, 5 rows, lit selected segment (%s)' % r)
+        pg.evaluate("document.querySelector('.overlay').remove()")
+
+        print('== 單元：點一下直接開始 25 題；綜合 50 題；百分制')
+        pg.evaluate("renderStart()")
+        check(pg.evaluate("document.querySelectorAll('.unit').length") == 5 and pg.evaluate("document.querySelectorAll('.unit .subs, [data-sub], [data-unitmix]').length") == 0, 'five unit buttons, no sub lists')
+        pg.click('[data-ustart="u3"]'); pg.wait_for_selector('#fb', state='attached')
+        r = pg.evaluate("({ n:App.qs.length, ids:[...new Set(App.qs.map(q => q.id))].sort().join() })")
+        check(r['n'] == 25 and r['ids'] == 'periodChoice,schedListen,schedMatch', 'unit 3 = 25 questions of its 3 types (%s)' % r)
+        answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
+        check(pg.evaluate("App.score") == 4, 'one right of 25 = 4 points')
+        pg.evaluate("renderStart()")
+        pg.evaluate("startRound('all','mix','mix',true)")
+        check(pg.evaluate("App.qs.length") == 50, 'mixed challenge = 50 questions')
+        answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
+        check(pg.evaluate("App.score") == 2, 'one right of 50 = 2 points')
+        pg.evaluate("renderStart()")
+
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:
-            pg.evaluate("startRound(['%s'], 'mid', '%s', false)" % (sub, sub))
+            pg.evaluate("startRound(['%s'], 'mid', '%s', false, 10)" % (sub, sub))
             run_round(pg, False)
             sc = pg.evaluate("App.score")
             check(sc < 100, '%s wrong-answers round finished (score=%s)' % (sub, sc))
@@ -477,7 +501,7 @@ if __name__ == '__main__':
         pg.evaluate("renderStart()"); pass
         pg.evaluate("startRound('all','mix','mix',true)")
         run_round(pg, True)
-        check(pg.evaluate("App.score") == 200, 'mixed challenge perfect = 200')
+        check(pg.evaluate("App.score") == 100, 'mixed challenge perfect = 100')
         pg.wait_for_timeout(600)
         check(pg.evaluate("!document.body.innerHTML.includes('firebase')"), 'no firebase')
 
@@ -486,7 +510,7 @@ if __name__ == '__main__':
         for (s, l, ph) in combos:
             pg.evaluate("Settings.script='%s'; Settings.lang='%s'; Settings.phon='%s'; renderStart()" % (s, l, ph))
             for sub in ['clockChoice', 'dateChoice', 'schedMatch', 'calWhatTime', 'relWeek', 'tapAbs', 'yearView', 'clockSet']:
-                pg.evaluate("startRound(['%s'],'mid','%s',false)" % (sub, sub))
+                pg.evaluate("startRound(['%s'],'mid','%s',false, 10)" % (sub, sub))
                 run_round(pg, True)
             check(pg.evaluate("document.body.innerText.length") > 20, 'settings %s/%s/%s ok' % (s, l, ph))
         pg.evaluate("Settings.script='trad'; Settings.lang='es'; Settings.phon='pinyin'; writeSettings(Settings)")
@@ -501,13 +525,13 @@ if __name__ == '__main__':
                 pg.screenshot(path=os.path.join(SHOTS, name + '.png'), full_page=True)
             pg.evaluate("Settings.script='trad'; Settings.lang='es'; Settings.phon='pinyin'; App.open='u1'; renderStart()"); shot('00_start')
             for sub in ALL_SUBS:
-                pg.evaluate("startRound(['%s'],'mid','%s',false)" % (sub, sub)); pg.wait_for_timeout(100)
+                pg.evaluate("startRound(['%s'],'mid','%s',false, 10)" % (sub, sub)); pg.wait_for_timeout(100)
                 if sub == 'calWhatTime':
                     pg.click('.cal td.tap')
                 shot('q_' + sub)
                 answer(pg, False); pg.wait_for_selector('#next:not([hidden])'); shot('a_' + sub)
-            pg.evaluate("Settings.lang='zh'; Settings.phon='both'; startRound(['clockChoice'],'hard','x',false)"); shot('z_both_clockChoice')
-            pg.evaluate("Settings.script='simp'; Settings.lang='en'; Settings.phon='zhuyin'; startRound(['schedListen'],'hard','x',false)"); shot('z_simp_schedListen')
+            pg.evaluate("Settings.lang='zh'; Settings.phon='both'; startRound(['clockChoice'],'hard','x',false, 10)"); shot('z_both_clockChoice')
+            pg.evaluate("Settings.script='simp'; Settings.lang='en'; Settings.phon='zhuyin'; startRound(['schedListen'],'hard','x',false, 10)"); shot('z_simp_schedListen')
         b.close()
     print('FAILS', fails)
     sys.exit(1 if fails else 0)

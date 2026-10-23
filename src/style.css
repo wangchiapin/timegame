@@ -300,3 +300,31 @@ html.tod-night .vis > svg.clock > circle:first-child{fill:#c9b98a}
 html.tod-night .fb .fbr .tm{background:#1b1d27;color:#e6d6a6}
 .fb.ok .fbh{background:#3f6a45}
 html.tod-night .fb.ok .fbh{background:var(--ok)}
+
+/* ===== 預覽：標題銘牌、齒輪旋鈕、設定面板 ===== */
+.title{padding:16px 0 4px}
+.title h1{position:relative;display:inline-block;margin:0;padding:7px 34px 8px;background:#2a2a27;color:#f3ecd8;border:2px solid var(--edge);border-radius:4px;box-shadow:0 4px 0 var(--edge);font-size:28px;letter-spacing:.2em;text-indent:.2em}
+.title h1::before,.title h1::after{content:'';position:absolute;top:50%;width:7px;height:7px;margin-top:-4px;border-radius:50%;background:#b9ae94;box-shadow:inset -1px -1px 0 rgba(0,0,0,.35)}
+.title h1::before{left:11px}.title h1::after{right:11px}
+.title .sub{margin-top:12px}
+html.tod-night .title h1{background:#161824;color:#e6d6a6}
+#gear,#gearq{border-radius:50%;background:#2a2a27;color:#f3ecd8;box-shadow:0 3px 0 var(--edge)}
+html.tod-night #gear,html.tod-night #gearq{background:#161824;color:#e6d6a6}
+.lvchip{background:#2a2a27;color:#f3ecd8;border-radius:4px;box-shadow:0 3px 0 var(--edge);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.lvchip .tr,.lvchip .tr.inline{color:#cfc7b0}
+html.tod-night .lvchip{background:#161824;color:#e6d6a6}
+.overlay .panel{padding:0 0 14px;overflow:hidden;box-shadow:0 4px 0 var(--edge)}
+.overlay .panel h3{margin:0 0 8px;padding:8px 14px;background:#2a2a27;color:#f3ecd8;border-bottom:2px solid var(--edge);font-size:17px;letter-spacing:.1em}
+.overlay .panel h3 .tr{display:inline;margin-left:10px;font-size:12px;color:#cfc7b0;letter-spacing:0}
+html.tod-night .overlay .panel h3{background:#161824;color:#e6d6a6}
+.overlay .panel>.setrow,.overlay .panel>.note{margin-left:14px;margin-right:14px}
+.overlay .panel>.btn.wide{width:calc(100% - 28px);margin:12px 14px 0}
+.setrow{padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.setrow label{font-weight:600;color:var(--ink)}
+.setrow label .tr{font-weight:400;color:var(--sub)}
+.seg{background:#2a2a27}
+.seg button{color:#cfc7b0;border-right:1px solid #55524a}
+.seg button .tr{color:#9d9783}
+.seg button.on{background:#e6d6a6;color:#2b2a27;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.seg button.on .tr{color:#4a4638}
+html.tod-night .seg{background:#161824}

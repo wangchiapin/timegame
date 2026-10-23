@@ -309,6 +309,34 @@ html.tod-night .fb .fbr .tm{background:#1b1d27;color:#e6d6a6}
 .fb.ok .fbh{background:#3f6a45}
 html.tod-night .fb.ok .fbh{background:var(--ok)}
 
+/* ===== 預覽：標題銘牌、齒輪旋鈕、設定面板 ===== */
+.title{padding:16px 0 4px}
+.title h1{position:relative;display:inline-block;margin:0;padding:7px 34px 8px;background:#2a2a27;color:#f3ecd8;border:2px solid var(--edge);border-radius:4px;box-shadow:0 4px 0 var(--edge);font-size:28px;letter-spacing:.2em;text-indent:.2em}
+.title h1::before,.title h1::after{content:'';position:absolute;top:50%;width:7px;height:7px;margin-top:-4px;border-radius:50%;background:#b9ae94;box-shadow:inset -1px -1px 0 rgba(0,0,0,.35)}
+.title h1::before{left:11px}.title h1::after{right:11px}
+.title .sub{margin-top:12px}
+html.tod-night .title h1{background:#161824;color:#e6d6a6}
+#gear,#gearq{border-radius:50%;background:#2a2a27;color:#f3ecd8;box-shadow:0 3px 0 var(--edge)}
+html.tod-night #gear,html.tod-night #gearq{background:#161824;color:#e6d6a6}
+.lvchip{background:#2a2a27;color:#f3ecd8;border-radius:4px;box-shadow:0 3px 0 var(--edge);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.lvchip .tr,.lvchip .tr.inline{color:#cfc7b0}
+html.tod-night .lvchip{background:#161824;color:#e6d6a6}
+.overlay .panel{padding:0 0 14px;overflow:hidden;box-shadow:0 4px 0 var(--edge)}
+.overlay .panel h3{margin:0 0 8px;padding:8px 14px;background:#2a2a27;color:#f3ecd8;border-bottom:2px solid var(--edge);font-size:17px;letter-spacing:.1em}
+.overlay .panel h3 .tr{display:inline;margin-left:10px;font-size:12px;color:#cfc7b0;letter-spacing:0}
+html.tod-night .overlay .panel h3{background:#161824;color:#e6d6a6}
+.overlay .panel>.setrow,.overlay .panel>.note{margin-left:14px;margin-right:14px}
+.overlay .panel>.btn.wide{width:calc(100% - 28px);margin:12px 14px 0}
+.setrow{padding-bottom:8px;border-bottom:1px dashed var(--line)}
+.setrow label{font-weight:600;color:var(--ink)}
+.setrow label .tr{font-weight:400;color:var(--sub)}
+.seg{background:#2a2a27}
+.seg button{color:#cfc7b0;border-right:1px solid #55524a}
+.seg button .tr{color:#9d9783}
+.seg button.on{background:#e6d6a6;color:#2b2a27;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.seg button.on .tr{color:#4a4638}
+html.tod-night .seg{background:#161824}
+
 </style>
 </head>
 <body>
@@ -1310,16 +1338,16 @@ const GEN = { clockChoice:gClockChoice, clockSet:gClockSet, clockListen:gClockLi
   relDay:gRelDay, relWeek:gRelWeek, yearView:gYearView,
   tapAbs:gTapAbs, tapRelDay:gTapRelDay, tapRelWeek:gTapRelWeek };
 const UNITS = [
-  { id:'u1', t:L('單元一　看時鐘', 'Unidad 1 · Leer el reloj', 'Unit 1 · Reading the clock'),
+  { id:'u1', t:L('單元一　幾點幾分', 'Unidad 1 · ¿Qué hora es?', 'Unit 1 · What time is it?'),
     subs:[['clockChoice', L('看時鐘選說法', 'Mira el reloj y elige', 'Look and choose')], ['clockSet', L('聽時間撥指針', 'Escucha y mueve las manecillas', 'Listen and set the hands')], ['clockListen', L('聽時間選答案', 'Escucha y elige', 'Listen and choose')]] },
-  { id:'u2', t:L('單元二　日期和星期', 'Unidad 2 · Fecha y día de la semana', 'Unit 2 · Dates and weekdays'),
+  { id:'u2', t:L('單元二　幾月幾日星期幾', 'Unidad 2 · Fecha y día de la semana', 'Unit 2 · Date and weekday'),
     subs:[['dateChoice', L('看日期選中文', 'De la fecha al chino', 'From date to Chinese')], ['weekdayChoice', L('星期幾？', '¿Qué día de la semana?', 'Which weekday?')], ['dateListen', L('聽日期選答案', 'Escucha la fecha y elige', 'Listen to the date')]] },
-  { id:'u3', t:L('單元三　一天的行程', 'Unidad 3 · El horario del día', 'Unit 3 · A day’s schedule'),
+  { id:'u3', t:L('單元三　一日行程', 'Unidad 3 · Horario del día', 'Unit 3 · Daily schedule'),
     subs:[['schedMatch', L('行程配對時間', 'Une cada actividad con su hora', 'Match plans to times')], ['schedListen', L('聽行程選答案', 'Escucha la actividad y elige', 'Listen to the plan')], ['periodChoice', L('早上、中午、下午、晚上', 'Mañana, mediodía, tarde, noche', 'Morning, noon, afternoon, evening')]] },
-  { id:'u4', t:L('單元四　月曆行事曆', 'Unidad 4 · Calendario de actividades', 'Unit 4 · Calendar plans'),
-    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')], ['tapAbs', L('聽幾月幾號，點日期', 'Escucha la fecha y toca el día', 'Listen to the date, tap the day')]] },
-  { id:'u5', t:L('單元五　星期和日期推算', 'Unidad 5 · Calcular días y fechas', 'Unit 5 · Working out days'),
-    subs:[['relDay', L('昨天、今天、明天（到大前天、大後天）', 'Ayer, hoy, mañana (hasta hace 3 días / en 3 días)', 'Yesterday, today, tomorrow (up to 3 days)')], ['relWeek', L('上星期、這星期、下星期（到上上、下下）', 'La semana pasada, esta, la próxima (hasta 2 semanas)', 'Last, this, next week (up to 2 weeks)')], ['yearView', L('年曆：上個月、下個月、去年、明年（到前年、後年）', 'Año: mes pasado, próximo, año pasado… (hasta 2 años)', 'Year view: last/next month, year (up to 2 years)')], ['tapRelDay', L('聽昨天、明天…，點日期', 'Escucha ayer, mañana… y toca el día', 'Listen to yesterday, tomorrow… and tap')], ['tapRelWeek', L('聽上星期、下星期…，點日期', 'Escucha la semana pasada / próxima y toca el día', 'Listen to last / next week and tap')]] }
+  { id:'u4', t:L('單元四　月曆年曆', 'Unidad 4 · Calendario mensual y anual', 'Unit 4 · Month and year calendars'),
+    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')], ['tapAbs', L('聽幾月幾號，點日期', 'Escucha la fecha y toca el día', 'Listen to the date, tap the day')], ['yearView', L('年曆：上個月、下個月、去年、明年（到前年、後年）', 'Año: mes pasado, próximo, año pasado… (hasta 2 años)', 'Year view: last/next month, year (up to 2 years)')]] },
+  { id:'u5', t:L('單元五　時間推算', 'Unidad 5 · Calcular el tiempo', 'Unit 5 · Working out dates'),
+    subs:[['relDay', L('昨天、今天、明天（到大前天、大後天）', 'Ayer, hoy, mañana (hasta hace 3 días / en 3 días)', 'Yesterday, today, tomorrow (up to 3 days)')], ['relWeek', L('上星期、這星期、下星期（到上上、下下）', 'La semana pasada, esta, la próxima (hasta 2 semanas)', 'Last, this, next week (up to 2 weeks)')], ['tapRelDay', L('聽昨天、明天…，點日期', 'Escucha ayer, mañana… y toca el día', 'Listen to yesterday, tomorrow… and tap')], ['tapRelWeek', L('聽上星期、下星期…，點日期', 'Escucha la semana pasada / próxima y toca el día', 'Listen to last / next week and tap')]] }
 ];
 const ALL_IDS = Object.keys(GEN);
 const qSig = q => [q.id, q.line && q.line.zh, q.audio, JSON.stringify(q.visual), JSON.stringify(q.target), q.cards && q.cards.map(c => c.zh + '|' + c.slot).join(',')].join('#');
@@ -1358,8 +1386,7 @@ const STR = {
   setRate:  L('語速', 'Voz', 'Voice'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
-  mixSub:   L('20 題，所有單元混在一起，看看你的最高分', '20 preguntas de todas las unidades; mira tu mejor puntaje', '20 questions from every unit — see your best score'),
-  mixUnit:  L('這個單元全部混合（10 題）', 'Mezclar toda la unidad (10 preguntas)', 'Mix this whole unit (10 questions)'),
+  mixSub:   L('50 題，五個單元混合', '50 preguntas de las cinco unidades', '50 questions from all five units'),
   board:    L('排行榜', 'Clasificación', 'Leaderboard'),
   hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
   peek:     L('看文字', 'Ver el texto', 'Show text'),
@@ -1376,7 +1403,6 @@ const STR = {
   home:     L('回主畫面', 'Volver al inicio', 'Back to start'),
   score:    L('分', 'pts', 'pts'),
   today:    L('今天', 'Hoy', 'Today'),
-  best:     L('我的最高分', 'Mi mejor puntaje', 'My best score'),
   loading:  L('讀取中…', 'Cargando…', 'Loading…'),
   lbFail:   L('排行榜暫時連不上', 'La clasificación no está disponible ahora', 'The leaderboard is unavailable right now'),
   lbEmpty:  L('還沒有人上榜，你當第一名吧！', 'Aún no hay nadie. ¡Sé el primero!', 'Nobody yet — be the first!'),
@@ -1535,22 +1561,18 @@ function renderStart(){
   h += `<button class="lvchip" id="lvchip">${Li(STR.setLv)}：${Li(LV_OPTS().find(x => x[0] === App.lv)[1])} ⚙</button>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
-    h += `<div class="unit${App.open === u.id ? ' open' : ''}" data-u="${u.id}"><button class="uh"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button><div class="subs">`;
-    u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
-    h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
+    h += `<div class="unit" data-u="${u.id}"><button class="uh" data-ustart="${u.id}"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button></div>`;
   });
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
-  $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
-  $$('[data-sub]').forEach(b => b.addEventListener('click', () => startRound([b.dataset.sub], App.lv, b.dataset.sub, false)));
-  $$('[data-unitmix]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.unitmix); startRound(u.subs.map(s => s[0]), App.lv, u.id, false); }));
+  $$('[data-ustart]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.ustart); startRound(u.subs.map(x => x[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
 }
 
 /* =====================  出題與作答  ===================== */
-function startRound(spec, lv, label, isMix){
-  const n = isMix ? 20 : 10;
+function startRound(spec, lv, label, isMix, nOver){
+  const n = nOver || (isMix ? 50 : 25);
   App.round = { spec, lv, label, isMix, n };
   App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
   renderQ();
@@ -1645,7 +1667,7 @@ function renderQ(){
 
 function showFeedback(ok, q, chosen, extraHTML){
   App.answered = true;
-  if (ok){ App.score += 10; App.right++; }
+  if (ok){ App.right++; App.score = Math.round(App.right * 100 / App.round.n); }
   sfx(ok);
   let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="fbh big">${Li(ok ? STR.right : STR.wrong)}</div><div class="fbb">`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
@@ -1753,13 +1775,10 @@ function answerMatch(){
 }
 
 /* =====================  結果與排行榜  ===================== */
-function localBest(){ try{ return +localStorage.getItem('timegame.best') || 0; }catch(e){ return 0; } }
 function showResult(){
-  const r = App.round, n = App.qs.length, max = n * 10, ratio = App.score / max;
+  const r = App.round, n = App.qs.length, max = 100, ratio = App.score / max;
   const msg = ratio >= 0.9 ? L('太棒了！', '¡Excelente!', 'Excellent!') : ratio >= 0.7 ? L('很好！', '¡Muy bien!', 'Well done!') : ratio >= 0.5 ? L('不錯，再練習一下。', 'Bien, practica un poco más.', 'Good, keep practicing.') : L('再試一次，你可以的！', 'Inténtalo otra vez, ¡puedes!', 'Try again, you can do it!');
-  if (App.score > localBest() && r.isMix){ try{ localStorage.setItem('timegame.best', String(App.score)); }catch(e){} }
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
-  if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h; window.scrollTo(0, 0);
