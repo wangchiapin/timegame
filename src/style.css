@@ -148,3 +148,19 @@ svg.clock.mini{width:100%;max-width:140px;margin:0 auto}
 .overlay{position:fixed;inset:0;background:rgba(43,42,39,.45);display:flex;align-items:flex-start;justify-content:center;z-index:50;overflow:auto;padding:20px 12px}
 .overlay .panel{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;width:100%;max-width:460px}
 @media (min-width:700px){#app{padding-top:24px}}
+
+/* 解答條：固定在螢幕底部，上面的畫面不動 */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--bg);border-top:1px solid var(--line);box-shadow:0 -4px 14px rgba(43,42,39,.12);padding:8px 14px calc(8px + env(safe-area-inset-bottom,0px))}
+.sheet[hidden]{display:none}
+.sheetin{max-width:560px;margin:0 auto;display:flex;flex-direction:column;max-height:48vh}
+.sheet #fb{overflow:auto;flex:1 1 auto;min-height:0}
+.sheet .fb{margin:0 0 6px;padding:8px 12px}
+.sheet .fb .ans{font-size:20px;margin:2px 0}
+.sheet .foot{margin-top:2px;flex:0 0 auto}
+body.has-sheet #app{padding-bottom:calc(var(--sheet-h,260px) + 24px)}
+.sheet .fb .big{font-size:16px}
+.sheet .fb .why{font-size:13px;margin-top:2px;line-height:1.35}
+.sheet .fb .small{font-size:12px;margin-top:3px!important}
+.sheet .fb .ans{font-size:19px;margin:0}
+.sheet .fb .ph{font-size:10px}
+.sheet .btn{padding-top:8px;padding-bottom:8px}

@@ -169,6 +169,7 @@ function renderStart(){
     u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
     h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
   });
+  document.body.classList.remove('has-sheet');
   root().innerHTML = h;
   $$('[data-seg]').forEach(box => box.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -234,7 +235,8 @@ function renderQ(){
     h += `<div class="match"><div class="small" style="text-align:center">${esc(zhOf(STR.hintLine))}${trOf(STR.hintLine) ? ' · ' + esc(trOf(STR.hintLine)) : ''}</div><div id="slots"></div><div class="cards" id="cards"></div></div>`;
   }
   if (q.kind !== 'choice') h += `<div class="foot"><button class="btn primary" id="confirm" disabled>${Lh(STR.confirm)}</button></div>`;
-  h += '<div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div>';
+  h += '<div class="sheet" id="sheet" hidden><div class="sheetin"><div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div></div></div>';
+  document.body.classList.remove('has-sheet');
   root().innerHTML = h;
   window.scrollTo(0, 0);
   $('#home').addEventListener('click', renderStart);
@@ -273,7 +275,9 @@ function showFeedback(ok, q, chosen, extraHTML){
   nb.innerHTML = Lh(last ? STR.seeResult : STR.next); nb.hidden = false;
   nb.onclick = () => { if (last) showResult(); else { App.i++; renderQ(); } };
   const cf = $('#confirm'); if (cf) cf.disabled = true;
-  nb.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  /* 解答條固定在螢幕底部：上面的題目、時鐘、選項完全不動，也不自動捲動 */
+  const sh = $('#sheet'); sh.hidden = false; document.body.classList.add('has-sheet');
+  document.documentElement.style.setProperty('--sheet-h', (sh.offsetHeight + 16) + 'px');
 }
 
 function answerChoice(i){
@@ -362,6 +366,7 @@ function showResult(){
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
   if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
+  document.body.classList.remove('has-sheet');
   root().innerHTML = h; window.scrollTo(0, 0);
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);
