@@ -36,6 +36,36 @@ const Settings = readSettings();
 
 /* ---------- 字典：字 拼音（台灣讀音）簡體 ---------- */
 const DICT_SRC = `
+文 wén
+行 xíng
+游 yóu
+泳 yǒng
+打 dǎ
+籃 lán 篮
+球 qiú
+歌 gē
+煮 zhǔ
+掃 sǎo 扫
+衣 yī
+服 fú
+銀 yín 银
+寄 jì
+包 bāo
+裹 guǒ
+展 zhǎn
+覽 lǎn 览
+夜 yè
+市 shì
+婚 hūn
+禮 lǐ 礼
+參 cān 参
+加 jiā
+出 chū
+差 chāi
+旅 lǚ
+圖 tú 图
+書 shū 书
+館 guǎn 馆
 零 líng
 一 yī
 二 èr
@@ -189,6 +219,7 @@ function parseLine(text){
     if (c === '{') continue;
     const e = DICT[c];
     const item = { c, py: e ? e.py : null, hz: !!e };
+    if (c === '行' && arr[i - 1] === '銀') item.py = 'háng';   // 銀行（háng）；其他情況（旅行、行）預設 xíng
     if (arr[i + 1] === '{'){ const j = arr.indexOf('}', i + 2); if (j > 0){ item.py = arr.slice(i + 2, j).join(''); item.hz = true; i = j; } }
     out.push(item);
   }

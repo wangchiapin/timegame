@@ -345,18 +345,35 @@ const EVENTS = [
   { id:'hiking',   label:'爬山',   doZh:'爬山',       fut:'要去爬山',     past:'去爬山了',     es:'ir de excursión a la montaña', en:'go hiking',              esP:'fui de excursión a la montaña', enP:'went hiking',            times:[[6,0],[7,0],[8,0]], day:'we' },
   { id:'haircut',  label:'剪髮',   doZh:'剪頭髮',     fut:'要去剪頭髮',   past:'去剪頭髮了',   es:'cortarme el pelo',             en:'get a haircut',          esP:'me corté el pelo',              enP:'got a haircut',          times:[[10,0],[15,0],[16,0]], day:'any' },
   { id:'birthday', label:'生日',   doZh:'生日派對',   fut:'要去生日派對', past:'去生日派對了', es:'ir a una fiesta de cumpleaños',en:'go to a birthday party', esP:'fui a una fiesta de cumpleaños',enP:'went to a birthday party', times:[[19,0],[19,30]], day:'we' },
-  { id:'concert',  label:'演唱會', doZh:'看演唱會',   fut:'要去看演唱會', past:'去看演唱會了', es:'ir a un concierto',            en:'go to a concert',        esP:'fui a un concierto',            enP:'went to a concert',      times:[[19,0],[19,30]], day:'we' },
+  { id:'concert',  grp:'sing', label:'演唱會', doZh:'看演唱會',   fut:'要去看演唱會', past:'去看演唱會了', es:'ir a un concierto',            en:'go to a concert',        esP:'fui a un concierto',            enP:'went to a concert',      times:[[19,0],[19,30]], day:'we' },
   { id:'moving',   label:'搬家',   doZh:'搬家',       fut:'要搬家',       past:'搬家了',       es:'mudarme',                      en:'move house',             esP:'me mudé',                       enP:'moved house',            times:[[8,0],[9,0]], day:'we' },
   { id:'doctor',   label:'醫生',   doZh:'看醫生',     fut:'要去看醫生',   past:'去看醫生了',   es:'ir al médico',                 en:'see the doctor',         esP:'fui al médico',                 enP:'saw the doctor',         times:[[9,0],[10,0],[14,30],[16,0]], day:'wk' },
-  { id:'class',    label:'上課',   doZh:'上課',       fut:'要上課',       past:'上課了',       es:'tener clase',                  en:'have class',             esP:'tuve clase',                    enP:'had class',              times:[[8,0],[9,0],[10,0],[13,30],[15,0]], day:'wk' },
   { id:'shopping', label:'逛街',   doZh:'逛街',       fut:'要去逛街',     past:'去逛街了',     es:'ir de compras',                en:'go shopping',            esP:'fui de compras',                enP:'went shopping',          times:[[14,0],[15,30]], day:'we' },
-  { id:'gym',      label:'運動',   doZh:'運動',       fut:'要去運動',     past:'去運動了',     es:'hacer ejercicio',              en:'exercise',               esP:'hice ejercicio',                enP:'exercised',              times:[[6,30],[19,0],[20,0]], day:'any' }
+  { id:'gym',      grp:'sport', label:'運動',   doZh:'運動',       fut:'要去運動',     past:'去運動了',     es:'hacer ejercicio',              en:'exercise',               esP:'hice ejercicio',                enP:'exercised',              times:[[6,30],[19,0],[20,0]], day:'any' },
+  { id:'zhclass', label:'上中文課', doZh:'上中文課', fut:'要上中文課', past:'上中文課了', es:'tener clase de chino', en:'have a Chinese class', esP:'tuve clase de chino', enP:'had a Chinese class', times:[[9,0],[10,0],[14,0],[19,0],[20,0]], day:'any' },
+  { id:'swim', label:'游泳', doZh:'游泳', fut:'要去游泳', past:'去游泳了', es:'ir a nadar', en:'go swimming', esP:'fui a nadar', enP:'went swimming', times:[[7,0],[10,0],[15,0],[16,30]], day:'we', grp:'sport' },
+  { id:'basketball', label:'打籃球', doZh:'打籃球', fut:'要打籃球', past:'打籃球了', es:'jugar al baloncesto', en:'play basketball', esP:'jugué al baloncesto', enP:'played basketball', times:[[15,0],[16,0],[19,0],[20,0]], day:'any', grp:'sport' },
+  { id:'sing', label:'唱歌', doZh:'唱歌', fut:'要去唱歌', past:'去唱歌了', es:'ir a cantar karaoke', en:'go sing karaoke', esP:'fui a cantar karaoke', enP:'went to sing karaoke', times:[[19,0],[20,0],[21,0]], day:'any', grp:'sing' },
+  { id:'cook', label:'煮飯', doZh:'煮飯', fut:'要煮飯', past:'煮飯了', es:'cocinar', en:'cook', esP:'cociné', enP:'cooked', times:[[8,0],[12,0],[19,0]], day:'any' },
+  { id:'clean', label:'打掃', doZh:'打掃', fut:'要打掃', past:'打掃了', es:'limpiar la casa', en:'clean the house', esP:'limpié la casa', enP:'cleaned the house', times:[[9,0],[10,0],[14,0]], day:'we' },
+  { id:'laundry', label:'洗衣服', doZh:'洗衣服', fut:'要洗衣服', past:'洗衣服了', es:'lavar la ropa', en:'do the laundry', esP:'lavé la ropa', enP:'did the laundry', times:[[8,0],[9,0],[20,0]], day:'we' },
+  { id:'bank', label:'去銀行', doZh:'去銀行', fut:'要去銀行', past:'去銀行了', es:'ir al banco', en:'go to the bank', esP:'fui al banco', enP:'went to the bank', times:[[9,30],[10,0],[14,0],[15,0]], day:'wk' },
+  { id:'parcel', label:'寄包裹', doZh:'寄包裹', fut:'要去寄包裹', past:'去寄包裹了', es:'enviar un paquete', en:'send a package', esP:'envié un paquete', enP:'sent a package', times:[[10,0],[14,0],[15,0]], day:'wk' },
+  { id:'exhibit', label:'看展覽', doZh:'看展覽', fut:'要去看展覽', past:'去看展覽了', es:'ir a una exposición', en:'go to an exhibition', esP:'fui a una exposición', enP:'went to an exhibition', times:[[10,0],[14,0],[15,0]], day:'we' },
+  { id:'nightmkt', label:'逛夜市', doZh:'逛夜市', fut:'要去逛夜市', past:'去逛夜市了', es:'ir al mercado nocturno', en:'go to the night market', esP:'fui al mercado nocturno', enP:'went to the night market', times:[[19,0],[19,30],[20,0]], day:'any' },
+  { id:'wedding', label:'婚禮', doZh:'參加婚禮', fut:'要去參加婚禮', past:'去參加婚禮了', es:'ir a una boda', en:'go to a wedding', esP:'fui a una boda', enP:'went to a wedding', times:[[12,0],[19,0]], day:'we' },
+  { id:'bizTrip', label:'出差', doZh:'出差', fut:'要出差', past:'出差了', es:'ir de viaje de trabajo', en:'go on a business trip', esP:'fui de viaje de trabajo', enP:'went on a business trip', times:[[8,0],[9,0],[10,0]], day:'wk' },
+  { id:'travel', label:'旅行', doZh:'去旅行', fut:'要去旅行', past:'去旅行了', es:'ir de viaje', en:'go on a trip', esP:'fui de viaje', enP:'went on a trip', times:[[7,0],[8,0],[9,0]], day:'we' },
+  { id:'library', label:'去圖書館', doZh:'去圖書館', fut:'要去圖書館', past:'去圖書館了', es:'ir a la biblioteca', en:'go to the library', esP:'fui a la biblioteca', enP:'went to the library', times:[[10,0],[14,0],[15,0]], day:'any' },
 ];
 const nEvents = lv => (lv === 'easy' ? 5 : lv === 'mid' ? 8 : 11);
 function makeMonth(n){
   const y = randInt(2025, 2028), m = randInt(1, 12), N = dim(y, m);
   const free = new Set(Array.from({ length:N }, (_, i) => i + 1)), out = [];
-  shuffle(EVENTS).slice(0, n).forEach(ev => {
+  /* 長得太像的行程（運動／游泳／打籃球；唱歌／演唱會）同一回只放一個 */
+  const usedGrp = new Set(), pickEv = [];
+  shuffle(EVENTS).forEach(ev => { if (pickEv.length >= n) return; if (ev.grp){ if (usedGrp.has(ev.grp)) return; usedGrp.add(ev.grp); } pickEv.push(ev); });
+  pickEv.forEach(ev => {
     let pool = [...free].filter(d => { const w = weekdayOf(y, m, d); return ev.day === 'any' || (ev.day === 'wk' ? (w >= 1 && w <= 5) : (w === 0 || w === 6)); });
     if (!pool.length) pool = [...free];
     const day = pick(pool); free.delete(day);
