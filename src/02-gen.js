@@ -294,7 +294,7 @@ function gSchedListen(lv){
   // 至少一個「同一個行程、不同時間」，一個「同一個時間、不同行程」
   const sameAct = picked.filter(w => w.zh === a.short), otherAct = picked.filter(w => w.zh !== a.short);
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
-  return { id:'schedListen', kind:'choice',
+  return { id:'schedListen', kind:'choice', tod:H + m / 60,
     instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
     line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
@@ -310,7 +310,7 @@ function gPeriodRead(lv){
   if (H <= 12) add(H + 12, m, 'pmAm'); else add(H - 12, m, 'pmAm');           // 早上／下午搞混（例如 03:00 和 15:00）
   add(H + 1, m, 'time'); add(H - 1, m, 'time'); add(H, flip, 'time'); add(H + 2, m, 'time');
   const trap = wrongs.filter(w => w.why === 'pmAm'), rest = shuffle(wrongs.filter(w => w.why !== 'pmAm'));
-  return { id:'periodChoice', kind:'choice',
+  return { id:'periodChoice', kind:'choice', tod:H + m / 60,
     instr:L('看中文時間，選出正確的數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese time and choose the digital time.'),
     line:{ zh, es:'', en:'' }, visual:null, dbg:{ form:'read', H, m },
     options:mkOptions({ zh:digital24(H, m), why:null, d:digital24(H, m) }, [].concat(trap, rest)),
@@ -326,7 +326,7 @@ function gPeriodChoice(lv){
   [H + 1, H - 1].filter(x => x >= 6 && x <= 23).forEach(x => wrongs.push({ zh:ptZh(x, m, st), why:'time', d:digital24(x, m) }));
   const order = wrongs.filter(w => w.why === 'periodOrder'), pw = shuffle(wrongs.filter(w => w.why === 'periodWrong')), tm = shuffle(wrongs.filter(w => w.why === 'time'));
   const wr = [].concat(order, pw.slice(0, 1), tm.slice(0, 1), pw.slice(1), tm.slice(1));
-  return { id:'periodChoice', kind:'choice',
+  return { id:'periodChoice', kind:'choice', tod:H + m / 60,
     instr:L('看數字時間，選出正確的中文說法（含早上、中午、下午、晚上）。', 'Mira la hora en números y elige cómo se dice (con mañana, mediodía, tarde o noche).', 'Look at the digital time and choose how to say it (with morning, noon, afternoon or evening).'),
     line:null, visual:{ type:'digital', text:digital24(H, m) },
     options:mkOptions({ zh:correct, why:null, d:digital24(H, m) }, wr),
@@ -450,7 +450,7 @@ function gCalWhatTime(lv){
     if (H >= 6 && H <= 23) generic.push({ zh:ptZh(H, mm, st), why:'time', d:digital24(H, mm) });
   });
   const others = D.evs.filter(x => x !== e).map(x => ({ zh:ptZh(x.h, x.mi, st), why:'otherEv', d:digital24(x.h, x.mi) }));
-  return { id:'calWhatTime', kind:'choice',
+  return { id:'calWhatTime', kind:'choice', tod:e.h + e.mi / 60,
     instr:L('點月曆上的日子看行程（＋代表還有其他行程），再選出正確的時間。', 'Toca un día del calendario para ver los planes (＋ = hay más planes) y elige la hora correcta.', 'Tap a day to see its plans (＋ = more plans) and choose the right time.'),
     line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
     visual:{ type:'cal', y:mo.y, m:mo.m, mode:'view', labels, details, plus },
@@ -460,8 +460,8 @@ function gCalWhatTime(lv){
 }
 
 /* =====================  單元五：星期和日期推算  ===================== */
-const REL_DAYS = { '-2':'前天', '-1':'昨天', '0':'今天', '1':'明天', '2':'後天' };
-const REL_DAYS_L = { '-2':['anteayer', 'the day before yesterday'], '-1':['ayer', 'yesterday'], '0':['hoy', 'today'], '1':['mañana', 'tomorrow'], '2':['pasado mañana', 'the day after tomorrow'] };
+const REL_DAYS = { '-3':'大前天', '-2':'前天', '-1':'昨天', '0':'今天', '1':'明天', '2':'後天', '3':'大後天' };
+const REL_DAYS_L = { '-3':['hace tres días', 'three days ago'], '-2':['anteayer', 'the day before yesterday'], '-1':['ayer', 'yesterday'], '0':['hoy', 'today'], '1':['mañana', 'tomorrow'], '2':['pasado mañana', 'the day after tomorrow'], '3':['dentro de tres días', 'three days from now'] };
 function randToday(){
   for (;;){
     const y = randInt(2025, 2028), m = randInt(1, 12), d = randInt(8, 22), w = weekdayOf(y, m, d);
@@ -473,7 +473,7 @@ function todayVisual(T, extra){ return Object.assign({ type:'cal', y:T.y, m:T.m,
 function dateOpt(t, why){ return { zh:monthZh(t.m) + dayZh(t.d, '號'), why:why || 'val', d:fmtDate(t.y, t.m, t.d, false) }; }
 
 function gRelDay(lv){
-  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2], off = pick(offs);
+  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3], off = pick(offs), ring = lv === 'easy' ? [-2, -1, 0, 1, 2] : [-3, -2, -1, 0, 1, 2, 3];
   const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
   const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
   const lt = REL_DAYS_L[String(off)];
@@ -482,14 +482,14 @@ function gRelDay(lv){
   let options, line, ansZh;
   if (askWeek){
     const dow = weekdayOf(tg.y, tg.m, tg.d); ansZh = wkZh(dow, sun);
-    const wr = shuffle([-2, -1, 0, 1, 2].filter(x => x !== off)).map(x => { const t = addDays(T.y, T.m, T.d, x); return { zh:wkZh(weekdayOf(t.y, t.m, t.d), sun), why:'rel' }; });
+    const wr = shuffle(ring.filter(x => x !== off)).map(x => { const t = addDays(T.y, T.m, T.d, x); return { zh:wkZh(weekdayOf(t.y, t.m, t.d), sun), why:'rel' }; });
     shuffle([0, 1, 2, 3, 4, 5, 6]).forEach(x => wr.push({ zh:wkZh(x, sun), why:'wk' }));
     options = mkOptions({ zh:ansZh, why:null }, wr);
     line = { zh:word + '是星期幾？', es:'¿Qué día de la semana es ' + lt[0] + '?', en:'What day of the week is ' + lt[1] + '?' };
   } else {
     ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
     const wr = [];
-    [-2, -1, 0, 1, 2].filter(x => x !== off).forEach(x => wr.push(dateOpt(addDays(T.y, T.m, T.d, x), 'rel')));
+    ring.filter(x => x !== off).forEach(x => wr.push(dateOpt(addDays(T.y, T.m, T.d, x), 'rel')));
     [7, -7].forEach(x => wr.push(dateOpt(addDays(tg.y, tg.m, tg.d, x), 'weekShift')));
     options = mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, shuffle(wr));
     line = { zh:word + '是幾月幾號？', es:'¿Qué fecha es ' + lt[0] + '?', en:'What is the date ' + lt[1] + '?' };
@@ -546,7 +546,7 @@ function gYearView(lv){
   const wr = [{ zh:yearQtyZh(ty) + '年', why:'yearQty' }, { zh:digitsZh(ty) + '個年', why:'ge' }];
   [-2, -1, 0, 1, 2].filter(x => x !== dy).forEach(x => wr.push({ zh:yearZh(y + x), why:x === 0 ? 'rel' : 'year' }));
   return Object.assign(base, {
-    line:{ zh:word + '是幾年？', es:'¿Qué año es ' + tr[0] + '?', en:'What year is ' + tr[1] + '?' },
+    line:{ zh:word + '是哪一年？', es:'¿Qué año es ' + tr[0] + '?', en:'What year is ' + tr[1] + '?' },
     options:mkOptions({ zh:ansZh, why:null }, wr), fb:{ ansZh, extra:fmtDate(y, m, d, true) } });
 }
 
@@ -568,7 +568,7 @@ function gTapAbs(lv){
   q.id = 'tapAbs'; return q;
 }
 function gTapRelDay(lv){
-  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2]);
+  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3]);
   const tg = addDays(T.y, T.m, T.d, off), past = off < 0, lt = REL_DAYS_L[String(off)];
   const zh = REL_DAYS[String(off)] + '我' + (past ? ev.past : ev.fut);
   const q = tapQuestion(T, tg, zh, [lt[0][0].toUpperCase() + lt[0].slice(1), lt[1][0].toUpperCase() + lt[1].slice(1)], ev, past);

@@ -192,7 +192,7 @@ LOGIC_JS = r'''
     if (id === 'relDay'){
       const { y, m, today } = q.visual, T = new Date(y, m - 1, today), w = T.getDay();
       if (w < 1 || w > 5) E(tag + ' today weekday ' + w);
-      const off = { '前天':-2, '昨天':-1, '明天':1, '後天':2 }[q.line.zh.slice(0, 2)], tg = new Date(y, m - 1, today + off);
+      const off = { '大前天':-3, '大後天':3, '前天':-2, '昨天':-1, '明天':1, '後天':2 }[q.line.zh.startsWith('大') ? q.line.zh.slice(0, 3) : q.line.zh.slice(0, 2)], tg = new Date(y, m - 1, today + off);
       if (q.line.zh.includes('星期幾')){
         if (!wkSet(tg.getDay()).has(c.zh)) E(tag + ' wk answer ' + c.zh);
         q.options.filter(o => !o.ok).forEach(o => { if (wkSet(tg.getDay()).has(o.zh)) E(tag + ' wrong wk valid'); });
@@ -228,7 +228,7 @@ LOGIC_JS = r'''
       const { y, m, today } = q.visual, T = new Date(y, m - 1, today), w = T.getDay(), s = q.audio, tg = q.target;
       if (w < 1 || w > 5) E(tag + ' today weekday');
       let exp;
-      const rd = { '前天':-2, '昨天':-1, '明天':1, '後天':2 }[s.slice(0, 2)];
+      const rd = { '大前天':-3, '大後天':3, '前天':-2, '昨天':-1, '明天':1, '後天':2 }[s.startsWith('大') ? s.slice(0, 3) : s.slice(0, 2)];
       if (rd !== undefined) exp = new Date(y, m - 1, today + rd);
       else if ('上這下'.includes(s[0]) && s.slice(1, 3) === '星期'){
         const rel = { '上':-1, '這':0, '下':1 }[s[0]], X = WK_ZH.indexOf(s[3]);
@@ -366,6 +366,10 @@ if __name__ == '__main__':
         check(all(len(e['label']) <= 4 for e in ev), 'calendar labels at most 4 characters')
         bad = pg.evaluate("(() => { let b = 0; for (let k = 0; k < 400; k++) for (const n of [5, 8, 11]){ const ls = makeMonth(n).events.map(x => x.ev.label); if (ls.length !== n) b++; if (['運動','游泳','打籃球'].filter(x => ls.includes(x)).length > 1 || ['唱歌','演唱會'].filter(x => ls.includes(x)).length > 1) b++; } return b; })()")
         check(bad == 0, 'makeMonth: right count, no look-alike events together')
+        print('== 大前天、大後天')
+        cnt = pg.evaluate("(() => { const r = {}; for (const lv of ['easy','mid','hard']) for (const g of ['relDay','tapRelDay']){ let n = 0; for (let k = 0; k < 400; k++){ const q = GEN[g](lv); const z = q.line ? q.line.zh : q.audio; if (/^大(前|後)天/.test(z)) n++; } r[lv + '/' + g] = n; } return r; })()")
+        check(cnt['easy/relDay'] == 0 and cnt['easy/tapRelDay'] == 0, 'easy never uses 大前天/大後天: %s' % cnt)
+        check(all(cnt[k] > 20 for k in cnt if not k.startswith('easy')), 'mid/hard use 大前天/大後天 regularly: %s' % cnt)
         print('== 詞間空隔（只影響畫面）')
         gp = lambda z: pg.evaluate("(z) => gapAfter(parseLine(z)).map(i => Array.from(z)[i]).join('')", z)
         check(gp('二零二六年五月二十日五點十五分') == '年月日點', 'gap after 年月日點, none after final 分')
@@ -397,6 +401,22 @@ if __name__ == '__main__':
                 if sc != 100:
                     check(False, '%s/%s perfect round score=%s' % (sub, lv, sc))
         check(fails == before, 'every sub-mode scored 100 when answered correctly')
+
+        print('== 鐘錶風格 ＋ 日出日落色帶')
+        for sub in ALL_SUBS:
+            pg.evaluate("startRound(['%s'], 'mid', '%s', false)" % (sub, sub)); pg.wait_for_timeout(50)
+            r = pg.evaluate("""() => { const b = document.querySelector('.tod'); return b ? { h:b.getBoundingClientRect().height, cls:document.documentElement.className, hasMk:!!b.querySelector('.mk') } : null; }""")
+            check(r and abs(r['h'] - 30) < 1 and r['hasMk'] and r['cls'].startswith('tod-'), '%s: 30px band + marker + html class (%s)' % (sub, r))
+        for hh, cl in [(7, 'tod-morning'), (13, 'tod-afternoon'), (21, 'tod-night'), (3, 'tod-night'), (12, 'tod-afternoon'), (19, 'tod-night')]:
+            check(pg.evaluate("todClass(%d)" % hh) == cl, 'todClass(%d)=%s' % (hh, cl))
+        pg.evaluate("startRound(['schedListen'], 'mid', 's', false)")
+        pg.evaluate("startRound(['yearView'], 'mid', 'y', false)"); pg.wait_for_timeout(50)
+        for _ in range(12):
+            if pg.evaluate("!!document.querySelector('.ycal')"): break
+            pg.evaluate("document.querySelector('#next') && !document.querySelector('#next').hidden && document.querySelector('#next').click()")
+        txt = pg.evaluate("document.body.innerText")
+        check('是幾年' not in txt, 'year questions say 哪一年 not 幾年')
+        check(pg.evaluate("!document.querySelector('.ycal') || !document.querySelector('.datebox')"), 'year view has no Hoy box')
 
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:

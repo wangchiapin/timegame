@@ -75,23 +75,23 @@ function sfx(ok){
 function clockSVG(o){
   const { h, m, s } = o, hasS = s != null;
   const pt = (a, len) => { const r = a * Math.PI / 180; return [(100 + len * Math.sin(r)).toFixed(2), (100 - len * Math.cos(r)).toFixed(2)]; };
-  let g = '<circle cx="100" cy="100" r="95" fill="#fbf8f0" stroke="#2b2a27" stroke-width="2"/>';
+  let g = '<circle cx="100" cy="100" r="97" fill="#1f1f1d"/><circle cx="100" cy="100" r="90" fill="#fbf9f2"/>';
   for (let i = 0; i < 60; i++){
-    const big = i % 5 === 0, a = i * 6, p1 = pt(a, 94), p2 = pt(a, big ? 85 : 90);
-    g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#2b2a27" stroke-width="${big ? 2 : 1}"/>`;
+    const big = i % 5 === 0, a = i * 6, p1 = pt(a, 88), p2 = pt(a, big ? 76 : 83);
+    g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#1f1f1d" stroke-width="${big ? 3.6 : 1.1}" stroke-linecap="butt"/>`;
   }
   let nums = '';
-  for (let n = 1; n <= 12; n++){ const p = pt(n * 30, 70); nums += `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" font-size="17" fill="#2b2a27" stroke="#fbf8f0" stroke-width="3" paint-order="stroke" font-family="system-ui,sans-serif">${n}</text>`; }
+  for (let n = 1; n <= 12; n++){ const p = pt(n * 30, 62); nums += `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="700" fill="#1f1f1d" font-family="Georgia,'Times New Roman',serif">${n}</text>`; }
   const hA = (h % 12) * 30 + m * 0.5 + (hasS ? s / 120 : 0), mA = m * 6 + (hasS ? s * 0.1 : 0);
-  const hp = pt(hA, 48), mp = pt(mA, 74);
+  const hp = pt(hA, 46), mp = pt(mA, 76), hb = pt(hA + 180, 9), mb = pt(mA + 180, 12);
   g += nums;
-  g += `<line class="hh" x1="100" y1="100" x2="${hp[0]}" y2="${hp[1]}" stroke="#2b2a27" stroke-width="6" stroke-linecap="round"/>`;
-  g += `<line class="mh" x1="100" y1="100" x2="${mp[0]}" y2="${mp[1]}" stroke="#2b2a27" stroke-width="3.5" stroke-linecap="round"/>`;
+  g += `<line class="hh" x1="${hb[0]}" y1="${hb[1]}" x2="${hp[0]}" y2="${hp[1]}" stroke="#1f1f1d" stroke-width="7.5" stroke-linecap="butt"/>`;
+  g += `<line class="mh" x1="${mb[0]}" y1="${mb[1]}" x2="${mp[0]}" y2="${mp[1]}" stroke="#1f1f1d" stroke-width="5" stroke-linecap="butt"/>`;
   if (hasS){
-    const sp = pt(s * 6, 82), st = pt(s * 6 + 180, 16);
-    g += `<line x1="${st[0]}" y1="${st[1]}" x2="${sp[0]}" y2="${sp[1]}" stroke="#a8503c" stroke-width="1.6" stroke-linecap="round"/>`;
+    const sp = pt(s * 6, 84), st = pt(s * 6 + 180, 22), sd = pt(s * 6, 70);
+    g += `<line x1="${st[0]}" y1="${st[1]}" x2="${sp[0]}" y2="${sp[1]}" stroke="#c0392b" stroke-width="2" stroke-linecap="butt"/><circle cx="${sd[0]}" cy="${sd[1]}" r="5" fill="#c0392b"/>`;
   }
-  g += `<circle cx="100" cy="100" r="4.5" fill="${hasS ? '#a8503c' : '#2b2a27'}"/>`;
+  g += `<circle cx="100" cy="100" r="6" fill="${hasS ? '#c0392b' : '#1f1f1d'}"/>`;
   return `<svg viewBox="0 0 200 200" class="clock${o.mini ? ' mini' : ''}" ${o.dial ? 'id="dial"' : ''} role="img" aria-label="clock">${g}</svg>`;
 }
 function setHands(svg, h, m){
@@ -137,8 +137,7 @@ function calHTML(v){
   return h + '</tbody></table></div>';
 }
 function ycalHTML(v){
-  const todayTxt = (Settings.lang === 'es' ? 'Hoy: ' : Settings.lang === 'en' ? 'Today: ' : sc('今天：')) + fmtDate(v.y, v.m, v.d, true);
-  let h = `<div class="datebox">${esc(todayTxt)}</div><div class="ytitle">${esc(Settings.lang === 'zh' ? v.y + '年' : String(v.y))}</div><div class="ycal">`;
+  let h = `<div class="ytitle">${esc(Settings.lang === 'zh' ? v.y + '年' : String(v.y))}</div><div class="ycal">`;
   for (let m = 1; m <= 12; m++){
     const N = dim(v.y, m), first = new Date(v.y, m - 1, 1).getDay();
     h += `<div class="mm${m === v.m ? ' cur' : ''}"><div class="mt">${esc(sc(monthZh(m)))}</div><table>`;
@@ -200,7 +199,7 @@ function renderStart(){
     u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
     h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
   });
-  document.body.classList.remove('has-sheet');
+  document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
   $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
@@ -232,11 +231,25 @@ function optHTML(o){
   if (o.gloss){ const t = trOf(o.gloss); if (t) h += `<span class="tr">${esc(t)}</span>`; }
   return h;
 }
+/* =====  一天的時間：色帶和背景色  ===== */
+const todClass = h => (h >= 5 && h < 12 ? 'tod-morning' : h >= 12 && h < 19 ? 'tod-afternoon' : 'tod-night');
+const nowHour = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
+const todOf = q => (q && typeof q.tod === 'number' ? q.tod : nowHour());   // 題目有時間就用題目的，沒有就用手機現在的時間
+function applyTod(h){ document.documentElement.className = todClass(h); }
+const TOD_ICON = { 'tod-morning':['☀️', '#ffe08a'], 'tod-afternoon':['🌤️', '#ffd27a'], 'tod-night':['🌙', '#e8e3c6'] };
+function todBand(h){
+  let t = '';
+  for (let i = 0; i <= 24; i++) t += `<i class="tk${i % 6 === 0 ? ' b' : ''}" style="left:${(i / 24 * 100).toFixed(2)}%"></i>`;
+  [0, 6, 12, 18, 24].forEach(i => { t += `<i class="tl" style="left:${Math.min(Math.max(i / 24 * 100, 4), 96)}%">${i}</i>`; });
+  const ic = TOD_ICON[todClass(h)], x = Math.min(Math.max(h / 24 * 100, 3), 97);
+  return `<div class="tod" aria-hidden="true" data-h="${h.toFixed(2)}">${t}<i class="mk" style="left:${x.toFixed(2)}%;background:${ic[1]}">${ic[0]}</i></div>`;
+}
 function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
+  const th = todOf(q); applyTod(th); h += todBand(th);
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;
   if (q.line){
@@ -263,7 +276,7 @@ function renderQ(){
   if (q.kind === 'choice'){
     const long = q.options.some(o => o.zh && o.zh.replace(/\{[^}]*\}/g, '').length > 5);
     const cls = (q.optClass === 'cardopt' || long) ? 'opts one' : 'opts';
-    h += `<div class="${cls}">` + q.options.map((o, i) => `<button class="opt" data-i="${i}">${optHTML(o)}</button>`).join('') + '</div>';
+    h += `<div class="${cls}">` + q.options.map((o, i) => `<button class="opt${o.svg ? ' img' : ''}" data-i="${i}">${optHTML(o)}</button>`).join('') + '</div>';
   } else if (q.kind === 'match'){
     h += `<div class="match"><div class="small" style="text-align:center">${esc(zhOf(STR.hintLine))}${trOf(STR.hintLine) ? ' · ' + esc(trOf(STR.hintLine)) : ''}</div><div id="slots"></div><div class="cards" id="cards"></div></div>`;
   }
@@ -404,7 +417,7 @@ function showResult(){
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
   if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
-  document.body.classList.remove('has-sheet');
+  document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h; window.scrollTo(0, 0);
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);

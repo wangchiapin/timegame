@@ -7,7 +7,7 @@
 <title>練習時間 · ¿Qué hora es?</title>
 <style>
 :root{
-  --bg:#ebe5d6; --card:#f6f2e8; --card2:#efe9db; --ink:#2b2a27; --sub:#6d675a; --line:#c4baa3;
+  --bg:#ebe5d6; --card:#f6f2e8; --card2:#efe9db; --ink:#2b2a27; --sub:#5f594c; --line:#c4baa3;
   --accent:#4c5a4b; --ok:#4f7a54; --okbg:#dfe9d6; --bad:#a8503c; --badbg:#f1dcd3; --hl:#e6d6a6; --red:#a8503c;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -214,6 +214,78 @@ button.gear{font-size:20px;line-height:1}
 .detail .plan{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;column-gap:.7em;margin:2px 0}
 .detail .plan .small{display:inline;font-size:13px}
 
+/* ======================================================
+   鐘錶機械感 ＋ 日出日落
+   背景和色帶跟著「題目的時間」走；題目沒有時間就用手機現在的時間
+   ====================================================== */
+:root{
+  --edge:#1f1f1d; --onaccent:#f6f2e8; --paper:#faf8f1; --paperink:#2b2a27; --calred:#a8503c;
+  --pok:#dfe9d6; --pbad:#f1dcd3; --phl:#e6d6a6; --boardink:#f3ecd8; --boardsub:#d4cdb6;
+}
+html.tod-morning{--bg:#ece6c4;--card:#f8f3d8;--card2:#efe8c5}
+html.tod-afternoon{--bg:#ecd9bd;--card:#f8ead6;--card2:#efdfc7}
+html.tod-night{--bg:#242a3b;--card:#2f364b;--card2:#293045;--ink:#ece7d8;--sub:#b4bacb;--line:#6b7491;--accent:#e6d6a6;
+  --onaccent:#1b1d27;--edge:#e6d6a6;--ok:#86c792;--okbg:#1f3a2a;--bad:#e8917b;--badbg:#4a2a26;--hl:#5a5636;--red:#e8917b}
+body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(31,31,29,.04) 23px 24px)}
+html.tod-night body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(255,255,255,.035) 23px 24px)}
+
+/* 粗框、小圓角、硬陰影：像實體的機械按鈕 */
+.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb,.fb,.slot .tm,.slot .box,.seg,.overlay .panel,#gear,.lvchip,.prog{border:2px solid var(--edge);border-radius:4px}
+.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb{box-shadow:0 3px 0 var(--edge)}
+.seg button{border-right-color:var(--edge)}
+.btn.primary{background:var(--accent);color:var(--onaccent)}
+.seg button.on,.seg button.on .tr{color:var(--onaccent)}
+.sheet{border-top:2px solid var(--edge)}
+.prog{height:8px}
+input[type=text]{background:var(--card)}
+
+/* 選項：像車站的翻牌時刻表 */
+.opt{background:#262624;color:var(--boardink);border:2px solid var(--edge);border-radius:4px;box-shadow:0 3px 0 #000;position:relative}
+.opt::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.7);box-shadow:0 1px 0 rgba(255,255,255,.07);pointer-events:none}
+.opt.img::after{display:none}
+.opt .ph,.opt .tr,.opt .badge,.opt .small{color:var(--boardsub)}
+.opt:active{background:#33332f}
+.opt.ok{background:#1f3a2a;border-color:#86c792}
+.opt.bad{background:#4a2a26;border-color:#e8917b}
+.opt.sel{background:#3d3a24}
+.opt .tr{position:relative;z-index:1}
+
+/* 月曆：像一張淺色的紙，白天晚上都用深色字 */
+.cal .ct{letter-spacing:.08em;text-transform:uppercase}
+.cal table{border:2px solid var(--edge);background:var(--paper)}
+.cal th{background:#1f1f1d;color:#f3ecd8;border-color:#1f1f1d}
+.cal th.we{color:#ffab94}
+.cal td{background:var(--paper);color:var(--paperink);border-color:#c9bfa6}
+.cal td.empty{background:#ebe5d6}
+.cal td.we .n{color:var(--calred)}
+.cal td.we.sel .n{color:#8a3a28}
+.cal td .lb{color:#4c5a4b}
+.cal td.today{outline-color:var(--calred)}
+.cal td.today::after{color:var(--calred)}
+.cal td.mark .n{border-color:var(--paperink)}
+.cal td.sel,.cal td.tap:active{background:var(--phl)}
+.cal td.good{background:var(--pok)}
+.cal td.wrong{background:var(--pbad)}
+.ycal td.t{background:#c0392b;color:#fff}
+
+/* 數字顯示：老式電子鐘 */
+.digi,.dialread{font-family:"Courier New",monospace;background:#1f1f1d;color:#ff9f43;display:inline-block;padding:4px 14px;border-radius:3px;letter-spacing:.12em}
+.dialread{font-size:15px}
+svg.clock{filter:drop-shadow(0 3px 0 rgba(31,31,29,.28))}
+html.tod-night svg.clock{filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
+html.tod-night .vis > svg.clock > circle:first-child{fill:#c9b98a}
+
+/* 24 小時刻度盤色帶（30 像素高） */
+.tod{height:30px;margin:0 0 5px;position:relative;overflow:hidden;border:2px solid var(--edge);border-radius:3px;
+  box-shadow:0 2px 0 var(--edge),inset 0 1px 3px rgba(0,0,0,.25);
+  background:linear-gradient(90deg,#222a45 0%,#5d5588 16%,#f2a97c 27%,#f9e3a0 38%,#fff0b8 50%,#f6d493 64%,#ee8f66 75%,#4e5384 88%,#222a45 100%)}
+.tod i{font-style:normal;position:absolute}
+.tod .tk{bottom:0;width:1px;height:5px;background:rgba(255,255,255,.7)}
+.tod .tk.b{height:9px;width:2px;background:#fff}
+.tod .tl{top:1px;font:700 8px Georgia,serif;color:rgba(255,255,255,.92);transform:translateX(-50%);text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.tod .mk{top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid var(--edge);font-size:11px;display:flex;align-items:center;justify-content:center}
+.btn.primary .tr,.btn.primary .small{color:var(--onaccent)}
+
 </style>
 </head>
 <body>
@@ -303,6 +375,7 @@ const Settings = readSettings();
 /* ---------- 字典：字 拼音（台灣讀音）簡體 ---------- */
 const DICT_SRC = `
 文 wén
+大 dà
 行 xíng
 游 yóu
 泳 yǒng
@@ -495,7 +568,7 @@ function plainZh(text){ return String(text).replace(/\{[^}]*\}/g, ''); }
 /* 日期、時間的詞後面空一小格，方便學生斷詞：二零二六年 五月 二十日 五點 十五分
    只在「數字＋年月日號點分秒」和幾個固定詞（今天、下午、星期一…）後面加；只影響畫面，不改文字，語音和比對不受影響 */
 const GAP_NUM = '零一二三四五六七八九十兩百千';
-const GAP_WORDS = /大後天|後天|前天|今天|明天|昨天|今年|明年|去年|早上|上午|中午|下午|晚上|星期[一二三四五六七日天]/g;
+const GAP_WORDS = /大後天|大前天|後天|前天|今天|明天|昨天|今年|明年|去年|早上|上午|中午|下午|晚上|星期[一二三四五六七日天]/g;
 function gapAfter(items){
   const arr = items.map(it => it.c), n = arr.length, set = new Set();
   const isNum = c => c !== undefined && (GAP_NUM.includes(c) || /\d/.test(c));
@@ -911,7 +984,7 @@ function gSchedListen(lv){
   // 至少一個「同一個行程、不同時間」，一個「同一個時間、不同行程」
   const sameAct = picked.filter(w => w.zh === a.short), otherAct = picked.filter(w => w.zh !== a.short);
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
-  return { id:'schedListen', kind:'choice',
+  return { id:'schedListen', kind:'choice', tod:H + m / 60,
     instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
     line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
@@ -927,7 +1000,7 @@ function gPeriodRead(lv){
   if (H <= 12) add(H + 12, m, 'pmAm'); else add(H - 12, m, 'pmAm');           // 早上／下午搞混（例如 03:00 和 15:00）
   add(H + 1, m, 'time'); add(H - 1, m, 'time'); add(H, flip, 'time'); add(H + 2, m, 'time');
   const trap = wrongs.filter(w => w.why === 'pmAm'), rest = shuffle(wrongs.filter(w => w.why !== 'pmAm'));
-  return { id:'periodChoice', kind:'choice',
+  return { id:'periodChoice', kind:'choice', tod:H + m / 60,
     instr:L('看中文時間，選出正確的數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese time and choose the digital time.'),
     line:{ zh, es:'', en:'' }, visual:null, dbg:{ form:'read', H, m },
     options:mkOptions({ zh:digital24(H, m), why:null, d:digital24(H, m) }, [].concat(trap, rest)),
@@ -943,7 +1016,7 @@ function gPeriodChoice(lv){
   [H + 1, H - 1].filter(x => x >= 6 && x <= 23).forEach(x => wrongs.push({ zh:ptZh(x, m, st), why:'time', d:digital24(x, m) }));
   const order = wrongs.filter(w => w.why === 'periodOrder'), pw = shuffle(wrongs.filter(w => w.why === 'periodWrong')), tm = shuffle(wrongs.filter(w => w.why === 'time'));
   const wr = [].concat(order, pw.slice(0, 1), tm.slice(0, 1), pw.slice(1), tm.slice(1));
-  return { id:'periodChoice', kind:'choice',
+  return { id:'periodChoice', kind:'choice', tod:H + m / 60,
     instr:L('看數字時間，選出正確的中文說法（含早上、中午、下午、晚上）。', 'Mira la hora en números y elige cómo se dice (con mañana, mediodía, tarde o noche).', 'Look at the digital time and choose how to say it (with morning, noon, afternoon or evening).'),
     line:null, visual:{ type:'digital', text:digital24(H, m) },
     options:mkOptions({ zh:correct, why:null, d:digital24(H, m) }, wr),
@@ -1067,7 +1140,7 @@ function gCalWhatTime(lv){
     if (H >= 6 && H <= 23) generic.push({ zh:ptZh(H, mm, st), why:'time', d:digital24(H, mm) });
   });
   const others = D.evs.filter(x => x !== e).map(x => ({ zh:ptZh(x.h, x.mi, st), why:'otherEv', d:digital24(x.h, x.mi) }));
-  return { id:'calWhatTime', kind:'choice',
+  return { id:'calWhatTime', kind:'choice', tod:e.h + e.mi / 60,
     instr:L('點月曆上的日子看行程（＋代表還有其他行程），再選出正確的時間。', 'Toca un día del calendario para ver los planes (＋ = hay más planes) y elige la hora correcta.', 'Tap a day to see its plans (＋ = more plans) and choose the right time.'),
     line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
     visual:{ type:'cal', y:mo.y, m:mo.m, mode:'view', labels, details, plus },
@@ -1077,8 +1150,8 @@ function gCalWhatTime(lv){
 }
 
 /* =====================  單元五：星期和日期推算  ===================== */
-const REL_DAYS = { '-2':'前天', '-1':'昨天', '0':'今天', '1':'明天', '2':'後天' };
-const REL_DAYS_L = { '-2':['anteayer', 'the day before yesterday'], '-1':['ayer', 'yesterday'], '0':['hoy', 'today'], '1':['mañana', 'tomorrow'], '2':['pasado mañana', 'the day after tomorrow'] };
+const REL_DAYS = { '-3':'大前天', '-2':'前天', '-1':'昨天', '0':'今天', '1':'明天', '2':'後天', '3':'大後天' };
+const REL_DAYS_L = { '-3':['hace tres días', 'three days ago'], '-2':['anteayer', 'the day before yesterday'], '-1':['ayer', 'yesterday'], '0':['hoy', 'today'], '1':['mañana', 'tomorrow'], '2':['pasado mañana', 'the day after tomorrow'], '3':['dentro de tres días', 'three days from now'] };
 function randToday(){
   for (;;){
     const y = randInt(2025, 2028), m = randInt(1, 12), d = randInt(8, 22), w = weekdayOf(y, m, d);
@@ -1090,7 +1163,7 @@ function todayVisual(T, extra){ return Object.assign({ type:'cal', y:T.y, m:T.m,
 function dateOpt(t, why){ return { zh:monthZh(t.m) + dayZh(t.d, '號'), why:why || 'val', d:fmtDate(t.y, t.m, t.d, false) }; }
 
 function gRelDay(lv){
-  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2], off = pick(offs);
+  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3], off = pick(offs), ring = lv === 'easy' ? [-2, -1, 0, 1, 2] : [-3, -2, -1, 0, 1, 2, 3];
   const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
   const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
   const lt = REL_DAYS_L[String(off)];
@@ -1099,14 +1172,14 @@ function gRelDay(lv){
   let options, line, ansZh;
   if (askWeek){
     const dow = weekdayOf(tg.y, tg.m, tg.d); ansZh = wkZh(dow, sun);
-    const wr = shuffle([-2, -1, 0, 1, 2].filter(x => x !== off)).map(x => { const t = addDays(T.y, T.m, T.d, x); return { zh:wkZh(weekdayOf(t.y, t.m, t.d), sun), why:'rel' }; });
+    const wr = shuffle(ring.filter(x => x !== off)).map(x => { const t = addDays(T.y, T.m, T.d, x); return { zh:wkZh(weekdayOf(t.y, t.m, t.d), sun), why:'rel' }; });
     shuffle([0, 1, 2, 3, 4, 5, 6]).forEach(x => wr.push({ zh:wkZh(x, sun), why:'wk' }));
     options = mkOptions({ zh:ansZh, why:null }, wr);
     line = { zh:word + '是星期幾？', es:'¿Qué día de la semana es ' + lt[0] + '?', en:'What day of the week is ' + lt[1] + '?' };
   } else {
     ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
     const wr = [];
-    [-2, -1, 0, 1, 2].filter(x => x !== off).forEach(x => wr.push(dateOpt(addDays(T.y, T.m, T.d, x), 'rel')));
+    ring.filter(x => x !== off).forEach(x => wr.push(dateOpt(addDays(T.y, T.m, T.d, x), 'rel')));
     [7, -7].forEach(x => wr.push(dateOpt(addDays(tg.y, tg.m, tg.d, x), 'weekShift')));
     options = mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, shuffle(wr));
     line = { zh:word + '是幾月幾號？', es:'¿Qué fecha es ' + lt[0] + '?', en:'What is the date ' + lt[1] + '?' };
@@ -1163,7 +1236,7 @@ function gYearView(lv){
   const wr = [{ zh:yearQtyZh(ty) + '年', why:'yearQty' }, { zh:digitsZh(ty) + '個年', why:'ge' }];
   [-2, -1, 0, 1, 2].filter(x => x !== dy).forEach(x => wr.push({ zh:yearZh(y + x), why:x === 0 ? 'rel' : 'year' }));
   return Object.assign(base, {
-    line:{ zh:word + '是幾年？', es:'¿Qué año es ' + tr[0] + '?', en:'What year is ' + tr[1] + '?' },
+    line:{ zh:word + '是哪一年？', es:'¿Qué año es ' + tr[0] + '?', en:'What year is ' + tr[1] + '?' },
     options:mkOptions({ zh:ansZh, why:null }, wr), fb:{ ansZh, extra:fmtDate(y, m, d, true) } });
 }
 
@@ -1185,7 +1258,7 @@ function gTapAbs(lv){
   q.id = 'tapAbs'; return q;
 }
 function gTapRelDay(lv){
-  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-2, -1, 1, 2]);
+  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3]);
   const tg = addDays(T.y, T.m, T.d, off), past = off < 0, lt = REL_DAYS_L[String(off)];
   const zh = REL_DAYS[String(off)] + '我' + (past ? ev.past : ev.fut);
   const q = tapQuestion(T, tg, zh, [lt[0][0].toUpperCase() + lt[0].slice(1), lt[1][0].toUpperCase() + lt[1].slice(1)], ev, past);
@@ -1319,23 +1392,23 @@ function sfx(ok){
 function clockSVG(o){
   const { h, m, s } = o, hasS = s != null;
   const pt = (a, len) => { const r = a * Math.PI / 180; return [(100 + len * Math.sin(r)).toFixed(2), (100 - len * Math.cos(r)).toFixed(2)]; };
-  let g = '<circle cx="100" cy="100" r="95" fill="#fbf8f0" stroke="#2b2a27" stroke-width="2"/>';
+  let g = '<circle cx="100" cy="100" r="97" fill="#1f1f1d"/><circle cx="100" cy="100" r="90" fill="#fbf9f2"/>';
   for (let i = 0; i < 60; i++){
-    const big = i % 5 === 0, a = i * 6, p1 = pt(a, 94), p2 = pt(a, big ? 85 : 90);
-    g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#2b2a27" stroke-width="${big ? 2 : 1}"/>`;
+    const big = i % 5 === 0, a = i * 6, p1 = pt(a, 88), p2 = pt(a, big ? 76 : 83);
+    g += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#1f1f1d" stroke-width="${big ? 3.6 : 1.1}" stroke-linecap="butt"/>`;
   }
   let nums = '';
-  for (let n = 1; n <= 12; n++){ const p = pt(n * 30, 70); nums += `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" font-size="17" fill="#2b2a27" stroke="#fbf8f0" stroke-width="3" paint-order="stroke" font-family="system-ui,sans-serif">${n}</text>`; }
+  for (let n = 1; n <= 12; n++){ const p = pt(n * 30, 62); nums += `<text x="${p[0]}" y="${p[1]}" text-anchor="middle" dominant-baseline="central" font-size="19" font-weight="700" fill="#1f1f1d" font-family="Georgia,'Times New Roman',serif">${n}</text>`; }
   const hA = (h % 12) * 30 + m * 0.5 + (hasS ? s / 120 : 0), mA = m * 6 + (hasS ? s * 0.1 : 0);
-  const hp = pt(hA, 48), mp = pt(mA, 74);
+  const hp = pt(hA, 46), mp = pt(mA, 76), hb = pt(hA + 180, 9), mb = pt(mA + 180, 12);
   g += nums;
-  g += `<line class="hh" x1="100" y1="100" x2="${hp[0]}" y2="${hp[1]}" stroke="#2b2a27" stroke-width="6" stroke-linecap="round"/>`;
-  g += `<line class="mh" x1="100" y1="100" x2="${mp[0]}" y2="${mp[1]}" stroke="#2b2a27" stroke-width="3.5" stroke-linecap="round"/>`;
+  g += `<line class="hh" x1="${hb[0]}" y1="${hb[1]}" x2="${hp[0]}" y2="${hp[1]}" stroke="#1f1f1d" stroke-width="7.5" stroke-linecap="butt"/>`;
+  g += `<line class="mh" x1="${mb[0]}" y1="${mb[1]}" x2="${mp[0]}" y2="${mp[1]}" stroke="#1f1f1d" stroke-width="5" stroke-linecap="butt"/>`;
   if (hasS){
-    const sp = pt(s * 6, 82), st = pt(s * 6 + 180, 16);
-    g += `<line x1="${st[0]}" y1="${st[1]}" x2="${sp[0]}" y2="${sp[1]}" stroke="#a8503c" stroke-width="1.6" stroke-linecap="round"/>`;
+    const sp = pt(s * 6, 84), st = pt(s * 6 + 180, 22), sd = pt(s * 6, 70);
+    g += `<line x1="${st[0]}" y1="${st[1]}" x2="${sp[0]}" y2="${sp[1]}" stroke="#c0392b" stroke-width="2" stroke-linecap="butt"/><circle cx="${sd[0]}" cy="${sd[1]}" r="5" fill="#c0392b"/>`;
   }
-  g += `<circle cx="100" cy="100" r="4.5" fill="${hasS ? '#a8503c' : '#2b2a27'}"/>`;
+  g += `<circle cx="100" cy="100" r="6" fill="${hasS ? '#c0392b' : '#1f1f1d'}"/>`;
   return `<svg viewBox="0 0 200 200" class="clock${o.mini ? ' mini' : ''}" ${o.dial ? 'id="dial"' : ''} role="img" aria-label="clock">${g}</svg>`;
 }
 function setHands(svg, h, m){
@@ -1381,8 +1454,7 @@ function calHTML(v){
   return h + '</tbody></table></div>';
 }
 function ycalHTML(v){
-  const todayTxt = (Settings.lang === 'es' ? 'Hoy: ' : Settings.lang === 'en' ? 'Today: ' : sc('今天：')) + fmtDate(v.y, v.m, v.d, true);
-  let h = `<div class="datebox">${esc(todayTxt)}</div><div class="ytitle">${esc(Settings.lang === 'zh' ? v.y + '年' : String(v.y))}</div><div class="ycal">`;
+  let h = `<div class="ytitle">${esc(Settings.lang === 'zh' ? v.y + '年' : String(v.y))}</div><div class="ycal">`;
   for (let m = 1; m <= 12; m++){
     const N = dim(v.y, m), first = new Date(v.y, m - 1, 1).getDay();
     h += `<div class="mm${m === v.m ? ' cur' : ''}"><div class="mt">${esc(sc(monthZh(m)))}</div><table>`;
@@ -1444,7 +1516,7 @@ function renderStart(){
     u.subs.forEach(([id, l]) => { h += `<button class="btn" data-sub="${id}">${Lh(l)}</button>`; });
     h += `<button class="btn mixu" data-unitmix="${u.id}">${Lh(STR.mixUnit)}</button></div></div>`;
   });
-  document.body.classList.remove('has-sheet');
+  document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
   $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
@@ -1476,11 +1548,25 @@ function optHTML(o){
   if (o.gloss){ const t = trOf(o.gloss); if (t) h += `<span class="tr">${esc(t)}</span>`; }
   return h;
 }
+/* =====  一天的時間：色帶和背景色  ===== */
+const todClass = h => (h >= 5 && h < 12 ? 'tod-morning' : h >= 12 && h < 19 ? 'tod-afternoon' : 'tod-night');
+const nowHour = () => { const d = new Date(); return d.getHours() + d.getMinutes() / 60; };
+const todOf = q => (q && typeof q.tod === 'number' ? q.tod : nowHour());   // 題目有時間就用題目的，沒有就用手機現在的時間
+function applyTod(h){ document.documentElement.className = todClass(h); }
+const TOD_ICON = { 'tod-morning':['☀️', '#ffe08a'], 'tod-afternoon':['🌤️', '#ffd27a'], 'tod-night':['🌙', '#e8e3c6'] };
+function todBand(h){
+  let t = '';
+  for (let i = 0; i <= 24; i++) t += `<i class="tk${i % 6 === 0 ? ' b' : ''}" style="left:${(i / 24 * 100).toFixed(2)}%"></i>`;
+  [0, 6, 12, 18, 24].forEach(i => { t += `<i class="tl" style="left:${Math.min(Math.max(i / 24 * 100, 4), 96)}%">${i}</i>`; });
+  const ic = TOD_ICON[todClass(h)], x = Math.min(Math.max(h / 24 * 100, 3), 97);
+  return `<div class="tod" aria-hidden="true" data-h="${h.toFixed(2)}">${t}<i class="mk" style="left:${x.toFixed(2)}%;background:${ic[1]}">${ic[0]}</i></div>`;
+}
 function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
+  const th = todOf(q); applyTod(th); h += todBand(th);
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;
   if (q.line){
@@ -1507,7 +1593,7 @@ function renderQ(){
   if (q.kind === 'choice'){
     const long = q.options.some(o => o.zh && o.zh.replace(/\{[^}]*\}/g, '').length > 5);
     const cls = (q.optClass === 'cardopt' || long) ? 'opts one' : 'opts';
-    h += `<div class="${cls}">` + q.options.map((o, i) => `<button class="opt" data-i="${i}">${optHTML(o)}</button>`).join('') + '</div>';
+    h += `<div class="${cls}">` + q.options.map((o, i) => `<button class="opt${o.svg ? ' img' : ''}" data-i="${i}">${optHTML(o)}</button>`).join('') + '</div>';
   } else if (q.kind === 'match'){
     h += `<div class="match"><div class="small" style="text-align:center">${esc(zhOf(STR.hintLine))}${trOf(STR.hintLine) ? ' · ' + esc(trOf(STR.hintLine)) : ''}</div><div id="slots"></div><div class="cards" id="cards"></div></div>`;
   }
@@ -1648,7 +1734,7 @@ function showResult(){
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
   if (r.isMix) h += `<div class="card"><div class="note">${Li(STR.best)}：${localBest()}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
-  document.body.classList.remove('has-sheet');
+  document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h; window.scrollTo(0, 0);
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);

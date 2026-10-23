@@ -37,6 +37,7 @@ const Settings = readSettings();
 /* ---------- 字典：字 拼音（台灣讀音）簡體 ---------- */
 const DICT_SRC = `
 文 wén
+大 dà
 行 xíng
 游 yóu
 泳 yǒng
@@ -229,7 +230,7 @@ function plainZh(text){ return String(text).replace(/\{[^}]*\}/g, ''); }
 /* 日期、時間的詞後面空一小格，方便學生斷詞：二零二六年 五月 二十日 五點 十五分
    只在「數字＋年月日號點分秒」和幾個固定詞（今天、下午、星期一…）後面加；只影響畫面，不改文字，語音和比對不受影響 */
 const GAP_NUM = '零一二三四五六七八九十兩百千';
-const GAP_WORDS = /大後天|後天|前天|今天|明天|昨天|今年|明年|去年|早上|上午|中午|下午|晚上|星期[一二三四五六七日天]/g;
+const GAP_WORDS = /大後天|大前天|後天|前天|今天|明天|昨天|今年|明年|去年|早上|上午|中午|下午|晚上|星期[一二三四五六七日天]/g;
 function gapAfter(items){
   const arr = items.map(it => it.c), n = arr.length, set = new Set();
   const isNum = c => c !== undefined && (GAP_NUM.includes(c) || /\d/.test(c));

@@ -1,5 +1,5 @@
 :root{
-  --bg:#ebe5d6; --card:#f6f2e8; --card2:#efe9db; --ink:#2b2a27; --sub:#6d675a; --line:#c4baa3;
+  --bg:#ebe5d6; --card:#f6f2e8; --card2:#efe9db; --ink:#2b2a27; --sub:#5f594c; --line:#c4baa3;
   --accent:#4c5a4b; --ok:#4f7a54; --okbg:#dfe9d6; --bad:#a8503c; --badbg:#f1dcd3; --hl:#e6d6a6; --red:#a8503c;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -205,3 +205,75 @@ button.gear{font-size:20px;line-height:1}
 .cal td .lb .plus{font-weight:700;margin-left:1px}
 .detail .plan{display:flex;align-items:flex-end;justify-content:center;flex-wrap:wrap;column-gap:.7em;margin:2px 0}
 .detail .plan .small{display:inline;font-size:13px}
+
+/* ======================================================
+   鐘錶機械感 ＋ 日出日落
+   背景和色帶跟著「題目的時間」走；題目沒有時間就用手機現在的時間
+   ====================================================== */
+:root{
+  --edge:#1f1f1d; --onaccent:#f6f2e8; --paper:#faf8f1; --paperink:#2b2a27; --calred:#a8503c;
+  --pok:#dfe9d6; --pbad:#f1dcd3; --phl:#e6d6a6; --boardink:#f3ecd8; --boardsub:#d4cdb6;
+}
+html.tod-morning{--bg:#ece6c4;--card:#f8f3d8;--card2:#efe8c5}
+html.tod-afternoon{--bg:#ecd9bd;--card:#f8ead6;--card2:#efdfc7}
+html.tod-night{--bg:#242a3b;--card:#2f364b;--card2:#293045;--ink:#ece7d8;--sub:#b4bacb;--line:#6b7491;--accent:#e6d6a6;
+  --onaccent:#1b1d27;--edge:#e6d6a6;--ok:#86c792;--okbg:#1f3a2a;--bad:#e8917b;--badbg:#4a2a26;--hl:#5a5636;--red:#e8917b}
+body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(31,31,29,.04) 23px 24px)}
+html.tod-night body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(255,255,255,.035) 23px 24px)}
+
+/* 粗框、小圓角、硬陰影：像實體的機械按鈕 */
+.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb,.fb,.slot .tm,.slot .box,.seg,.overlay .panel,#gear,.lvchip,.prog{border:2px solid var(--edge);border-radius:4px}
+.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb{box-shadow:0 3px 0 var(--edge)}
+.seg button{border-right-color:var(--edge)}
+.btn.primary{background:var(--accent);color:var(--onaccent)}
+.seg button.on,.seg button.on .tr{color:var(--onaccent)}
+.sheet{border-top:2px solid var(--edge)}
+.prog{height:8px}
+input[type=text]{background:var(--card)}
+
+/* 選項：像車站的翻牌時刻表 */
+.opt{background:#262624;color:var(--boardink);border:2px solid var(--edge);border-radius:4px;box-shadow:0 3px 0 #000;position:relative}
+.opt::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.7);box-shadow:0 1px 0 rgba(255,255,255,.07);pointer-events:none}
+.opt.img::after{display:none}
+.opt .ph,.opt .tr,.opt .badge,.opt .small{color:var(--boardsub)}
+.opt:active{background:#33332f}
+.opt.ok{background:#1f3a2a;border-color:#86c792}
+.opt.bad{background:#4a2a26;border-color:#e8917b}
+.opt.sel{background:#3d3a24}
+.opt .tr{position:relative;z-index:1}
+
+/* 月曆：像一張淺色的紙，白天晚上都用深色字 */
+.cal .ct{letter-spacing:.08em;text-transform:uppercase}
+.cal table{border:2px solid var(--edge);background:var(--paper)}
+.cal th{background:#1f1f1d;color:#f3ecd8;border-color:#1f1f1d}
+.cal th.we{color:#ffab94}
+.cal td{background:var(--paper);color:var(--paperink);border-color:#c9bfa6}
+.cal td.empty{background:#ebe5d6}
+.cal td.we .n{color:var(--calred)}
+.cal td.we.sel .n{color:#8a3a28}
+.cal td .lb{color:#4c5a4b}
+.cal td.today{outline-color:var(--calred)}
+.cal td.today::after{color:var(--calred)}
+.cal td.mark .n{border-color:var(--paperink)}
+.cal td.sel,.cal td.tap:active{background:var(--phl)}
+.cal td.good{background:var(--pok)}
+.cal td.wrong{background:var(--pbad)}
+.ycal td.t{background:#c0392b;color:#fff}
+
+/* 數字顯示：老式電子鐘 */
+.digi,.dialread{font-family:"Courier New",monospace;background:#1f1f1d;color:#ff9f43;display:inline-block;padding:4px 14px;border-radius:3px;letter-spacing:.12em}
+.dialread{font-size:15px}
+svg.clock{filter:drop-shadow(0 3px 0 rgba(31,31,29,.28))}
+html.tod-night svg.clock{filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
+html.tod-night .vis > svg.clock > circle:first-child{fill:#c9b98a}
+
+/* 24 小時刻度盤色帶（30 像素高） */
+.tod{height:30px;margin:0 0 5px;position:relative;overflow:hidden;border:2px solid var(--edge);border-radius:3px;
+  box-shadow:0 2px 0 var(--edge),inset 0 1px 3px rgba(0,0,0,.25);
+  background:linear-gradient(90deg,#222a45 0%,#5d5588 16%,#f2a97c 27%,#f9e3a0 38%,#fff0b8 50%,#f6d493 64%,#ee8f66 75%,#4e5384 88%,#222a45 100%)}
+.tod i{font-style:normal;position:absolute}
+.tod .tk{bottom:0;width:1px;height:5px;background:rgba(255,255,255,.7)}
+.tod .tk.b{height:9px;width:2px;background:#fff}
+.tod .tl{top:1px;font:700 8px Georgia,serif;color:rgba(255,255,255,.92);transform:translateX(-50%);text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.tod .mk{top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid var(--edge);font-size:11px;display:flex;align-items:center;justify-content:center}
+.btn.primary .tr,.btn.primary .small{color:var(--onaccent)}
