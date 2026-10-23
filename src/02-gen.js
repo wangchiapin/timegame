@@ -604,7 +604,7 @@ const UNITS = [
   { id:'u4', t:L('單元四　月曆行事曆', 'Unidad 4 · Calendario de actividades', 'Unit 4 · Calendar plans'),
     subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')]] },
   { id:'u5', t:L('單元五　星期和日期推算', 'Unidad 5 · Calcular días y fechas', 'Unit 5 · Working out days'),
-    subs:[['relDay', L('昨天、今天、明天', 'Ayer, hoy, mañana', 'Yesterday, today, tomorrow')], ['relWeek', L('上星期、這星期、下星期', 'La semana pasada, esta, la próxima', 'Last, this, next week')], ['yearView', L('年曆：上個月、下個月、去年、明年', 'Año: mes pasado, próximo, año pasado…', 'Year view: last/next month, last/next year')]] },
+    subs:[['relDay', L('大前天、前天、昨天、今天、明天、後天、大後天', 'Hace 3 días, anteayer, ayer, hoy, mañana, pasado mañana, en 3 días', '3 days ago … in 3 days (yesterday, today, tomorrow)')], ['relWeek', L('上星期、這星期、下星期', 'La semana pasada, esta, la próxima', 'Last, this, next week')], ['yearView', L('年曆：上個月、下個月、去年、明年', 'Año: mes pasado, próximo, año pasado…', 'Year view: last/next month, last/next year')]] },
   { id:'u6', t:L('單元六　聽力點日期', 'Unidad 6 · Escucha y señala el día', 'Unit 6 · Listen and tap the day'),
     subs:[['tapAbs', L('聽幾月幾號', 'Escucha la fecha', 'Listen to the date')], ['tapRelDay', L('聽昨天、明天、後天', 'Escucha ayer, mañana…', 'Listen to yesterday, tomorrow…')], ['tapRelWeek', L('聽上星期、下星期', 'Escucha la semana pasada / próxima', 'Listen to last / next week')]] }
 ];
