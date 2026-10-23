@@ -219,7 +219,7 @@ button.gear{font-size:20px;line-height:1}
    背景和色帶跟著「題目的時間」走；題目沒有時間就用手機現在的時間
    ====================================================== */
 :root{
-  --edge:#1f1f1d; --onaccent:#f6f2e8; --paper:#faf8f1; --paperink:#2b2a27; --calred:#a8503c;
+  --edge:#1f1f1d; --onaccent:#f6f2e8; --paper:#faf8f1; --paperink:#2b2a27; --calred:#963e2b;
   --pok:#dfe9d6; --pbad:#f1dcd3; --phl:#e6d6a6; --boardink:#f3ecd8; --boardsub:#d4cdb6;
 }
 html.tod-morning{--bg:#ece6c4;--card:#f8f3d8;--card2:#efe8c5}
@@ -286,6 +286,28 @@ html.tod-night .vis > svg.clock > circle:first-child{fill:#c9b98a}
 .tod .mk{top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid var(--edge);font-size:11px;display:flex;align-items:center;justify-content:center}
 .btn.primary .tr,.btn.primary .small{color:var(--onaccent)}
 .fb .say{margin:6px 0 2px;font-size:18px}
+
+/* ===== 答案欄位：機械面板（深色標題條 ＋ 紙卡） ===== */
+.fb{padding:0;overflow:hidden;background:var(--paper)!important;border:2px solid var(--edge)!important;border-radius:4px;box-shadow:0 3px 0 var(--edge);color:var(--paperink)}
+.sheet .fb{padding:0}
+.fb .fbh{padding:5px 12px;font-size:16px;font-weight:700;letter-spacing:.5px;border-bottom:2px solid var(--edge);color:var(--onaccent)}
+.fb.ok .fbh{background:var(--ok)}
+.fb.bad .fbh{background:var(--bad)}
+.fb .fbh .tr{display:inline;margin-left:10px;font-size:13px;color:var(--onaccent);font-weight:400}
+.fb .fbb{padding:7px 12px 8px;background:var(--paper);color:var(--paperink)}
+.fb .fbb .small,.fb .fbb .tr,.fb .fbb .ph{color:#5f594c}
+.fb .fbb .why{color:var(--paperink)}
+.fb .fbl0{margin-top:6px!important;font-size:12px;letter-spacing:.5px}
+.fb .ans{font-size:22px;font-weight:600;margin:1px 0 2px}
+.sheet .fb .ans{font-size:21px}
+.fb .say{margin:6px 0 2px;padding-top:6px;border-top:1px dashed #b9ae94;font-size:17px;font-weight:400}
+.fb .fbl{margin:2px 0}
+.fb .fbr{display:flex;align-items:center;gap:8px;margin:4px 0}
+.fb .fbr .tm{flex:0 0 66px;text-align:center;border:2px solid var(--edge);border-radius:4px;background:#2a2a27;color:#f3ecd8;font-variant-numeric:tabular-nums;font-size:16px;padding:3px 0;letter-spacing:1px}
+.fb .fbr .ans{font-size:18px;margin:0;font-weight:500}
+html.tod-night .fb .fbr .tm{background:#1b1d27;color:#e6d6a6}
+.fb.ok .fbh{background:#3f6a45}
+html.tod-night .fb.ok .fbh{background:var(--ok)}
 
 </style>
 </head>
@@ -968,7 +990,7 @@ function gSchedMatch(lv){
   return { id:'schedMatch', kind:'match',
     instr:L('把每一句話放到正確的時間。先點句子，再點時間。', 'Pon cada frase en su hora. Toca la frase y luego la hora.', 'Put each sentence at the right time. Tap a sentence, then a time.'),
     line:null, visual:null, slots, cards, dbg:{ items:items.map(it => ({ short:it.a.short, H:it.H, m:it.m })), withPeriod },
-    fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), extra:null } };
+    fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), list:items.map(it => ({ tm:schedLabel(it.H, it.m, withPeriod), zh:schedZh(it.a, it.H, it.m, withPeriod) })), extra:null } };
 }
 function gSchedListen(lv){
   const withPeriod = lv !== 'easy';
@@ -1625,16 +1647,18 @@ function showFeedback(ok, q, chosen, extraHTML){
   App.answered = true;
   if (ok){ App.score += 10; App.right++; }
   sfx(ok);
-  let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="big">${Lh(ok ? STR.right : STR.wrong)}</div>`;
+  let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="fbh big">${Li(ok ? STR.right : STR.wrong)}</div><div class="fbb">`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
   if (!ok && chosen && chosen.why && chosen.why !== 'heard' && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
   if (extraHTML) h += extraHTML;
-  if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
-  h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
+  if (!ok) h += `<div class="small fbl0">${Li(STR.correctIs)}</div>`;
+  if (q.fb.list) h += '<div class="fbl">' + q.fb.list.map(r => `<div class="fbr"><span class="tm">${esc(r.tm)}</span><span class="ans">${lineHTML(r.zh)}</span></div>`).join('') + '</div>';
+  else h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
   if (q.fb.extra) h += `<div class="small">${esc(q.fb.extra)}</div>`;
   const say = q.fb.say || q.audio;
   if (say) h += `<div class="say">${lineHTML(say)}</div>`;
   if (q.fb.trans){ const t = Settings.lang === 'es' ? q.fb.trans.es : Settings.lang === 'en' ? q.fb.trans.en : ''; if (t) h += `<div class="small">${esc(t)}</div>`; }
+  h += '</div>';
   h += '</div>';
   $('#fb').innerHTML = h;
   $('#home').nextElementSibling.nextElementSibling.querySelector('b').textContent = App.score;

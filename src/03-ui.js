@@ -307,16 +307,18 @@ function showFeedback(ok, q, chosen, extraHTML){
   App.answered = true;
   if (ok){ App.score += 10; App.right++; }
   sfx(ok);
-  let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="big">${Lh(ok ? STR.right : STR.wrong)}</div>`;
+  let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="fbh big">${Li(ok ? STR.right : STR.wrong)}</div><div class="fbb">`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
   if (!ok && chosen && chosen.why && chosen.why !== 'heard' && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
   if (extraHTML) h += extraHTML;
-  if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
-  h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
+  if (!ok) h += `<div class="small fbl0">${Li(STR.correctIs)}</div>`;
+  if (q.fb.list) h += '<div class="fbl">' + q.fb.list.map(r => `<div class="fbr"><span class="tm">${esc(r.tm)}</span><span class="ans">${lineHTML(r.zh)}</span></div>`).join('') + '</div>';
+  else h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
   if (q.fb.extra) h += `<div class="small">${esc(q.fb.extra)}</div>`;
   const say = q.fb.say || q.audio;
   if (say) h += `<div class="say">${lineHTML(say)}</div>`;
   if (q.fb.trans){ const t = Settings.lang === 'es' ? q.fb.trans.es : Settings.lang === 'en' ? q.fb.trans.en : ''; if (t) h += `<div class="small">${esc(t)}</div>`; }
+  h += '</div>';
   h += '</div>';
   $('#fb').innerHTML = h;
   $('#home').nextElementSibling.nextElementSibling.querySelector('b').textContent = App.score;

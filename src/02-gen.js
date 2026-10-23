@@ -277,7 +277,7 @@ function gSchedMatch(lv){
   return { id:'schedMatch', kind:'match',
     instr:L('把每一句話放到正確的時間。先點句子，再點時間。', 'Pon cada frase en su hora. Toca la frase y luego la hora.', 'Put each sentence at the right time. Tap a sentence, then a time.'),
     line:null, visual:null, slots, cards, dbg:{ items:items.map(it => ({ short:it.a.short, H:it.H, m:it.m })), withPeriod },
-    fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), extra:null } };
+    fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), list:items.map(it => ({ tm:schedLabel(it.H, it.m, withPeriod), zh:schedZh(it.a, it.H, it.m, withPeriod) })), extra:null } };
 }
 function gSchedListen(lv){
   const withPeriod = lv !== 'easy';

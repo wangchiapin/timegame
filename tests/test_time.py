@@ -444,6 +444,15 @@ if __name__ == '__main__':
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("!document.querySelector('.fb .say')"), 'non-listening question shows no .say')
 
+        print('== 答案欄位：標題條 ＋ 紙卡；配對題清單')
+        pg.evaluate("startRound(['schedMatch'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
+        r = pg.evaluate("({ h:!!document.querySelector('.fb .fbh'), n:document.querySelectorAll('.fb .fbr').length, m:App.cur.slots.length, tm:[...document.querySelectorAll('.fb .fbr .tm')].map(e=>e.innerText).join() === App.cur.slots.map(s=>s.label).join() })")
+        check(r['h'] and r['n'] == r['m'] and r['tm'], 'match feedback: header bar + one row per slot, times in order (%s)' % r)
+        pg.evaluate("startRound(['relDay'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
+        check(pg.evaluate("document.querySelector('.fb.ok .fbh') && !document.querySelector('.fb .fbr')"), 'ok feedback: green header, no list')
+
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:
             pg.evaluate("startRound(['%s'], 'mid', '%s', false)" % (sub, sub))
