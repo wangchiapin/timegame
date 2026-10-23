@@ -191,6 +191,18 @@ svg.clock{margin:2px auto;width:min(74vw,250px,31vh)}
 .cal td{height:38px;padding:1px 2px}
 .vis .datebox{padding:4px 12px;font-size:17px;margin-bottom:2px}
 
+/* 齒輪與設定 */
+#app{position:relative}
+button.gear{font-size:20px;line-height:1}
+.title + .gear, #gear{position:absolute;right:14px;top:10px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:22px}
+.btn.gear{width:38px;min-height:34px;padding:2px 0;position:static}
+.bar .rgt{display:flex;align-items:center;gap:8px}
+.lvchip{display:block;margin:6px auto 2px;padding:6px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:14px;color:var(--sub)}
+.seg button .tr{display:block;font-size:11px;opacity:.85;margin-top:1px}
+.overlay .panel h3{margin:0 0 6px;font-size:18px}
+.lvchip{white-space:nowrap}.lvchip .tr.inline{margin-left:4px}
+.seg button.on .tr{color:#e6e0d0;opacity:1}
+
 </style>
 </head>
 <body>
@@ -1125,6 +1137,8 @@ const STR = {
   sub:      L('時鐘、日期、月曆，一起練習中文怎麼說', 'Reloj, fechas y calendario en chino', 'Clocks, dates and calendars in Chinese'),
   nameL:    L('名字', 'Nombre', 'Name'),
   namePh:   L('輸入你的名字', 'Escribe tu nombre', 'Enter your name'),
+  settings: L('設定', 'Ajustes', 'Settings'),
+  lvNote:   L('難度從下一回開始生效。', 'El nivel cambia en la próxima ronda.', 'The level applies from the next round.'),
   setScript:L('字形', 'Escritura', 'Script'),
   setLang:  L('介面語言', 'Idioma', 'Language'),
   setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
@@ -1268,16 +1282,45 @@ function ycalHTML(v){
 
 /* =====================  開始畫面  ===================== */
 function seg(key, opts, cur){
-  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${esc(zhOf(L(l)))}</button>`).join('') + '</div>';
+  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${typeof l === 'string' ? esc(l) : Lh(l)}</button>`).join('') + '</div>';
+}
+const LV_OPTS = () => [['easy', L('簡單', 'Fácil', 'Easy')], ['mid', L('普通', 'Normal', 'Medium')], ['hard', L('困難', 'Difícil', 'Hard')]];
+function settingsRows(){
+  let h = `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin ㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
+  return h;
+}
+/* 齒輪：所有設定都在這裡，開始畫面和遊戲中都能打開 */
+function openSettings(){
+  const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
+  let changed = false;
+  const close = () => {
+    ov.remove();
+    if (!changed) return;
+    if (App.round){ if (!App.answered) renderQ(); } else renderStart();   // 已答完的題目不重畫，下一題才套用新設定
+  };
+  const draw = () => {
+    ov.innerHTML = `<div class="panel"><h3>⚙ ${Lh(STR.settings)}</h3>${settingsRows()}${App.round ? `<div class="note">${Lh(STR.lvNote)}</div>` : ''}<button class="btn wide" id="sclose">${Lh(STR.close)}</button></div>`;
+    $('#sclose', ov).addEventListener('click', close);
+    $$('[data-seg]', ov).forEach(box => box.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      const k = box.dataset.seg, v = b.dataset.v;
+      if (k === 'lv'){ App.lv = v; try{ localStorage.setItem('timegame.lv', v); }catch(err){} }
+      else { Settings[k] = v; writeSettings(Settings); if (k !== 'rate') changed = true; }
+      draw();
+    }));
+  };
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  draw();
 }
 function renderStart(){
   App.round = null; try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
-  h += `<div class="card"><div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', '中＋西'], ['en', '中＋英'], ['zh', '純中文']], Settings.lang)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', '拼音'], ['zhuyin', '注音'], ['both', '兩者'], ['off', '關']], Settings.phon)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', '慢'], ['normal', '一般'], ['fast', '快']], Settings.rate)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', [['easy', '簡單'], ['mid', '普通'], ['hard', '困難']], App.lv)}</div></div>`;
+  h += `<button class="gear" id="gear" aria-label="settings">⚙</button>`;
+  h += `<button class="lvchip" id="lvchip">${Li(STR.setLv)}：${Li(LV_OPTS().find(x => x[0] === App.lv)[1])} ⚙</button>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
     h += `<div class="unit${App.open === u.id ? ' open' : ''}" data-u="${u.id}"><button class="uh"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button><div class="subs">`;
@@ -1286,13 +1329,7 @@ function renderStart(){
   });
   document.body.classList.remove('has-sheet');
   root().innerHTML = h;
-  $$('[data-seg]').forEach(box => box.addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    const k = box.dataset.seg, v = b.dataset.v;
-    if (k === 'lv'){ App.lv = v; try{ localStorage.setItem('timegame.lv', v); }catch(err){} }
-    else { Settings[k] = v; writeSettings(Settings); }
-    renderStart();
-  }));
+  $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
   $$('.unit .uh').forEach(b => b.addEventListener('click', () => { const id = b.parentNode.dataset.u; App.open = App.open === id ? null : id; renderStart(); }));
   $$('[data-sub]').forEach(b => b.addEventListener('click', () => startRound([b.dataset.sub], App.lv, b.dataset.sub, false)));
   $$('[data-unitmix]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.unitmix); startRound(u.subs.map(s => s[0]), App.lv, u.id, false); }));
@@ -1318,7 +1355,7 @@ function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
-  let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></div></div>`;
+  let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;
   if (q.line){
@@ -1355,6 +1392,7 @@ function renderQ(){
   root().innerHTML = h;
   window.scrollTo(0, 0);
   $('#home').addEventListener('click', renderStart);
+  $('#gearq').addEventListener('click', openSettings);
   if (q.audio){
     $('#hear').addEventListener('click', () => speak(q.audio));
     $('#peek').addEventListener('click', () => { const b = $('#peekBox'); b.hidden = !b.hidden; });

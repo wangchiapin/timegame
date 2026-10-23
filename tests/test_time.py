@@ -311,6 +311,16 @@ if __name__ == '__main__':
         pg.goto(PAGE); pg.wait_for_timeout(500)
         check(pg.evaluate("typeof GEN") == 'object', 'game loaded')
         check(pg.evaluate("document.querySelectorAll('.unit').length") == 6, 'six units on start screen')
+        # 齒輪設定：開始畫面和遊戲中都能打開、能改
+        check(pg.evaluate("!document.querySelector('.setrow')") and pg.evaluate("!!document.querySelector('#gear')"), 'start screen has gear, no inline settings')
+        pg.click('#gear'); check(pg.evaluate("document.querySelectorAll('.overlay .setrow').length") == 5, 'settings panel has 5 rows')
+        check('Chino + Español' in pg.inner_text('.overlay'), 'language label reads Chino + Español')
+        pg.click('[data-seg=lv] button[data-v=hard]'); pg.click('#sclose')
+        check(pg.evaluate("App.lv") == 'hard', 'level set from start gear')
+        pg.evaluate("startRound(['clockChoice'],App.lv,'clockChoice',false)")
+        pg.click('#gearq'); pg.click('[data-seg=phon] button[data-v=zhuyin]'); pg.click('[data-seg=lv] button[data-v=easy]'); pg.click('#sclose')
+        check(pg.evaluate("Settings.phon") == 'zhuyin' and pg.evaluate("App.lv") == 'easy' and pg.evaluate("App.round.lv") == 'hard', 'in-game gear changes settings; level only for next round')
+        pg.evaluate("Settings.phon='pinyin'; writeSettings(Settings); App.lv='mid'; renderStart()")
 
         print('== 出題邏輯（每題型 × 3 難度 × 250 題）')
         res = pg.evaluate(LOGIC_JS)

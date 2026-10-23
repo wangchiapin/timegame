@@ -182,3 +182,15 @@ svg.clock{margin:2px auto;width:min(74vw,250px,31vh)}
 .cal th{padding:2px 0}
 .cal td{height:38px;padding:1px 2px}
 .vis .datebox{padding:4px 12px;font-size:17px;margin-bottom:2px}
+
+/* 齒輪與設定 */
+#app{position:relative}
+button.gear{font-size:20px;line-height:1}
+.title + .gear, #gear{position:absolute;right:14px;top:10px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:22px}
+.btn.gear{width:38px;min-height:34px;padding:2px 0;position:static}
+.bar .rgt{display:flex;align-items:center;gap:8px}
+.lvchip{display:block;margin:6px auto 2px;padding:6px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);font-size:14px;color:var(--sub)}
+.seg button .tr{display:block;font-size:11px;opacity:.85;margin-top:1px}
+.overlay .panel h3{margin:0 0 6px;font-size:18px}
+.lvchip{white-space:nowrap}.lvchip .tr.inline{margin-left:4px}
+.seg button.on .tr{color:#e6e0d0;opacity:1}
