@@ -24,6 +24,7 @@ const WHY = {
   sevenWk:  L('星期天（星期日）不說「星期七」。', 'El domingo es 星期天 o 星期日, no 星期七.', 'Sunday is 星期天 or 星期日, never 星期七.'),
   wk:       L('星期不對，再看一次月曆。', 'El día de la semana no es correcto. Mira otra vez el calendario.', 'That is not the right weekday. Look at the calendar again.'),
   periodOrder:L('時段要放在前面：「早上七點」，不是「七點早上」。', 'El momento del día va primero: 早上七點, no 七點早上.', 'The part of the day comes first: 早上七點, not 七點早上.'),
+  pmAm:     L('早上、中午、下午、晚上要和 24 小時制對起來：下午三點是 15:00。', 'Mañana, mediodía, tarde y noche se corresponden con el reloj de 24 horas: 下午三點 son las 15:00.', 'Morning, noon, afternoon and evening map to the 24-hour clock: 下午三點 is 15:00.'),
   periodWrong:L('時段不對，想一想這是白天還是晚上。', 'El momento del día no corresponde a esa hora.', 'That part of the day does not fit this time.'),
   act:      L('聽到的行程不是這個，再聽一次。', 'No es la actividad que se oyó. Escucha otra vez.', 'That is not the activity you heard. Listen again.'),
   weekShift:L('這是不同星期的同一天，要注意「上、這、下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上, 這, 下.', 'Same weekday, but a different week. Watch 上, 這 and 下.'),
@@ -299,7 +300,22 @@ function gSchedListen(lv){
 }
 
 const PERIOD_HOURS = [6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23];
+function gPeriodRead(lv){
+  /* 反過來：看中文（早上／中午／下午／晚上＋時間），選出正確的數字時間 */
+  const H = pick(PERIOD_HOURS), m = pick(schedMins(lv)), st = { half:true, zheng:Math.random() < 0.5 };
+  const zh = ptZh(H, m, st), flip = m === 0 ? 30 : 0, wrongs = [];
+  const add = (HH, mm, why) => { if (HH >= (why === 'pmAm' ? 1 : 6) && HH <= 23 && !(HH === H && mm === m)) wrongs.push({ zh:digital24(HH, mm), why }); };
+  if (H <= 12) add(H + 12, m, 'pmAm'); else add(H - 12, m, 'pmAm');           // 早上／下午搞混（例如 03:00 和 15:00）
+  add(H + 1, m, 'time'); add(H - 1, m, 'time'); add(H, flip, 'time'); add(H + 2, m, 'time');
+  const trap = wrongs.filter(w => w.why === 'pmAm'), rest = shuffle(wrongs.filter(w => w.why !== 'pmAm'));
+  return { id:'periodChoice', kind:'choice',
+    instr:L('看中文時間，選出正確的數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese time and choose the digital time.'),
+    line:{ zh, es:'', en:'' }, visual:null, dbg:{ form:'read', H, m },
+    options:mkOptions({ zh:digital24(H, m), why:null, d:digital24(H, m) }, [].concat(trap, rest)),
+    fb:{ ansZh:zh, extra:digital24(H, m) } };
+}
 function gPeriodChoice(lv){
+  if (Math.random() < 0.5) return gPeriodRead(lv);
   const H = pick(PERIOD_HOURS), m = pick(schedMins(lv)), st = { half:true, zheng:Math.random() < 0.5 };
   const correct = ptZh(H, m, st), hh = h12(H);
   const wrongs = [];
@@ -543,15 +559,18 @@ const UNITS = [
     subs:[['tapAbs', L('聽幾月幾號', 'Escucha la fecha', 'Listen to the date')], ['tapRelDay', L('聽昨天、明天、後天', 'Escucha ayer, mañana…', 'Listen to yesterday, tomorrow…')], ['tapRelWeek', L('聽上星期、下星期', 'Escucha la semana pasada / próxima', 'Listen to last / next week')]] }
 ];
 const ALL_IDS = Object.keys(GEN);
+const qSig = q => [q.id, q.line && q.line.zh, q.audio, JSON.stringify(q.visual), JSON.stringify(q.target), q.cards && q.cards.map(c => c.zh + '|' + c.slot).join(',')].join('#');
 function makeQuestions(spec, lv, n){
-  /* spec: 'all' 或 一串題型 id；lv: 'easy'|'mid'|'hard'|'mix' */
+  /* spec: 'all' 或 一串題型 id；lv: 'easy'|'mid'|'hard'|'mix'。同一回不出現題幹一樣的題目 */
   const ids = spec === 'all' ? ALL_IDS : spec;
-  const out = []; let bag = [];
+  const out = [], seen = new Set(); let bag = [];
   while (out.length < n){
     if (!bag.length) bag = shuffle(ids);
     const id = bag.pop();
     const L2 = lv === 'mix' ? pick(['easy', 'mid', 'mid', 'hard']) : lv;
-    const q = GEN[id](L2); q.lv = L2; out.push(q);
+    let q = null;
+    for (let t = 0; t < 30; t++){ q = GEN[id](L2); if (!seen.has(qSig(q))) break; }
+    seen.add(qSig(q)); q.lv = L2; out.push(q);
   }
   return out;
 }

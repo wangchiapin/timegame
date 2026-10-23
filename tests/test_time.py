@@ -109,7 +109,13 @@ LOGIC_JS = r'''
       if (c.zh !== q.audio) E(tag + ' correct != audio');
       q.options.filter(o => !o.ok).forEach(o => { if (o.zh === q.audio) E(tag + ' wrong==audio'); });
     }
-    if (id === 'periodChoice'){
+    if (id === 'periodChoice' && q.dbg && q.dbg.form === 'read'){
+      const { H: HH, m: mm } = q.dbg, valid = new Set([true, false].map(z => ptZh(HH, mm, { half:true, zheng:z })));
+      if (!valid.has(q.line.zh)) E(tag + ' read line invalid ' + q.line.zh);
+      if (c.zh !== digital24(HH, mm)) E(tag + ' read correct ' + c.zh);
+      if ([11,17,18].includes(HH)) E(tag + ' ambiguous hour ' + HH);
+      q.options.filter(o => !o.ok).forEach(o => { if (o.zh === digital24(HH, mm)) E(tag + ' read wrong==correct'); if (!/^\d\d:\d\d$/.test(o.zh)) E(tag + ' read bad option ' + o.zh); });
+    } else if (id === 'periodChoice'){
       const [HH, mm] = q.visual.text.split(':').map(Number), valid = new Set([true, false].map(z => ptZh(HH, mm, { half:true, zheng:z })));
       if (!valid.has(c.zh)) E(tag + ' correct invalid ' + c.zh + ' ' + q.visual.text);
       if ([11,17,18].includes(HH)) E(tag + ' ambiguous hour ' + HH);
@@ -218,6 +224,7 @@ LOGIC_JS = r'''
   // makeQuestions
   try {
     const a = makeQuestions('all', 'mix', 20), ids = new Set(a.map(x => x.id)); if (a.length !== 20) E('mix length');
+    for (const sid of Object.keys(GEN)) for (const lv of ['easy','mid','hard']) for (let r = 0; r < 60; r++){ const qs = makeQuestions([sid], lv, 10), sg = qs.map(qSig); if (new Set(sg).size !== sg.length) { E('dup in round ' + sid + ' ' + lv); break; } }
     const b = makeQuestions(['clockChoice','clockSet'], 'mid', 10); if (b.length !== 10 || new Set(b.map(x => x.id)).size !== 2) E('makeQuestions subset');
   } catch (e) { E('makeQuestions THROW ' + e.message); }
   // 拼音→注音
