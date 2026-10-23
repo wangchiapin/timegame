@@ -43,9 +43,18 @@
 難度：簡單／中等／困難／混合。同一回不會出現題幹一樣的題目。答完後，解答（對錯、原因、正確答案、下一題）顯示在螢幕底部的固定解答條，上面的題目和時鐘不會被推動。版面壓緊：手機（約 390×650）上，看時鐘、聽力、星期幾、時段等題型的題目和選項可以不捲動就同時看到；月曆類題型（月曆本身較高）在較矮的螢幕上仍需捲動。一到九分的時間，每題隨機用「八點零五分」或「八點五分」其中一種說法，同一題不混用。答錯會用中、西、英三種語言說明哪裡不對（聽行程題沒有「看文字」，行程卡的時間排在中文前面（語序同中文，字體大小和格式跟中文一樣）；聽時間題只有時鐘圖版本保留「看文字」；聽力題選錯時不再顯示「聽起來很像」那句，畫面上已有「你選的是…」和正確答案）。
 
 ## 設定
-所有設定（字形、介面語言、拼音／注音、語速、難度）都收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開；遊戲中改難度從下一回才生效。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
+設定（字形、介面語言、拼音／注音、語速）收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開。難度（簡單／普通／困難）不在設定裡，直接放在開始畫面單元上方，一點就換；遊戲中不能改難度。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
 
 和其他遊戲共用 localStorage `hanziGames.settings`：繁／簡體、介面語言（西／英／只有中文）、拼音／注音、語速（慢 0.45／正常 0.65／快 0.85）。拼音一律台灣讀音；語音只選 zh-TW。
+
+## 手機操作
+- 所有按鈕至少 44px 高、44px 寬（回主選單、齒輪、設定開關）。
+- 作答中按「回主選單」，如果已經答過題，會先問「要離開嗎？」，避免誤觸丟掉整回；還沒答任何題就直接離開。
+- 設定面板：右上角 ✕、底下「關閉」、點旁邊暗處、電腦按 Esc、手機按返回鍵，都能關掉；打開時背景不會跟著捲。
+- 拼音／注音四個選項排成 2×2，字不會被切掉。
+- 選語速時會念一句「現在三點半」讓學生聽聽看。
+- 頁面最下面留了空白，最後一個單元可以捲到靜音鈕和版權文字的上面；設定視窗打開時，靜音鈕暫時隱藏。
+- 西班牙文／英文小字至少 13px；「🔊 聽」下面的翻譯不再重複喇叭圖示。
 
 ## 外觀：鐘錶機械感 ＋ 日出日落
 - 整體像機械鐘錶：粗邊框按鈕、深色翻牌式選項、紙質月曆、LCD 風格數字。
@@ -63,7 +72,7 @@
 - 所有聽力題（聽時間、聽日期、聽行程、聽力點日期）答完後，回饋框會顯示剛才念的那句中文（含拼音／注音）；答題前不顯示。
 
 ## 標題與設定
-- 開始畫面的標題是深色金屬銘牌（兩側各一顆螺絲），齒輪是圓形旋鈕，「難度 Nivel」小標籤是深色顯示牌。
+- 開始畫面的標題是深色金屬銘牌（兩側各一顆螺絲），齒輪是圓形旋鈕，難度是三格深色開關。
 - 設定面板：頂端深色標題條；每一排選項是一排深色開關，選中的那格是亮起來的琥珀色；排與排之間用虛線隔開。早上、下午、晚上三種配色都有對應（晚上是深藍配金色）。
 - 已檢查設定面板與開始畫面在三種時段、三種拼音／注音設定下的文字對比度。
 
@@ -117,8 +126,9 @@
 | 標題 | 練習時間 | Practica la hora y la fecha | Practice time and dates |
 | 副標 | 一起練習時間的中文！ | ¡Practiquemos juntos la hora en chino! | Let's practice time in Chinese together! |
 | 綜合挑戰 | 綜合挑戰／50 題，四個單元混合 | Desafío mixto／50 preguntas de las cuatro unidades | Mixed challenge／50 questions from all four units |
-| 設定各列 | 字形、介面語言、拼音／注音、語速、難度 | Escritura、Idioma、Pinyin / Zhuyin、Voz、Nivel | Script、Language、Pinyin / Zhuyin、Voice、Level |
-| 難度提示 | 難度從下一回開始生效。 | El nivel cambia en la próxima ronda. | The level applies from the next round. |
+| 設定各列 | 字形、介面語言、拼音／注音、語速 | Escritura、Idioma、Pinyin / Zhuyin、Voz | Script、Language、Pinyin / Zhuyin、Voice |
+| 開始畫面難度 | 難度：簡單／普通／困難 | Nivel：Fácil／Normal／Difícil | Level：Easy／Medium／Hard |
+| 離開確認（作答中按「回主選單」） | 要離開嗎？這一回的進度不會保留。／繼續玩／離開 | ¿Salir? El progreso de esta ronda no se guardará.／Seguir／Salir | Leave? Progress in this round will not be saved.／Keep playing／Leave |
 | 作答畫面按鈕 | 回主選單、🔊 聽、看文字、確定、下一題、看結果 | Volver al inicio、Escuchar、Ver el texto、Confirmar、Siguiente、Ver resultado | Back to start、Listen、Show text、Confirm、Next、See result |
 | 答案欄 | ✔ 答對了！／✘ 答錯了；正確答案；你選的是 | ¡Correcto!／Incorrecto；Respuesta correcta；Elegiste | Correct!／Not quite；Correct answer；You chose |
 | 月曆提示 | 點一天，看那天的行程；這一天沒有行程 | Toca un día para ver el plan；Ese día no hay planes | Tap a day to see its plan；Nothing planned that day |

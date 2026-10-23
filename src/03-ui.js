@@ -9,7 +9,6 @@ const STR = {
   title:    L('練習時間', 'Practica la hora y la fecha', 'Practice time and dates'),
   sub:      L('一起練習時間的中文！','¡Practiquemos juntos la hora en chino!', 'Let\'s practice time in Chinese together!'),
   settings: L('設定', 'Ajustes', 'Settings'),
-  lvNote:   L('難度從下一回開始生效。', 'El nivel cambia en la próxima ronda.', 'The level applies from the next round.'),
   setScript:L('字形', 'Escritura', 'Script'),
   setLang:  L('介面語言', 'Idioma', 'Language'),
   setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
@@ -17,7 +16,7 @@ const STR = {
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
   mixSub:   L('50 題，四個單元混合', '50 preguntas de las cuatro unidades', '50 questions from all four units'),
-  hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
+  hear:     L('🔊 聽', 'Escuchar', 'Listen'),
   peek:     L('看文字', 'Ver el texto', 'Show text'),
   confirm:  L('確定', 'Confirmar', 'Confirm'),
   next:     L('下一題', 'Siguiente', 'Next'),
@@ -32,6 +31,10 @@ const STR = {
   home:     L('回主選單','Volver al inicio', 'Back to start'),
   score:    L('分', 'pts', 'pts'),
   close:    L('關閉', 'Cerrar', 'Close'),
+  leaveQ:   L('要離開嗎？', '¿Salir?', 'Leave?'),
+  leaveNote:L('這一回的進度不會保留。', 'El progreso de esta ronda no se guardará.', 'Progress in this round will not be saved.'),
+  stay:     L('繼續玩', 'Seguir', 'Keep playing'),
+  leave:    L('離開', 'Salir', 'Leave'),
   hintLine: L('先點一句話，再點一個時間', 'Toca una frase y luego una hora', 'Tap a sentence, then a time')
 };
 const T = k => Lh(STR[k]);
@@ -150,44 +153,60 @@ function settingsRows(){
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   return h;
 }
 /* 齒輪：所有設定都在這裡，開始畫面和遊戲中都能打開 */
 function openSettings(){
   const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
-  let changed = false;
+  let changed = false, popped = false, hist = false;
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  const onPop = () => { popped = true; close(); };
   const close = () => {
-    ov.remove();
+    if (!ov.isConnected) return;
+    ov.remove(); document.removeEventListener('keydown', onKey); window.removeEventListener('popstate', onPop);
+    if (hist && !popped){ try{ history.back(); }catch(e){} }            // 手機的返回鍵也能關掉設定
     if (!changed) return;
     if (App.round){ if (!App.answered) renderQ(); } else renderStart();   // 已答完的題目不重畫，下一題才套用新設定
   };
   const draw = () => {
-    ov.innerHTML = `<div class="panel"><h3>⚙ ${Lh(STR.settings)}</h3>${settingsRows()}${App.round ? `<div class="note">${Lh(STR.lvNote)}</div>` : ''}<button class="btn wide" id="sclose">${Lh(STR.close)}</button></div>`;
+    ov.innerHTML = `<div class="panel"><h3>⚙ ${Lh(STR.settings)}<button class="x" id="sx" aria-label="close">✕</button></h3>${settingsRows()}<button class="btn wide" id="sclose">${Lh(STR.close)}</button></div>`;
     $('#sclose', ov).addEventListener('click', close);
+    $('#sx', ov).addEventListener('click', close);
     $$('[data-seg]', ov).forEach(box => box.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = box.dataset.seg, v = b.dataset.v;
-      if (k === 'lv'){ App.lv = v; try{ localStorage.setItem('timegame.lv', v); }catch(err){} }
-      else { Settings[k] = v; writeSettings(Settings); if (k !== 'rate') changed = true; }
+      Settings[k] = v; writeSettings(Settings);
+      if (k === 'rate') speak('現在三點半'); else changed = true;      // 選語速時念一句給學生聽聽看
       draw();
     }));
   };
   ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  document.addEventListener('keydown', onKey);
+  try{ history.pushState({ ov:1 }, ''); hist = true; window.addEventListener('popstate', onPop); }catch(e){}
   draw();
+}
+/* 作答中按「回主選單」：先確認，避免誤觸丟掉整回 */
+function confirmLeave(){
+  if (document.querySelector('.overlay')) return;
+  const ov = document.createElement('div'); ov.className = 'overlay dlg'; document.body.appendChild(ov);
+  ov.innerHTML = `<div class="panel"><h3>${Lh(STR.leaveQ)}</h3><div class="note">${Lh(STR.leaveNote)}</div><div class="two"><button class="btn" id="lstay">${Lh(STR.stay)}</button><button class="btn primary" id="lgo">${Lh(STR.leave)}</button></div></div>`;
+  $('#lstay', ov).addEventListener('click', () => ov.remove());
+  $('#lgo', ov).addEventListener('click', () => { ov.remove(); renderStart(); });
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
 }
 function renderStart(){
   App.round = null; try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
   h += `<button class="gear" id="gear" aria-label="settings">⚙</button>`;
-  h += `<button class="lvchip" id="lvchip">${Li(STR.setLv)}：${Li(LV_OPTS().find(x => x[0] === App.lv)[1])} ⚙</button>`;
+  h += `<div class="lvbar"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
     h += `<div class="unit" data-u="${u.id}"><button class="uh" data-ustart="${u.id}"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button></div>`;
   });
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
-  $('#gear').addEventListener('click', openSettings); $('#lvchip').addEventListener('click', openSettings);
+  $('#gear').addEventListener('click', openSettings);
+  $$('[data-seg=lv] button').forEach(b => b.addEventListener('click', () => { App.lv = b.dataset.v; try{ localStorage.setItem('timegame.lv', App.lv); }catch(err){} renderStart(); }));
   $$('[data-ustart]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.ustart); startRound(u.subs.map(x => x[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
 }
@@ -269,7 +288,7 @@ function renderQ(){
   document.body.classList.remove('has-sheet');
   root().innerHTML = h;
   window.scrollTo(0, 0);
-  $('#home').addEventListener('click', renderStart);
+  $('#home').addEventListener('click', () => { if (App.i > 0 || App.answered) confirmLeave(); else renderStart(); });
   $('#gearq').addEventListener('click', openSettings);
   if (q.audio){
     $('#hear').addEventListener('click', () => speak(q.audio));
