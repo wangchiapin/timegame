@@ -197,3 +197,7 @@ button.gear{font-size:20px;line-height:1}
 .overlay .panel h3{margin:0 0 6px;font-size:18px}
 .lvchip{white-space:nowrap}.lvchip .tr.inline{margin-left:4px}
 .seg button.on .tr{color:#e6e0d0;opacity:1}
+
+.qline .ln{display:block;white-space:nowrap;font-size:clamp(16px,5vw,22px)}
+.qline .ln.q{font-size:inherit;white-space:normal}
+.qline .qsep{display:block;width:60%;margin:4px auto 4px;border-top:1px solid var(--line)}

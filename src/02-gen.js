@@ -377,11 +377,12 @@ function calVisual(mo, mode, extra){
 function gCalFindDay(lv){
   /* 月曆上不寫任何行程；行程只寫在題目裡，學生讀完要在空白月曆上點出對的日期 */
   const mo = makeMonth(lv === 'easy' ? 2 : lv === 'hard' ? 3 : pick([2, 3])), e = pick(mo.events);
-  const facts = mo.events.map(x => monthZh(mo.m) + dayZh(x.day, '號') + x.ev.fut).join('，');
+  /* 一件事一行：行句尾用「，」，最後一件用「。」；\n 換行，\v 是行程和問題之間的細線 */
+  const facts = mo.events.map((x, i) => monthZh(mo.m) + dayZh(x.day, '號') + x.ev.fut + (i < mo.events.length - 1 ? '，' : '。')).join('\n');
   const v = calVisual(mo, 'pick'); v.labels = {}; v.details = {};
   return { id:'calFindDay', kind:'tap',
     instr:L('讀題目裡的行程，在月曆上點出正確的日子，再按「確定」。', 'Lee el plan en la pregunta, toca el día correcto en el calendario y pulsa «Confirmar».', 'Read the plans in the question, tap the right day on the calendar, then press “Confirm”.'),
-    line:{ zh:facts + '。' + e.ev.label + '是哪一{yì}天？', es:'¿Qué día es: ' + e.ev.es + '?', en:'Which day: ' + e.ev.en + '?' },
+    line:{ zh:facts + '\v' + e.ev.label + '是哪一{yì}天？', es:'¿Qué día es: ' + e.ev.es + '?', en:'Which day: ' + e.ev.en + '?' },
     dbg:{ events:mo.events.map(x => ({ d:x.day, label:x.ev.label, fut:x.ev.fut })), asked:e.ev.label },
     visual:v, target:{ y:mo.y, m:mo.m, d:e.day },
     fb:{ ansZh:monthZh(mo.m) + dayZh(e.day, '號'), extra:fmtDate(mo.y, mo.m, e.day, true) } };

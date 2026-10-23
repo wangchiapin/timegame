@@ -155,10 +155,11 @@ LOGIC_JS = r'''
       if (Object.keys(q.visual.labels).length || Object.keys(q.visual.details).length) E(tag + ' calendar must have no event text');
       if (ev.length < 2 || ev.length > 3) E(tag + ' event count ' + ev.length);
       if (new Set(ev.map(x => x.label)).size !== ev.length || new Set(ev.map(x => x.d)).size !== ev.length) E(tag + ' duplicate events/days');
-      const stem = q.line.zh.split('。')[0].split('，');
+      const [factsTxt, askTxt] = q.line.zh.split('\v');
+      const stem = factsTxt.split('\n').map((z, i, arr) => { if (!z.endsWith(i < arr.length - 1 ? '，' : '。')) E(tag + ' line end punct ' + z); return z.slice(0, -1); });
       if (stem.length !== ev.length) E(tag + ' facts count');
       ev.forEach((x, i) => { const mm = zhNum(stem[i].match(/^(.+?)月/)[1]), dd = zhNum(stem[i].match(/月(.+?)號/)[1]); if (mm !== q.visual.m || dd !== x.d || !stem[i].endsWith(x.fut)) E(tag + ' fact ' + stem[i]); });
-      if (q.line.zh.split('。')[1].split('是')[0] !== q.dbg.asked) E(tag + ' asked label');
+      if (askTxt.split('是')[0] !== q.dbg.asked) E(tag + ' asked label');
     }
     if (id === 'calWhatDo'){
       const mm = zhNum(q.line.zh.match(/^(.+?)月/)[1]), dd = zhNum(q.line.zh.match(/月(.+?)[號日]/)[1]);

@@ -217,8 +217,11 @@ function gapAfter(items){
 function lineHTML(text){
   const simp = Settings.script === 'simp', ph = Settings.phon;
   let o = '';
-  const items = parseLine(text), gaps = new Set(gapAfter(items));
+  const items = parseLine(text), gaps = new Set(gapAfter(items)), multi = /[\n\v]/.test(text);
+  if (multi) o += '<span class="ln">';
   items.forEach((it, idx) => {
+    if (it.c === '\n'){ o += '</span><span class="ln">'; return; }
+    if (it.c === '\v'){ o += '</span><span class="qsep"></span><span class="ln q">'; return; }
     const gp = gaps.has(idx) ? ' gap' : '';
     const ch = simp ? (DICT[it.c] ? DICT[it.c].s : (S2[it.c] || it.c)) : it.c;
     if (!it.hz || ph === 'off'){ o += `<span class="ch${it.hz ? '' : ' np'}${gp}"><span class="h">${esc(ch)}</span></span>`; return; }
@@ -229,6 +232,7 @@ function lineHTML(text){
     else { top = py; bot = zy; }
     o += `<span class="ch${gp}">${ph === 'zhuyin' ? '' : `<span class="ph">${esc(top)}</span>`}<span class="h">${esc(ch)}</span>${bot ? `<span class="ph">${esc(bot)}</span>` : ''}</span>`;
   });
+  if (multi) o += '</span>';
   return o;
 }
 
