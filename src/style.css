@@ -342,3 +342,6 @@ body:has(.overlay) #hgMute{display:none}
 .overlay.dlg{align-items:center}
 .overlay .panel .two{display:flex;gap:10px;margin:12px 14px 0}
 .overlay .panel .two .btn{flex:1}
+
+#gear,#gearq{display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:0}
+#gear svg,#gearq svg{display:block;width:24px;height:24px}
