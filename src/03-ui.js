@@ -288,7 +288,7 @@ function showFeedback(ok, q, chosen, extraHTML){
   sfx(ok);
   let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="big">${Lh(ok ? STR.right : STR.wrong)}</div>`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
-  if (!ok && chosen && chosen.why && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
+  if (!ok && chosen && chosen.why && chosen.why !== 'heard' && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
   if (extraHTML) h += extraHTML;
   if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
   h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;

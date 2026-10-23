@@ -588,7 +588,6 @@ const WHY = {
   secUnit:  L('秒針的數字要說「秒」，不是「分」。', 'Los segundos se dicen 秒, no 分.', 'Seconds are 秒, not 分.'),
   swapms:   L('分和秒說反了。', 'Cambiaste los minutos y los segundos.', 'You swapped the minutes and the seconds.'),
   time:     L('這個時間和鐘面上的不一樣，再看一次。', 'Esa hora no coincide con la del reloj. Míralo otra vez.', 'That time does not match the clock. Look again.'),
-  heard:    L('聽起來很像，要再聽仔細一點。', 'Suena parecido; escucha con más atención.', 'It sounds similar — listen more carefully.'),
   ge:       L('年、月、日（號）前面不加「個」。', 'No se pone 個 delante de 年, 月, 日 ni 號.', 'Do not put 個 before 年, 月, 日 or 號.'),
   order:    L('中文的日期從大到小：年、月、日。', 'En chino la fecha va de mayor a menor: año, mes, día.', 'Chinese dates go from largest to smallest: year, month, day.'),
   yearQty:  L('年份要一個數字一個數字念：二零二六年。', 'El año se lee dígito por dígito: 二零二六年.', 'A year is read digit by digit: 二零二六年.'),
@@ -599,6 +598,7 @@ const WHY = {
   periodOrder:L('時段要放在前面：「早上七點」，不是「七點早上」。', 'El momento del día va primero: 早上七點, no 七點早上.', 'The part of the day comes first: 早上七點, not 七點早上.'),
   pmAm:     L('早上、中午、下午、晚上要和 24 小時制對起來：下午三點是 15:00。', 'Mañana, mediodía, tarde y noche se corresponden con el reloj de 24 horas: 下午三點 son las 15:00.', 'Morning, noon, afternoon and evening map to the 24-hour clock: 下午三點 is 15:00.'),
   periodWrong:L('時段不對，想一想這是白天還是晚上。', 'El momento del día no corresponde a esa hora.', 'That part of the day does not fit this time.'),
+  heard:    L('', '', ''),   // 聽力選錯：不顯示說明（畫面上已有「你選的是…」和正確答案）
   act:      L('聽到的行程不是這個，再聽一次。', 'No es la actividad que se oyó. Escucha otra vez.', 'That is not the activity you heard. Listen again.'),
   weekShift:L('這是不同星期的同一天，要注意「上、這、下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上, 這, 下.', 'Same weekday, but a different week. Watch 上, 這 and 下.'),
   dayShift: L('差了一天，再數一次。', 'Te equivocaste por un día; cuenta otra vez.', 'Off by one day; count again.'),
@@ -1439,7 +1439,7 @@ function showFeedback(ok, q, chosen, extraHTML){
   sfx(ok);
   let h = `<div class="fb ${ok ? 'ok' : 'bad'}"><div class="big">${Lh(ok ? STR.right : STR.wrong)}</div>`;
   if (!ok && chosen && chosen.d) h += `<div class="why">${Li(STR.youChose)}：${esc(chosen.d)}</div>`;
-  if (!ok && chosen && chosen.why && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
+  if (!ok && chosen && chosen.why && chosen.why !== 'heard' && WHY[chosen.why]) h += `<div class="why">${Lh(WHY[chosen.why])}</div>`;
   if (extraHTML) h += extraHTML;
   if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
   h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
