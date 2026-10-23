@@ -50,7 +50,7 @@ LOGIC_JS = r'''
   const missing = new Set();
   const chk = (s, w) => { if (s == null) return; for (const c of String(s).replace(/\{[^}]*\}/g, '')) if (/[㐀-鿿]/.test(c) && !DICT[c]) missing.add(c + '@' + w); };
   const zhNum = s => { const D = {'零':0,'一':1,'二':2,'兩':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}; if (s.includes('十')){ const p = s.split('十'); return (p[0] ? D[p[0]] : 1) * 10 + (p[1] ? D[p[1]] : 0); } return D[s]; };
-  const styles = [{half:true,zheng:true},{half:true,zheng:false},{half:false,zheng:true},{half:false,zheng:false}];
+  const styles = [];[true,false].forEach(a => [true,false].forEach(b => [true,false].forEach(c => styles.push({half:a,zheng:b,ling:c}))));
   const wkSet = dow => new Set([wkZh(dow,'天'), wkZh(dow,'日')]);
   const N = 250, seen = {};
   // 靜態檢查：行程時間避開 11、17、18 點
@@ -108,6 +108,10 @@ LOGIC_JS = r'''
     if (id === 'dateListen'){
       if (c.zh !== q.audio) E(tag + ' correct != audio');
       q.options.filter(o => !o.ok).forEach(o => { if (o.zh === q.audio) E(tag + ' wrong==audio'); });
+    }
+    if (id === 'clockChoice'){
+      const hasLing = q.options.some(o => /點零[一二三四五六七八九]分/.test(o.zh)), noLing = q.options.some(o => /點[一二三四五六七八九]分/.test(o.zh));
+      if (hasLing && noLing) E(tag + ' mixes 零五分 and 五分 forms');
     }
     if (id === 'periodChoice' && q.dbg && q.dbg.form === 'read'){
       const { H: HH, m: mm } = q.dbg, valid = new Set([true, false].map(z => ptZh(HH, mm, { half:true, zheng:z })));

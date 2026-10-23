@@ -234,7 +234,7 @@ function tZh(h, m, s, st){
   }
   if (m === 0) return t + (st && st.zheng ? '整' : '');
   if (m === 30 && st && st.half) return t + '半';
-  if (m < 10) return t + '零' + DIGZ[m] + '分';
+  if (m < 10) return t + (st && st.ling === false ? '' : '零') + DIGZ[m] + '分';   // 八點零五分／八點五分都對，每題只用一種
   return t + numZh(m) + '分';
 }
 const digital = (h, m, s) => h + ':' + pad2(m) + (s != null ? ':' + pad2(s) : '');

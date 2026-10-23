@@ -55,7 +55,7 @@ function pickTime(lv, withSec){
   if (withSec && lv === 'hard' && Math.random() < 0.6){ s = pick([10, 15, 20, 25, 30, 35, 40, 45, 50, 55]); if (m === 0) m = randInt(1, 59); }
   return { h, m, s };
 }
-const randStyle = () => ({ half:Math.random() < 0.5, zheng:Math.random() < 0.5 });
+const randStyle = () => ({ half:Math.random() < 0.5, zheng:Math.random() < 0.5, ling:Math.random() < 0.5 });
 
 function wrongTimes(h, m, s, lv){
   const c = [];
@@ -80,8 +80,8 @@ function formErrors(h, m, s, st){
   const out = [], t = tZh(h, m, s, st);
   if (s == null){
     if (m === 0 || (m === 30 && st.half)) out.push({ zh:hourZh(h) + '小時' + (m === 30 ? '半' : (st.zheng ? '整' : '')), why:'hourDur' });
-    else out.push({ zh:hourZh(h) + '小時' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分', why:'hourDur' });
-    if (m !== 0 && !(m === 30 && st.half)) out.push({ zh:hourZh(h) + '點' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分鐘', why:'minDur' });
+    else out.push({ zh:hourZh(h) + '小時' + (m < 10 ? (st.ling === false ? '' : '零') + DIGZ[m] : numZh(m)) + '分', why:'hourDur' });
+    if (m !== 0 && !(m === 30 && st.half)) out.push({ zh:hourZh(h) + '點' + (m < 10 ? (st.ling === false ? '' : '零') + DIGZ[m] : numZh(m)) + '分鐘', why:'minDur' });
   } else {
     out.push({ zh:t.slice(0, -1) + '分', why:'secUnit' });
   }

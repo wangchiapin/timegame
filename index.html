@@ -173,6 +173,24 @@ body.has-sheet #app{padding-bottom:calc(var(--sheet-h,260px) + 24px)}
 .sheet .fb .ph{font-size:10px}
 .sheet .btn{padding-top:8px;padding-bottom:8px}
 
+/* 緊湊版面：讓題目和選項盡量同時看得到、不用捲動 */
+#app{padding-top:8px}
+.bar{margin-bottom:4px}.bar .btn{min-height:34px;padding:4px 12px}
+.prog{margin-bottom:5px}
+.instr{font-size:13px;line-height:1.3}
+.qline{font-size:24px;margin:2px 0 0}
+.vis{margin:4px 0}
+.opts{gap:8px;margin:8px 0}
+.opt{min-height:50px;padding:6px 8px;font-size:20px;gap:0}
+.opts.one .opt{min-height:46px}
+svg.clock{margin:2px auto;width:min(74vw,250px,31vh)}
+@media (min-width:700px){#app{padding-top:12px}}
+.cal{margin:2px auto}
+.cal .ct{margin-bottom:2px;font-size:15px}
+.cal th{padding:2px 0}
+.cal td{height:38px;padding:1px 2px}
+.vis .datebox{padding:4px 12px;font-size:17px;margin-bottom:2px}
+
 </style>
 </head>
 <body>
@@ -459,7 +477,7 @@ function tZh(h, m, s, st){
   }
   if (m === 0) return t + (st && st.zheng ? '整' : '');
   if (m === 30 && st && st.half) return t + '半';
-  if (m < 10) return t + '零' + DIGZ[m] + '分';
+  if (m < 10) return t + (st && st.ling === false ? '' : '零') + DIGZ[m] + '分';   // 八點零五分／八點五分都對，每題只用一種
   return t + numZh(m) + '分';
 }
 const digital = (h, m, s) => h + ':' + pad2(m) + (s != null ? ':' + pad2(s) : '');
@@ -575,7 +593,7 @@ function pickTime(lv, withSec){
   if (withSec && lv === 'hard' && Math.random() < 0.6){ s = pick([10, 15, 20, 25, 30, 35, 40, 45, 50, 55]); if (m === 0) m = randInt(1, 59); }
   return { h, m, s };
 }
-const randStyle = () => ({ half:Math.random() < 0.5, zheng:Math.random() < 0.5 });
+const randStyle = () => ({ half:Math.random() < 0.5, zheng:Math.random() < 0.5, ling:Math.random() < 0.5 });
 
 function wrongTimes(h, m, s, lv){
   const c = [];
@@ -600,8 +618,8 @@ function formErrors(h, m, s, st){
   const out = [], t = tZh(h, m, s, st);
   if (s == null){
     if (m === 0 || (m === 30 && st.half)) out.push({ zh:hourZh(h) + '小時' + (m === 30 ? '半' : (st.zheng ? '整' : '')), why:'hourDur' });
-    else out.push({ zh:hourZh(h) + '小時' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分', why:'hourDur' });
-    if (m !== 0 && !(m === 30 && st.half)) out.push({ zh:hourZh(h) + '點' + (m < 10 ? '零' + DIGZ[m] : numZh(m)) + '分鐘', why:'minDur' });
+    else out.push({ zh:hourZh(h) + '小時' + (m < 10 ? (st.ling === false ? '' : '零') + DIGZ[m] : numZh(m)) + '分', why:'hourDur' });
+    if (m !== 0 && !(m === 30 && st.half)) out.push({ zh:hourZh(h) + '點' + (m < 10 ? (st.ling === false ? '' : '零') + DIGZ[m] : numZh(m)) + '分鐘', why:'minDur' });
   } else {
     out.push({ zh:t.slice(0, -1) + '分', why:'secUnit' });
   }
