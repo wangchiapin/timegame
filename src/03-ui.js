@@ -7,9 +7,7 @@ const sc = s => (Settings.script === 'simp' ? toSimp(s) : s);
 
 const STR = {
   title:    L('練習時間', 'Practica la hora y la fecha', 'Practice time and dates'),
-  sub:      L('時鐘、日期、月曆，一起練習中文怎麼說', 'Reloj, fechas y calendario en chino', 'Clocks, dates and calendars in Chinese'),
-  nameL:    L('名字', 'Nombre', 'Name'),
-  namePh:   L('輸入你的名字', 'Escribe tu nombre', 'Enter your name'),
+  sub:      L('一起練習時間的中文！','¡Practiquemos juntos la hora en chino!', 'Let\'s practice time in Chinese together!'),
   settings: L('設定', 'Ajustes', 'Settings'),
   lvNote:   L('難度從下一回開始生效。', 'El nivel cambia en la próxima ronda.', 'The level applies from the next round.'),
   setScript:L('字形', 'Escritura', 'Script'),
@@ -18,8 +16,7 @@ const STR = {
   setRate:  L('語速', 'Voz', 'Voice'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
-  mixSub:   L('50 題，五個單元混合', '50 preguntas de las cinco unidades', '50 questions from all five units'),
-  board:    L('排行榜', 'Clasificación', 'Leaderboard'),
+  mixSub:   L('50 題，四個單元混合', '50 preguntas de las cuatro unidades', '50 questions from all four units'),
   hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
   peek:     L('看文字', 'Ver el texto', 'Show text'),
   confirm:  L('確定', 'Confirmar', 'Confirm'),
@@ -32,16 +29,9 @@ const STR = {
   tapHint:  L('點一天，看那天的行程', 'Toca un día para ver el plan', 'Tap a day to see its plan'),
   noPlan:   L('這一天沒有行程', 'Ese día no hay planes', 'Nothing planned that day'),
   again:    L('再玩一次', 'Jugar otra vez', 'Play again'),
-  home:     L('回主畫面', 'Volver al inicio', 'Back to start'),
+  home:     L('回主選單','Volver al inicio', 'Back to start'),
   score:    L('分', 'pts', 'pts'),
-  today:    L('今天', 'Hoy', 'Today'),
-  loading:  L('讀取中…', 'Cargando…', 'Loading…'),
-  lbFail:   L('排行榜暫時連不上', 'La clasificación no está disponible ahora', 'The leaderboard is unavailable right now'),
-  lbEmpty:  L('還沒有人上榜，你當第一名吧！', 'Aún no hay nadie. ¡Sé el primero!', 'Nobody yet — be the first!'),
-  lbNeedName:L('輸入名字才會記錄到排行榜', 'Escribe tu nombre para entrar en la clasificación', 'Enter your name to be on the leaderboard'),
-  lbSaved:  L('已記錄到排行榜', 'Guardado en la clasificación', 'Saved to the leaderboard'),
   close:    L('關閉', 'Cerrar', 'Close'),
-  correctSent:L('正確的配對', 'Emparejamiento correcto', 'Correct matches'),
   hintLine: L('先點一句話，再點一個時間', 'Toca una frase y luego una hora', 'Tap a sentence, then a time')
 };
 const T = k => Lh(STR[k]);
@@ -152,13 +142,13 @@ function ycalHTML(v){
 
 /* =====================  開始畫面  ===================== */
 function seg(key, opts, cur){
-  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${typeof l === 'string' ? esc(l) : Lh(l)}</button>`).join('') + '</div>';
+  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${typeof l === 'string' ? (l.includes('\n') ? esc(l.split('\n')[0]) + `<span class="tr">${esc(l.split('\n')[1])}</span>` : esc(l)) : Lh(l)}</button>`).join('') + '</div>';
 }
 const LV_OPTS = () => [['easy', L('簡單', 'Fácil', 'Easy')], ['mid', L('普通', 'Normal', 'Medium')], ['hard', L('困難', 'Difícil', 'Hard')]];
 function settingsRows(){
   let h = `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin ㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   return h;
@@ -242,7 +232,7 @@ function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
-  let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
+  let h = `<div class="bar"><button class="btn" id="home">${esc(zhOf(STR.home))}</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
   const th = todOf(q); applyTod(th); h += todBand(th);
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;

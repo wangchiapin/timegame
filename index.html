@@ -840,7 +840,7 @@ function gClockChoice(lv){
   let guard = 0;
   while (wrongs.length < 10 && guard++ < 30){ const r = pickTime(lv, s != null); if (timeKey(r.h, r.m, r.s) !== timeKey(h, m, s)) wrongs.push({ zh:tZh(r.h, r.m, r.s, st), why:'time', d:digital(r.h, r.m, r.s) }); }
   return { id:'clockChoice', kind:'choice',
-    instr:L('看時鐘，選出正確的說法。', 'Mira el reloj y elige cómo se dice.', 'Look at the clock and choose the correct way to say it.'),
+    instr:L('看時鐘，選出說法。', 'Mira el reloj y elige cómo se dice.', 'Look at the clock and choose.'),
     line:{ zh:'現在幾點？', es:'¿Qué hora es?', en:'What time is it?' },
     visual:{ type:'clock', h, m, s },
     options:mkOptions({ zh:correctZh, why:null, d:digital(h, m, s) }, wrongs),
@@ -851,7 +851,7 @@ function gClockSet(lv){
   const { h, m } = pickTime(lv, false), st = randStyle();
   const zh = tZh(h, m, null, st);
   return { id:'clockSet', kind:'dial',
-    instr:L('請聽，然後把時針和分針撥到正確的位置。', 'Escucha y mueve las manecillas a la hora correcta.', 'Listen, then move the hands to the right time.'),
+    instr:L('請聽，撥出正確的時間。', 'Escucha y pon la hora.', 'Listen and set the time.'),
     line:null, visual:{ type:'dial', h0:(h === 12 && m === 0) ? 6 : 12, m0:(h === 12 && m === 0) ? 30 : 0 },
     audio:zh, peek:zh, target:{ h, m }, fb:{ ansZh:zh, extra:digital(h, m) } };
 }
@@ -897,8 +897,8 @@ function gClockListen(lv){
       cands.map(c => ({ key:'c' + timeKey(c.h, c.m, c.s), svg:clockSVG({ h:c.h, m:c.m, s:c.s, mini:true }), why:'heard', d:digital(c.h, c.m, c.s) })));
   }
   return { id:'clockListen', kind:'choice',
-    instr:variant === 'text' ? L('請聽，選出正確的時間。', 'Escucha y elige la hora correcta.', 'Listen and choose the correct time.')
-                             : L('請聽，選出正確的時鐘。', 'Escucha y elige el reloj correcto.', 'Listen and choose the correct clock.'),
+    instr:variant === 'text' ? L('請聽，選出時間。', 'Escucha y elige la hora.', 'Listen and choose the time.')
+                             : L('請聽，選出時鐘。', 'Escucha y elige el reloj.', 'Listen and choose the clock.'),
     line:null, visual:null, audio:zh, peek:variant === 'clock' ? zh : undefined, optClass:variant === 'clock' ? 'clk' : '',
     options, fb:{ ansZh:zh, extra:digital(h, m, s) } };
 }
@@ -935,7 +935,7 @@ function gDateChoice(lv){
   const tg = pick(third); chosen.push(pick(grp[tg].length ? grp[tg] : grp.val));
   const extra = shuffle([].concat(grp.val, grp.ge, grp.order, grp.qty, grp.wk));
   return { id:'dateChoice', kind:'choice',
-    instr:L('看月曆上圈起來的日子，選出正確的中文說法。', 'Mira el día marcado en el calendario y elige cómo se dice en chino.', 'Look at the circled day and choose the correct Chinese.'),
+    instr:L('看圈起來的日子，選出說法。', 'Mira el día marcado y elige cómo se dice.', 'Look at the circled day and choose.'),
     line:{ zh:'這一{yì}天是什麼時候{hou}？', es:'¿Qué fecha es este día?', en:'What date is this day?' },
     visual:{ type:'cal', y, m, mark:d, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, chosen.concat(extra)),
@@ -948,7 +948,7 @@ function gWeekdayChoice(lv){
   const wrongs = shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== dow)).map(x => ({ zh:wkZh(x, sun), why:'wk' }));
   if (lv !== 'easy' && Math.random() < (dow === 0 ? 0.9 : 0.4)) wrongs.unshift({ zh:'星期七', why:'sevenWk' });
   return { id:'weekdayChoice', kind:'choice',
-    instr:L('看月曆，找到題目問的日子，選出星期幾。', 'Mira el calendario, busca el día de la pregunta y elige qué día de la semana es.', 'Find the day in the calendar and choose the weekday.'),
+    instr:L('找到那一天，選出星期幾。', 'Busca el día y elige el día de la semana.', 'Find the day and choose the weekday.'),
     line:{ zh:numZh(m) + '月' + numZh(d) + st + '是星期幾？', es:'¿Qué día de la semana es el ' + d + ' de ' + MONTHS_ES[m - 1] + '?', en:'What day of the week is ' + MONTHS_EN[m - 1] + ' ' + d + '?' },
     visual:{ type:'cal', y, m, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, wrongs),
@@ -972,7 +972,7 @@ function gDateListen(lv){
   if (withYear) [1, -1].forEach(x => add(y + x, m, d));
   const cs = shuffle([...cand.values()]);
   return { id:'dateListen', kind:'choice',
-    instr:L('請聽，選出正確的日期。', 'Escucha y elige la fecha correcta.', 'Listen and choose the correct date.'),
+    instr:L('請聽，選出日期。', 'Escucha y elige la fecha.', 'Listen and choose the date.'),
     line:null, visual:null, audio:zh,
     options:mkOptions({ zh, why:null, d:digDate(y, m, d) }, cs.map(c => ({ zh:mk(c.y, c.m, c.d), why:'heard', d:digDate(c.y, c.m, c.d) }))),
     fb:{ ansZh:zh, extra:fmtDate(y, m, d, true) } };
@@ -1016,7 +1016,7 @@ function gSchedMatch(lv){
   const slots = items.map(it => ({ label:schedLabel(it.H, it.m, withPeriod) }));
   const cards = shuffle(items.map((it, i) => ({ zh:schedZh(it.a, it.H, it.m, withPeriod), slot:i, gloss:L('', it.a.es, it.a.en) })));
   return { id:'schedMatch', kind:'match',
-    instr:L('把每一句話放到正確的時間。先點句子，再點時間。', 'Pon cada frase en su hora. Toca la frase y luego la hora.', 'Put each sentence at the right time. Tap a sentence, then a time.'),
+    instr:L('把每句話放到正確的時間。', 'Pon cada frase en su hora.', 'Put each sentence at its time.'),
     line:null, visual:null, slots, cards, dbg:{ items:items.map(it => ({ short:it.a.short, H:it.H, m:it.m })), withPeriod },
     fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), list:items.map(it => ({ tm:schedLabel(it.H, it.m, withPeriod), zh:schedZh(it.a, it.H, it.m, withPeriod) })), extra:null } };
 }
@@ -1036,7 +1036,7 @@ function gSchedListen(lv){
   const sameAct = picked.filter(w => w.zh === a.short), otherAct = picked.filter(w => w.zh !== a.short);
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
   return { id:'schedListen', kind:'choice', tod:H + m / 60,
-    instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
+    instr:L('請聽，選出行程和時間。', 'Escucha y elige la actividad y la hora.', 'Listen and choose the plan and time.'),
     line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
     fb:{ ansZh:zh, extra:lab } };
@@ -1052,7 +1052,7 @@ function gPeriodRead(lv){
   add(H + 1, m, 'time'); add(H - 1, m, 'time'); add(H, flip, 'time'); add(H + 2, m, 'time');
   const trap = wrongs.filter(w => w.why === 'pmAm'), rest = shuffle(wrongs.filter(w => w.why !== 'pmAm'));
   return { id:'periodChoice', kind:'choice', tod:H + m / 60,
-    instr:L('看中文時間，選出正確的數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese time and choose the digital time.'),
+    instr:L('看中文，選出數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese and choose the digital time.'),
     line:{ zh, es:'', en:'' }, visual:null, dbg:{ form:'read', H, m },
     options:mkOptions({ zh:digital24(H, m), why:null, d:digital24(H, m) }, [].concat(trap, rest)),
     fb:{ ansZh:zh, extra:digital24(H, m) } };
@@ -1068,7 +1068,7 @@ function gPeriodChoice(lv){
   const order = wrongs.filter(w => w.why === 'periodOrder'), pw = shuffle(wrongs.filter(w => w.why === 'periodWrong')), tm = shuffle(wrongs.filter(w => w.why === 'time'));
   const wr = [].concat(order, pw.slice(0, 1), tm.slice(0, 1), pw.slice(1), tm.slice(1));
   return { id:'periodChoice', kind:'choice', tod:H + m / 60,
-    instr:L('看數字時間，選出正確的中文說法（含早上、中午、下午、晚上）。', 'Mira la hora en números y elige cómo se dice (con mañana, mediodía, tarde o noche).', 'Look at the digital time and choose how to say it (with morning, noon, afternoon or evening).'),
+    instr:L('看數字，選出中文說法。', 'Mira la hora en números y elige cómo se dice.', 'Look at the digits and choose the Chinese.'),
     line:null, visual:{ type:'digital', text:digital24(H, m) },
     options:mkOptions({ zh:correct, why:null, d:digital24(H, m) }, wr),
     fb:{ ansZh:correct, extra:digital24(H, m) } };
@@ -1140,7 +1140,7 @@ function gCalFindDay(lv){
   const facts = mo.events.map((x, i) => monthZh(mo.m) + dayZh(x.day, '號') + x.ev.fut + (i < mo.events.length - 1 ? '，' : '。')).join('\n');
   const v = calVisual(mo, 'pick'); v.labels = {}; v.details = {};
   return { id:'calFindDay', kind:'tap',
-    instr:L('讀題目裡的行程，在月曆上點出正確的日子，再按「確定」。', 'Lee el plan en la pregunta, toca el día correcto en el calendario y pulsa «Confirmar».', 'Read the plans in the question, tap the right day on the calendar, then press “Confirm”.'),
+    instr:L('讀行程，點出正確的日子，再按「確定」。', 'Lee los planes, toca el día y pulsa «Confirmar».', 'Read the plans, tap the day, then press “Confirm”.'),
     line:{ zh:facts + '\v' + e.ev.label + '是哪一{yì}天？', es:'¿Qué día es: ' + e.ev.es + '?', en:'Which day: ' + e.ev.en + '?' },
     dbg:{ events:mo.events.map(x => ({ d:x.day, label:x.ev.label, fut:x.ev.fut })), asked:e.ev.label },
     visual:v, target:{ y:mo.y, m:mo.m, d:e.day },
@@ -1150,7 +1150,7 @@ function gCalWhatDo(lv){
   const mo = makeMonth(nEvents(lv)), e = pick(mo.events), st = '號';
   const opt = x => ({ key:x.ev.id, zh:x.ev.doZh, gloss:L('', x.ev.es, x.ev.en), why:'ev', d:x.ev.doZh });
   return { id:'calWhatDo', kind:'choice',
-    instr:L('看月曆，選出那一天要做什麼。', 'Mira el calendario y elige qué hay que hacer ese día.', 'Look at the calendar and choose what happens that day.'),
+    instr:L('選出那一天要做什麼。', 'Elige qué hay ese día.', 'Choose what is planned that day.'),
     line:{ zh:monthZh(mo.m) + dayZh(e.day, st) + '要做什麼？', es:'¿Qué hay que hacer el ' + fmtDate(mo.y, mo.m, e.day, false) + '?', en:'What is on ' + fmtDate(mo.y, mo.m, e.day, false) + '?' },
     visual:calVisual(mo, 'none'),
     options:mkOptions(Object.assign(opt(e), { why:null }), shuffle(mo.events.filter(x => x !== e)).map(opt)),
@@ -1192,7 +1192,7 @@ function gCalWhatTime(lv){
   });
   const others = D.evs.filter(x => x !== e).map(x => ({ zh:ptZh(x.h, x.mi, st), why:'otherEv', d:digital24(x.h, x.mi) }));
   return { id:'calWhatTime', kind:'choice', tod:e.h + e.mi / 60,
-    instr:L('點月曆上的日子看行程（＋代表還有其他行程），再選出正確的時間。', 'Toca un día del calendario para ver los planes (＋ = hay más planes) y elige la hora correcta.', 'Tap a day to see its plans (＋ = more plans) and choose the right time.'),
+    instr:L('點日子看行程（＋是還有其他行程），選出時間。', 'Toca un día para ver los planes (＋ = más planes) y elige la hora.', 'Tap a day to see its plans (＋ = more) and choose the time.'),
     line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
     visual:{ type:'cal', y:mo.y, m:mo.m, mode:'view', labels, details, plus },
     dbg:{ day:D.day, label:e.ev.label, h:e.h, mi:e.mi, days:mo.days.map(dd => ({ day:dd.day, items:dd.evs.map(x => ({ label:x.ev.label, h:x.h, mi:x.mi })) })) },
@@ -1218,7 +1218,8 @@ function gRelDay(lv){
   const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
   const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
   const lt = REL_DAYS_L[String(off)];
-  const instr = L('看月曆上標示「今天」的那一格，選出正確的答案。', 'Mira el día marcado como «hoy» y elige la respuesta correcta.', 'Find the day marked “today” and choose the right answer.');
+  const instr = askWeek ? L('看「今天」那一格，選出星期幾。', 'Mira el día de «hoy» y elige el día de la semana.', 'Look at “today” and choose the weekday.')
+                        : L('看「今天」那一格，選出日期。', 'Mira el día de «hoy» y elige la fecha.', 'Look at “today” and choose the date.');
   const sun = pick(['天', '日']);
   let options, line, ansZh;
   if (askWeek){
@@ -1257,7 +1258,7 @@ function gRelWeek(lv){
     const wrongs = [].concat(wk.slice(0, 1), ds.slice(0, 1), order);
     const ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
     return { id:'relWeek', kind:'choice',
-      instr:L('看月曆上標示「今天」的那一格，選出正確的日期。', 'Mira el día marcado como «hoy» y elige la fecha correcta.', 'Find the day marked “today” and choose the right date.'),
+      instr:L('看「今天」那一格，選出日期。', 'Mira el día de «hoy» y elige la fecha.', 'Look at “today” and choose the date.'),
       line:{ zh:word + '是幾月幾號？', es:'¿Qué fecha es el ' + DAYS_ES[X] + ' de ' + REL_WEEK[String(wOff)][1] + '?', en:'What is the date of ' + DAYS_EN[X] + ' ' + REL_WEEK[String(wOff)][2] + '?' },
       visual:todayVisual(T), options:mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, wrongs),
       fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
@@ -1273,7 +1274,7 @@ function gYearView(lv){
   if (cross){ kind = m === 1 ? pick(['pm', 'ly']) : pick(['nm', 'ny']); }
   const vis = { type:'ycal', y, m, d };
   const base = { id:'yearView', kind:'choice',
-    instr:L('看年曆（紅框是這個月），選出正確的答案。', 'Mira el calendario anual (el marco rojo es este mes) y elige la respuesta.', 'Look at the year calendar (the red frame is this month) and choose the answer.'),
+    instr:L('看年曆（紅框是這個月），選出答案。', 'Mira el año (el marco rojo es este mes) y elige.', 'Look at the year (red frame = this month) and choose.'),
     visual:vis };
   if (kind === 'pm' || kind === 'nm'){
     const t = kind === 'pm' ? m - 1 : m + 1, tm = ((t - 1 + 12) % 12) + 1;
@@ -1298,7 +1299,7 @@ function tapQuestion(T, tg, zh, whenTrans, ev, past){
   const trEs = whenTrans[0] + ', ' + (past ? ev.esP : 'voy a ' + ev.es) + '.';
   const trEn = whenTrans[1] + ', ' + (past ? 'I ' + ev.enP : 'I’m going to ' + ev.en) + '.';
   return { id:'tap', kind:'tap',
-    instr:L('請聽，然後點月曆上正確的日子，再按「確定」。', 'Escucha, toca el día correcto del calendario y pulsa «Confirmar».', 'Listen, tap the right day on the calendar, then press “Confirm”.'),
+    instr:L('請聽，點出那一天，再按「確定」。', 'Escucha, toca el día y pulsa «Confirmar».', 'Listen, tap the day, then press “Confirm”.'),
     line:null, visual:todayVisual(T, { mode:'pick' }), audio:zh, peek:zh, target:{ y:tg.y, m:tg.m, d:tg.d },
     fb:{ ansZh:monthZh(tg.m) + dayZh(tg.d, '號'), extra:fmtDate(tg.y, tg.m, tg.d, true), say:zh, trans:{ es:trEs, en:trEn } } };
 }
@@ -1373,9 +1374,7 @@ const sc = s => (Settings.script === 'simp' ? toSimp(s) : s);
 
 const STR = {
   title:    L('練習時間', 'Practica la hora y la fecha', 'Practice time and dates'),
-  sub:      L('時鐘、日期、月曆，一起練習中文怎麼說', 'Reloj, fechas y calendario en chino', 'Clocks, dates and calendars in Chinese'),
-  nameL:    L('名字', 'Nombre', 'Name'),
-  namePh:   L('輸入你的名字', 'Escribe tu nombre', 'Enter your name'),
+  sub:      L('一起練習時間的中文！','¡Practiquemos juntos la hora en chino!', 'Let\'s practice time in Chinese together!'),
   settings: L('設定', 'Ajustes', 'Settings'),
   lvNote:   L('難度從下一回開始生效。', 'El nivel cambia en la próxima ronda.', 'The level applies from the next round.'),
   setScript:L('字形', 'Escritura', 'Script'),
@@ -1385,7 +1384,6 @@ const STR = {
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
   mixSub:   L('50 題，四個單元混合', '50 preguntas de las cuatro unidades', '50 questions from all four units'),
-  board:    L('排行榜', 'Clasificación', 'Leaderboard'),
   hear:     L('🔊 聽', '🔊 Escuchar', '🔊 Listen'),
   peek:     L('看文字', 'Ver el texto', 'Show text'),
   confirm:  L('確定', 'Confirmar', 'Confirm'),
@@ -1398,16 +1396,9 @@ const STR = {
   tapHint:  L('點一天，看那天的行程', 'Toca un día para ver el plan', 'Tap a day to see its plan'),
   noPlan:   L('這一天沒有行程', 'Ese día no hay planes', 'Nothing planned that day'),
   again:    L('再玩一次', 'Jugar otra vez', 'Play again'),
-  home:     L('回主畫面', 'Volver al inicio', 'Back to start'),
+  home:     L('回主選單','Volver al inicio', 'Back to start'),
   score:    L('分', 'pts', 'pts'),
-  today:    L('今天', 'Hoy', 'Today'),
-  loading:  L('讀取中…', 'Cargando…', 'Loading…'),
-  lbFail:   L('排行榜暫時連不上', 'La clasificación no está disponible ahora', 'The leaderboard is unavailable right now'),
-  lbEmpty:  L('還沒有人上榜，你當第一名吧！', 'Aún no hay nadie. ¡Sé el primero!', 'Nobody yet — be the first!'),
-  lbNeedName:L('輸入名字才會記錄到排行榜', 'Escribe tu nombre para entrar en la clasificación', 'Enter your name to be on the leaderboard'),
-  lbSaved:  L('已記錄到排行榜', 'Guardado en la clasificación', 'Saved to the leaderboard'),
   close:    L('關閉', 'Cerrar', 'Close'),
-  correctSent:L('正確的配對', 'Emparejamiento correcto', 'Correct matches'),
   hintLine: L('先點一句話，再點一個時間', 'Toca una frase y luego una hora', 'Tap a sentence, then a time')
 };
 const T = k => Lh(STR[k]);
@@ -1518,13 +1509,13 @@ function ycalHTML(v){
 
 /* =====================  開始畫面  ===================== */
 function seg(key, opts, cur){
-  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${typeof l === 'string' ? esc(l) : Lh(l)}</button>`).join('') + '</div>';
+  return `<div class="seg" data-seg="${key}">` + opts.map(([v, l]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${typeof l === 'string' ? (l.includes('\n') ? esc(l.split('\n')[0]) + `<span class="tr">${esc(l.split('\n')[1])}</span>` : esc(l)) : Lh(l)}</button>`).join('') + '</div>';
 }
 const LV_OPTS = () => [['easy', L('簡單', 'Fácil', 'Easy')], ['mid', L('普通', 'Normal', 'Medium')], ['hard', L('困難', 'Difícil', 'Hard')]];
 function settingsRows(){
   let h = `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
-  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin ㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   return h;
@@ -1608,7 +1599,7 @@ function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
-  let h = `<div class="bar"><button class="btn" id="home">←</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
+  let h = `<div class="bar"><button class="btn" id="home">${esc(zhOf(STR.home))}</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">⚙</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
   const th = todOf(q); applyTod(th); h += todBand(th);
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;

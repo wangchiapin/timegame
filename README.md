@@ -18,6 +18,8 @@
 | 四 | 月曆年曆 | 讀題目裡的行程再點日期（月曆是空白的）、這一天要做什麼、幾點要做、年曆（上個月、下個月、去年、明年…）、聽幾月幾號點日期、聽昨天明天後天點日期、聽上星期下星期點日期（共 7 種題型，凡是在月曆上點日期的都在這裡） |
 | — | 綜合挑戰 | 四個單元全部混合（18 種題型平均抽） |
 
+開始畫面副標：「一起練習時間的中文！」。作答畫面左上角的按鈕直接寫「回主選單」（不用箭頭）。設定裡的注音選項分兩行：Zhuyin／ㄅㄆㄇ，不再從中間斷行。
+
 每個單元 25 題，綜合挑戰 50 題；分數一律 0–100（答對題數 ÷ 總題數 × 100），不記錄最高分。
 
 相對時間詞的難度（單元二的昨天明天、上下星期，單元四的聽力點日期和年曆）：
@@ -74,6 +76,53 @@
 - 沒有 Firebase：不需要 Firestore 規則，也不會出現在分享區的排行榜總覽與遊玩紀錄後台。
 - 靜音鈕用 game-kit 的 `mute.js`；語音提示用 `voicehint.js`。
 - 版權說明用 game-kit 的 `copyright.js`（放在頁面最後面，不釘在畫面上）。
+
+## 說明文字總表
+
+改任何一句說明，這張表都要一起更新。程式裡每種題型的提示寫在 `src/02-gen.js` 的 `instr`，畫面按鈕和標題的字在 `src/03-ui.js` 最上面的 `STR`。
+
+寫法規則：聽力題一律「請聽，…」開頭；選答案一律「選出…」；能不重複的說明就不寫（例如月曆題不再每題都寫「看月曆」）；括號只放必要的提醒。
+
+### 各題型上方的提示
+
+| 題型 | 中文 | 西班牙文 | 英文 |
+|---|---|---|---|
+| 看時鐘選說法 | 看時鐘，選出說法。 | Mira el reloj y elige cómo se dice. | Look at the clock and choose. |
+| 聽時間撥指針 | 請聽，撥出正確的時間。 | Escucha y pon la hora. | Listen and set the time. |
+| 聽時間選答案 | 請聽，選出時間。 | Escucha y elige la hora. | Listen and choose the time. |
+| 聽時間選答案 | 請聽，選出時鐘。 | Escucha y elige el reloj. | Listen and choose the clock. |
+| 看日期選中文 | 看圈起來的日子，選出說法。 | Mira el día marcado y elige cómo se dice. | Look at the circled day and choose. |
+| 星期幾 | 找到那一天，選出星期幾。 | Busca el día y elige el día de la semana. | Find the day and choose the weekday. |
+| 聽日期選答案 | 請聽，選出日期。 | Escucha y elige la fecha. | Listen and choose the date. |
+| 行程配對時間 | 把每句話放到正確的時間。 | Pon cada frase en su hora. | Put each sentence at its time. |
+| 聽行程選答案 | 請聽，選出行程和時間。 | Escucha y elige la actividad y la hora. | Listen and choose the plan and time. |
+| 早上下午 | 看中文，選出數字時間。 | Lee la hora en chino y elige la hora en números. | Read the Chinese and choose the digital time. |
+| 早上下午 | 看數字，選出中文說法。 | Mira la hora en números y elige cómo se dice. | Look at the digits and choose the Chinese. |
+| 哪一天要做什麼（點日期） | 讀行程，點出正確的日子，再按「確定」。 | Lee los planes, toca el día y pulsa «Confirmar». | Read the plans, tap the day, then press “Confirm”. |
+| 這一天要做什麼 | 選出那一天要做什麼。 | Elige qué hay ese día. | Choose what is planned that day. |
+| 幾點要做 | 點日子看行程（＋是還有其他行程），選出時間。 | Toca un día para ver los planes (＋ = más planes) y elige la hora. | Tap a day to see its plans (＋ = more) and choose the time. |
+| 昨天今天明天 | 看「今天」那一格，選出星期幾。 | Mira el día de «hoy» y elige el día de la semana. | Look at “today” and choose the weekday. |
+| 昨天今天明天 | 看「今天」那一格，選出日期。 | Mira el día de «hoy» y elige la fecha. | Look at “today” and choose the date. |
+| 上星期下星期 | 看「今天」那一格，選出日期。 | Mira el día de «hoy» y elige la fecha. | Look at “today” and choose the date. |
+| 年曆 | 看年曆（紅框是這個月），選出答案。 | Mira el año (el marco rojo es este mes) y elige. | Look at the year (red frame = this month) and choose. |
+| 聽幾月幾號點日期 | 請聽，點出那一天，再按「確定」。 | Escucha, toca el día y pulsa «Confirmar». | Listen, tap the day, then press “Confirm”. |
+| 聽昨天明天點日期 | 請聽，點出那一天，再按「確定」。 | Escucha, toca el día y pulsa «Confirmar». | Listen, tap the day, then press “Confirm”. |
+| 聽上星期下星期點日期 | 請聽，點出那一天，再按「確定」。 | Escucha, toca el día y pulsa «Confirmar». | Listen, tap the day, then press “Confirm”. |
+
+### 開始畫面、設定、作答與結果
+
+| 位置 | 中文 | 西班牙文 | 英文 |
+|---|---|---|---|
+| 標題 | 練習時間 | Practica la hora y la fecha | Practice time and dates |
+| 副標 | 一起練習時間的中文！ | ¡Practiquemos juntos la hora en chino! | Let's practice time in Chinese together! |
+| 綜合挑戰 | 綜合挑戰／50 題，四個單元混合 | Desafío mixto／50 preguntas de las cuatro unidades | Mixed challenge／50 questions from all four units |
+| 設定各列 | 字形、介面語言、拼音／注音、語速、難度 | Escritura、Idioma、Pinyin / Zhuyin、Voz、Nivel | Script、Language、Pinyin / Zhuyin、Voice、Level |
+| 難度提示 | 難度從下一回開始生效。 | El nivel cambia en la próxima ronda. | The level applies from the next round. |
+| 作答畫面按鈕 | 回主選單、🔊 聽、看文字、確定、下一題、看結果 | Volver al inicio、Escuchar、Ver el texto、Confirmar、Siguiente、Ver resultado | Back to start、Listen、Show text、Confirm、Next、See result |
+| 答案欄 | ✔ 答對了！／✘ 答錯了；正確答案；你選的是 | ¡Correcto!／Incorrecto；Respuesta correcta；Elegiste | Correct!／Not quite；Correct answer；You chose |
+| 月曆提示 | 點一天，看那天的行程；這一天沒有行程 | Toca un día para ver el plan；Ese día no hay planes | Tap a day to see its plan；Nothing planned that day |
+| 配對提示 | 先點一句話，再點一個時間 | Toca una frase y luego una hora | Tap a sentence, then a time |
+| 結果畫面 | 再玩一次、回主選單；分數 0–100 | Jugar otra vez、Volver al inicio | Play again、Back to start |
 
 ## 還沒做的事
 - 分享區還沒有這個遊戲的卡片。

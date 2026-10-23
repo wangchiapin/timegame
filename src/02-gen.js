@@ -99,7 +99,7 @@ function gClockChoice(lv){
   let guard = 0;
   while (wrongs.length < 10 && guard++ < 30){ const r = pickTime(lv, s != null); if (timeKey(r.h, r.m, r.s) !== timeKey(h, m, s)) wrongs.push({ zh:tZh(r.h, r.m, r.s, st), why:'time', d:digital(r.h, r.m, r.s) }); }
   return { id:'clockChoice', kind:'choice',
-    instr:L('看時鐘，選出正確的說法。', 'Mira el reloj y elige cómo se dice.', 'Look at the clock and choose the correct way to say it.'),
+    instr:L('看時鐘，選出說法。', 'Mira el reloj y elige cómo se dice.', 'Look at the clock and choose.'),
     line:{ zh:'現在幾點？', es:'¿Qué hora es?', en:'What time is it?' },
     visual:{ type:'clock', h, m, s },
     options:mkOptions({ zh:correctZh, why:null, d:digital(h, m, s) }, wrongs),
@@ -110,7 +110,7 @@ function gClockSet(lv){
   const { h, m } = pickTime(lv, false), st = randStyle();
   const zh = tZh(h, m, null, st);
   return { id:'clockSet', kind:'dial',
-    instr:L('請聽，然後把時針和分針撥到正確的位置。', 'Escucha y mueve las manecillas a la hora correcta.', 'Listen, then move the hands to the right time.'),
+    instr:L('請聽，撥出正確的時間。', 'Escucha y pon la hora.', 'Listen and set the time.'),
     line:null, visual:{ type:'dial', h0:(h === 12 && m === 0) ? 6 : 12, m0:(h === 12 && m === 0) ? 30 : 0 },
     audio:zh, peek:zh, target:{ h, m }, fb:{ ansZh:zh, extra:digital(h, m) } };
 }
@@ -156,8 +156,8 @@ function gClockListen(lv){
       cands.map(c => ({ key:'c' + timeKey(c.h, c.m, c.s), svg:clockSVG({ h:c.h, m:c.m, s:c.s, mini:true }), why:'heard', d:digital(c.h, c.m, c.s) })));
   }
   return { id:'clockListen', kind:'choice',
-    instr:variant === 'text' ? L('請聽，選出正確的時間。', 'Escucha y elige la hora correcta.', 'Listen and choose the correct time.')
-                             : L('請聽，選出正確的時鐘。', 'Escucha y elige el reloj correcto.', 'Listen and choose the correct clock.'),
+    instr:variant === 'text' ? L('請聽，選出時間。', 'Escucha y elige la hora.', 'Listen and choose the time.')
+                             : L('請聽，選出時鐘。', 'Escucha y elige el reloj.', 'Listen and choose the clock.'),
     line:null, visual:null, audio:zh, peek:variant === 'clock' ? zh : undefined, optClass:variant === 'clock' ? 'clk' : '',
     options, fb:{ ansZh:zh, extra:digital(h, m, s) } };
 }
@@ -194,7 +194,7 @@ function gDateChoice(lv){
   const tg = pick(third); chosen.push(pick(grp[tg].length ? grp[tg] : grp.val));
   const extra = shuffle([].concat(grp.val, grp.ge, grp.order, grp.qty, grp.wk));
   return { id:'dateChoice', kind:'choice',
-    instr:L('看月曆上圈起來的日子，選出正確的中文說法。', 'Mira el día marcado en el calendario y elige cómo se dice en chino.', 'Look at the circled day and choose the correct Chinese.'),
+    instr:L('看圈起來的日子，選出說法。', 'Mira el día marcado y elige cómo se dice.', 'Look at the circled day and choose.'),
     line:{ zh:'這一{yì}天是什麼時候{hou}？', es:'¿Qué fecha es este día?', en:'What date is this day?' },
     visual:{ type:'cal', y, m, mark:d, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, chosen.concat(extra)),
@@ -207,7 +207,7 @@ function gWeekdayChoice(lv){
   const wrongs = shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== dow)).map(x => ({ zh:wkZh(x, sun), why:'wk' }));
   if (lv !== 'easy' && Math.random() < (dow === 0 ? 0.9 : 0.4)) wrongs.unshift({ zh:'星期七', why:'sevenWk' });
   return { id:'weekdayChoice', kind:'choice',
-    instr:L('看月曆，找到題目問的日子，選出星期幾。', 'Mira el calendario, busca el día de la pregunta y elige qué día de la semana es.', 'Find the day in the calendar and choose the weekday.'),
+    instr:L('找到那一天，選出星期幾。', 'Busca el día y elige el día de la semana.', 'Find the day and choose the weekday.'),
     line:{ zh:numZh(m) + '月' + numZh(d) + st + '是星期幾？', es:'¿Qué día de la semana es el ' + d + ' de ' + MONTHS_ES[m - 1] + '?', en:'What day of the week is ' + MONTHS_EN[m - 1] + ' ' + d + '?' },
     visual:{ type:'cal', y, m, mode:'none', cap:true },
     options:mkOptions({ zh:correct, why:null }, wrongs),
@@ -231,7 +231,7 @@ function gDateListen(lv){
   if (withYear) [1, -1].forEach(x => add(y + x, m, d));
   const cs = shuffle([...cand.values()]);
   return { id:'dateListen', kind:'choice',
-    instr:L('請聽，選出正確的日期。', 'Escucha y elige la fecha correcta.', 'Listen and choose the correct date.'),
+    instr:L('請聽，選出日期。', 'Escucha y elige la fecha.', 'Listen and choose the date.'),
     line:null, visual:null, audio:zh,
     options:mkOptions({ zh, why:null, d:digDate(y, m, d) }, cs.map(c => ({ zh:mk(c.y, c.m, c.d), why:'heard', d:digDate(c.y, c.m, c.d) }))),
     fb:{ ansZh:zh, extra:fmtDate(y, m, d, true) } };
@@ -275,7 +275,7 @@ function gSchedMatch(lv){
   const slots = items.map(it => ({ label:schedLabel(it.H, it.m, withPeriod) }));
   const cards = shuffle(items.map((it, i) => ({ zh:schedZh(it.a, it.H, it.m, withPeriod), slot:i, gloss:L('', it.a.es, it.a.en) })));
   return { id:'schedMatch', kind:'match',
-    instr:L('把每一句話放到正確的時間。先點句子，再點時間。', 'Pon cada frase en su hora. Toca la frase y luego la hora.', 'Put each sentence at the right time. Tap a sentence, then a time.'),
+    instr:L('把每句話放到正確的時間。', 'Pon cada frase en su hora.', 'Put each sentence at its time.'),
     line:null, visual:null, slots, cards, dbg:{ items:items.map(it => ({ short:it.a.short, H:it.H, m:it.m })), withPeriod },
     fb:{ ansZh:items.map(it => schedZh(it.a, it.H, it.m, withPeriod)).join('　'), list:items.map(it => ({ tm:schedLabel(it.H, it.m, withPeriod), zh:schedZh(it.a, it.H, it.m, withPeriod) })), extra:null } };
 }
@@ -295,7 +295,7 @@ function gSchedListen(lv){
   const sameAct = picked.filter(w => w.zh === a.short), otherAct = picked.filter(w => w.zh !== a.short);
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
   return { id:'schedListen', kind:'choice', tod:H + m / 60,
-    instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
+    instr:L('請聽，選出行程和時間。', 'Escucha y elige la actividad y la hora.', 'Listen and choose the plan and time.'),
     line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
     fb:{ ansZh:zh, extra:lab } };
@@ -311,7 +311,7 @@ function gPeriodRead(lv){
   add(H + 1, m, 'time'); add(H - 1, m, 'time'); add(H, flip, 'time'); add(H + 2, m, 'time');
   const trap = wrongs.filter(w => w.why === 'pmAm'), rest = shuffle(wrongs.filter(w => w.why !== 'pmAm'));
   return { id:'periodChoice', kind:'choice', tod:H + m / 60,
-    instr:L('看中文時間，選出正確的數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese time and choose the digital time.'),
+    instr:L('看中文，選出數字時間。', 'Lee la hora en chino y elige la hora en números.', 'Read the Chinese and choose the digital time.'),
     line:{ zh, es:'', en:'' }, visual:null, dbg:{ form:'read', H, m },
     options:mkOptions({ zh:digital24(H, m), why:null, d:digital24(H, m) }, [].concat(trap, rest)),
     fb:{ ansZh:zh, extra:digital24(H, m) } };
@@ -327,7 +327,7 @@ function gPeriodChoice(lv){
   const order = wrongs.filter(w => w.why === 'periodOrder'), pw = shuffle(wrongs.filter(w => w.why === 'periodWrong')), tm = shuffle(wrongs.filter(w => w.why === 'time'));
   const wr = [].concat(order, pw.slice(0, 1), tm.slice(0, 1), pw.slice(1), tm.slice(1));
   return { id:'periodChoice', kind:'choice', tod:H + m / 60,
-    instr:L('看數字時間，選出正確的中文說法（含早上、中午、下午、晚上）。', 'Mira la hora en números y elige cómo se dice (con mañana, mediodía, tarde o noche).', 'Look at the digital time and choose how to say it (with morning, noon, afternoon or evening).'),
+    instr:L('看數字，選出中文說法。', 'Mira la hora en números y elige cómo se dice.', 'Look at the digits and choose the Chinese.'),
     line:null, visual:{ type:'digital', text:digital24(H, m) },
     options:mkOptions({ zh:correct, why:null, d:digital24(H, m) }, wr),
     fb:{ ansZh:correct, extra:digital24(H, m) } };
@@ -399,7 +399,7 @@ function gCalFindDay(lv){
   const facts = mo.events.map((x, i) => monthZh(mo.m) + dayZh(x.day, '號') + x.ev.fut + (i < mo.events.length - 1 ? '，' : '。')).join('\n');
   const v = calVisual(mo, 'pick'); v.labels = {}; v.details = {};
   return { id:'calFindDay', kind:'tap',
-    instr:L('讀題目裡的行程，在月曆上點出正確的日子，再按「確定」。', 'Lee el plan en la pregunta, toca el día correcto en el calendario y pulsa «Confirmar».', 'Read the plans in the question, tap the right day on the calendar, then press “Confirm”.'),
+    instr:L('讀行程，點出正確的日子，再按「確定」。', 'Lee los planes, toca el día y pulsa «Confirmar».', 'Read the plans, tap the day, then press “Confirm”.'),
     line:{ zh:facts + '\v' + e.ev.label + '是哪一{yì}天？', es:'¿Qué día es: ' + e.ev.es + '?', en:'Which day: ' + e.ev.en + '?' },
     dbg:{ events:mo.events.map(x => ({ d:x.day, label:x.ev.label, fut:x.ev.fut })), asked:e.ev.label },
     visual:v, target:{ y:mo.y, m:mo.m, d:e.day },
@@ -409,7 +409,7 @@ function gCalWhatDo(lv){
   const mo = makeMonth(nEvents(lv)), e = pick(mo.events), st = '號';
   const opt = x => ({ key:x.ev.id, zh:x.ev.doZh, gloss:L('', x.ev.es, x.ev.en), why:'ev', d:x.ev.doZh });
   return { id:'calWhatDo', kind:'choice',
-    instr:L('看月曆，選出那一天要做什麼。', 'Mira el calendario y elige qué hay que hacer ese día.', 'Look at the calendar and choose what happens that day.'),
+    instr:L('選出那一天要做什麼。', 'Elige qué hay ese día.', 'Choose what is planned that day.'),
     line:{ zh:monthZh(mo.m) + dayZh(e.day, st) + '要做什麼？', es:'¿Qué hay que hacer el ' + fmtDate(mo.y, mo.m, e.day, false) + '?', en:'What is on ' + fmtDate(mo.y, mo.m, e.day, false) + '?' },
     visual:calVisual(mo, 'none'),
     options:mkOptions(Object.assign(opt(e), { why:null }), shuffle(mo.events.filter(x => x !== e)).map(opt)),
@@ -451,7 +451,7 @@ function gCalWhatTime(lv){
   });
   const others = D.evs.filter(x => x !== e).map(x => ({ zh:ptZh(x.h, x.mi, st), why:'otherEv', d:digital24(x.h, x.mi) }));
   return { id:'calWhatTime', kind:'choice', tod:e.h + e.mi / 60,
-    instr:L('點月曆上的日子看行程（＋代表還有其他行程），再選出正確的時間。', 'Toca un día del calendario para ver los planes (＋ = hay más planes) y elige la hora correcta.', 'Tap a day to see its plans (＋ = more plans) and choose the right time.'),
+    instr:L('點日子看行程（＋是還有其他行程），選出時間。', 'Toca un día para ver los planes (＋ = más planes) y elige la hora.', 'Tap a day to see its plans (＋ = more) and choose the time.'),
     line:{ zh:e.ev.label + '是幾點？', es:'¿A qué hora es: ' + e.ev.es + '?', en:'What time: ' + e.ev.en + '?' },
     visual:{ type:'cal', y:mo.y, m:mo.m, mode:'view', labels, details, plus },
     dbg:{ day:D.day, label:e.ev.label, h:e.h, mi:e.mi, days:mo.days.map(dd => ({ day:dd.day, items:dd.evs.map(x => ({ label:x.ev.label, h:x.h, mi:x.mi })) })) },
@@ -477,7 +477,8 @@ function gRelDay(lv){
   const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
   const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
   const lt = REL_DAYS_L[String(off)];
-  const instr = L('看月曆上標示「今天」的那一格，選出正確的答案。', 'Mira el día marcado como «hoy» y elige la respuesta correcta.', 'Find the day marked “today” and choose the right answer.');
+  const instr = askWeek ? L('看「今天」那一格，選出星期幾。', 'Mira el día de «hoy» y elige el día de la semana.', 'Look at “today” and choose the weekday.')
+                        : L('看「今天」那一格，選出日期。', 'Mira el día de «hoy» y elige la fecha.', 'Look at “today” and choose the date.');
   const sun = pick(['天', '日']);
   let options, line, ansZh;
   if (askWeek){
@@ -516,7 +517,7 @@ function gRelWeek(lv){
     const wrongs = [].concat(wk.slice(0, 1), ds.slice(0, 1), order);
     const ansZh = monthZh(tg.m) + dayZh(tg.d, '號');
     return { id:'relWeek', kind:'choice',
-      instr:L('看月曆上標示「今天」的那一格，選出正確的日期。', 'Mira el día marcado como «hoy» y elige la fecha correcta.', 'Find the day marked “today” and choose the right date.'),
+      instr:L('看「今天」那一格，選出日期。', 'Mira el día de «hoy» y elige la fecha.', 'Look at “today” and choose the date.'),
       line:{ zh:word + '是幾月幾號？', es:'¿Qué fecha es el ' + DAYS_ES[X] + ' de ' + REL_WEEK[String(wOff)][1] + '?', en:'What is the date of ' + DAYS_EN[X] + ' ' + REL_WEEK[String(wOff)][2] + '?' },
       visual:todayVisual(T), options:mkOptions({ zh:ansZh, why:null, d:fmtDate(tg.y, tg.m, tg.d, false) }, wrongs),
       fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
@@ -532,7 +533,7 @@ function gYearView(lv){
   if (cross){ kind = m === 1 ? pick(['pm', 'ly']) : pick(['nm', 'ny']); }
   const vis = { type:'ycal', y, m, d };
   const base = { id:'yearView', kind:'choice',
-    instr:L('看年曆（紅框是這個月），選出正確的答案。', 'Mira el calendario anual (el marco rojo es este mes) y elige la respuesta.', 'Look at the year calendar (the red frame is this month) and choose the answer.'),
+    instr:L('看年曆（紅框是這個月），選出答案。', 'Mira el año (el marco rojo es este mes) y elige.', 'Look at the year (red frame = this month) and choose.'),
     visual:vis };
   if (kind === 'pm' || kind === 'nm'){
     const t = kind === 'pm' ? m - 1 : m + 1, tm = ((t - 1 + 12) % 12) + 1;
@@ -557,7 +558,7 @@ function tapQuestion(T, tg, zh, whenTrans, ev, past){
   const trEs = whenTrans[0] + ', ' + (past ? ev.esP : 'voy a ' + ev.es) + '.';
   const trEn = whenTrans[1] + ', ' + (past ? 'I ' + ev.enP : 'I’m going to ' + ev.en) + '.';
   return { id:'tap', kind:'tap',
-    instr:L('請聽，然後點月曆上正確的日子，再按「確定」。', 'Escucha, toca el día correcto del calendario y pulsa «Confirmar».', 'Listen, tap the right day on the calendar, then press “Confirm”.'),
+    instr:L('請聽，點出那一天，再按「確定」。', 'Escucha, toca el día y pulsa «Confirmar».', 'Listen, tap the day, then press “Confirm”.'),
     line:null, visual:todayVisual(T, { mode:'pick' }), audio:zh, peek:zh, target:{ y:tg.y, m:tg.m, d:tg.d },
     fb:{ ansZh:monthZh(tg.m) + dayZh(tg.d, '號'), extra:fmtDate(tg.y, tg.m, tg.d, true), say:zh, trans:{ es:trEs, en:trEn } } };
 }
@@ -599,14 +600,12 @@ const GEN = { clockChoice:gClockChoice, clockSet:gClockSet, clockListen:gClockLi
 const UNITS = [
   { id:'u1', t:L('單元一　幾點幾分', 'Unidad 1 · ¿Qué hora es?', 'Unit 1 · What time is it?'),
     subs:[['clockChoice', L('看時鐘選說法', 'Mira el reloj y elige', 'Look and choose')], ['clockSet', L('聽時間撥指針', 'Escucha y mueve las manecillas', 'Listen and set the hands')], ['clockListen', L('聽時間選答案', 'Escucha y elige', 'Listen and choose')]] },
-  { id:'u2', t:L('單元二　幾月幾日星期幾', 'Unidad 2 · Fecha y día de la semana', 'Unit 2 · Date and weekday'),
-    subs:[['dateChoice', L('看日期選中文', 'De la fecha al chino', 'From date to Chinese')], ['weekdayChoice', L('星期幾？', '¿Qué día de la semana?', 'Which weekday?')], ['dateListen', L('聽日期選答案', 'Escucha la fecha y elige', 'Listen to the date')]] },
+  { id:'u2', t:L('單元二　日期和星期', 'Unidad 2 · Fecha y día de la semana', 'Unit 2 · Date and weekday'),
+    subs:[['dateChoice', L('看日期選中文', 'De la fecha al chino', 'From date to Chinese')], ['weekdayChoice', L('星期幾？', '¿Qué día de la semana?', 'Which weekday?')], ['dateListen', L('聽日期選答案', 'Escucha la fecha y elige', 'Listen to the date')], ['relDay', L('昨天、今天、明天（到大前天、大後天）', 'Ayer, hoy, mañana (hasta hace 3 días / en 3 días)', 'Yesterday, today, tomorrow (up to 3 days)')], ['relWeek', L('上星期、這星期、下星期（到上上、下下）', 'La semana pasada, esta, la próxima (hasta 2 semanas)', 'Last, this, next week (up to 2 weeks)')]] },
   { id:'u3', t:L('單元三　一日行程', 'Unidad 3 · Horario del día', 'Unit 3 · Daily schedule'),
     subs:[['schedMatch', L('行程配對時間', 'Une cada actividad con su hora', 'Match plans to times')], ['schedListen', L('聽行程選答案', 'Escucha la actividad y elige', 'Listen to the plan')], ['periodChoice', L('早上、中午、下午、晚上', 'Mañana, mediodía, tarde, noche', 'Morning, noon, afternoon, evening')]] },
   { id:'u4', t:L('單元四　月曆年曆', 'Unidad 4 · Calendario mensual y anual', 'Unit 4 · Month and year calendars'),
-    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')], ['tapAbs', L('聽幾月幾號，點日期', 'Escucha la fecha y toca el día', 'Listen to the date, tap the day')], ['yearView', L('年曆：上個月、下個月、去年、明年（到前年、後年）', 'Año: mes pasado, próximo, año pasado… (hasta 2 años)', 'Year view: last/next month, year (up to 2 years)')]] },
-  { id:'u5', t:L('單元五　時間推算', 'Unidad 5 · Calcular el tiempo', 'Unit 5 · Working out dates'),
-    subs:[['relDay', L('昨天、今天、明天（到大前天、大後天）', 'Ayer, hoy, mañana (hasta hace 3 días / en 3 días)', 'Yesterday, today, tomorrow (up to 3 days)')], ['relWeek', L('上星期、這星期、下星期（到上上、下下）', 'La semana pasada, esta, la próxima (hasta 2 semanas)', 'Last, this, next week (up to 2 weeks)')], ['tapRelDay', L('聽昨天、明天…，點日期', 'Escucha ayer, mañana… y toca el día', 'Listen to yesterday, tomorrow… and tap')], ['tapRelWeek', L('聽上星期、下星期…，點日期', 'Escucha la semana pasada / próxima y toca el día', 'Listen to last / next week and tap')]] }
+    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')], ['tapAbs', L('聽幾月幾號，點日期', 'Escucha la fecha y toca el día', 'Listen to the date, tap the day')], ['yearView', L('年曆：上個月、下個月、去年、明年（到前年、後年）', 'Año: mes pasado, próximo, año pasado… (hasta 2 años)', 'Year view: last/next month, year (up to 2 years)')], ['tapRelDay', L('聽昨天、明天…，點日期', 'Escucha ayer, mañana… y toca el día', 'Listen to yesterday, tomorrow… and tap')], ['tapRelWeek', L('聽上星期、下星期…，點日期', 'Escucha la semana pasada / próxima y toca el día', 'Listen to last / next week and tap')]] }
 ];
 const ALL_IDS = Object.keys(GEN);
 const qSig = q => [q.id, q.line && q.line.zh, q.audio, JSON.stringify(q.visual), JSON.stringify(q.target), q.cards && q.cards.map(c => c.zh + '|' + c.slot).join(',')].join('#');
