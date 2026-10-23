@@ -205,7 +205,7 @@ LOGIC_JS = r'''
       if (q.id !== 'relWeek') continue;
       const { y, m, today } = q.visual, T = new Date(y, m - 1, today), w = T.getDay();
       if (q.line.zh.includes('星期幾')) continue; // 退回 relDay 的情況
-      const rel = { '上':-1, '這':0, '下':1 }[q.line.zh[0]], X = WK_ZH.indexOf(q.line.zh[3]);
+      const z0 = q.line.zh, dbl = (z0[0] === '上' || z0[0] === '下') && z0[1] === z0[0] ? 1 : 0, rel = { '上':-1, '這':0, '下':1 }[z0[0]] * (dbl ? 2 : 1), X = WK_ZH.indexOf(z0[3 + dbl]);
       if (X < 1 || X > 5) E(tag + ' X ' + X);
       const mon = new Date(y, m - 1, today - ((w + 6) % 7) + rel * 7 + (X - 1));
       const sun = new Date(y, m - 1, today - w + rel * 7 + X);          // 星期日當一週開頭
@@ -221,7 +221,7 @@ LOGIC_JS = r'''
       } else {
         const dy = { '去年':-1, '明年':1, '前年':-2, '後年':2 }[w2];
         if (c.zh !== yearZh(y + dy)) E(tag + ' year answer ' + c.zh);
-        if (lv !== 'hard' && Math.abs(dy) === 2) E(tag + ' 前年/後年 outside hard');
+        if (lv === 'easy' && Math.abs(dy) === 2) E(tag + ' 前年/後年 in easy');
       }
     }
     if (['tapAbs','tapRelDay','tapRelWeek'].includes(id)){
@@ -230,8 +230,8 @@ LOGIC_JS = r'''
       let exp;
       const rd = { '大前天':-3, '大後天':3, '前天':-2, '昨天':-1, '明天':1, '後天':2 }[s.startsWith('大') ? s.slice(0, 3) : s.slice(0, 2)];
       if (rd !== undefined) exp = new Date(y, m - 1, today + rd);
-      else if ('上這下'.includes(s[0]) && s.slice(1, 3) === '星期'){
-        const rel = { '上':-1, '這':0, '下':1 }[s[0]], X = WK_ZH.indexOf(s[3]);
+      else if ('上這下'.includes(s[0]) && (s.slice(1, 3) === '星期' || s.slice(2, 4) === '星期')){
+        const dbl = s[1] === s[0] ? 1 : 0, rel = { '上':-1, '這':0, '下':1 }[s[0]] * (dbl ? 2 : 1), X = WK_ZH.indexOf(s[3 + dbl]);
         exp = new Date(y, m - 1, today - ((w + 6) % 7) + rel * 7 + (X - 1));
         const sun = new Date(y, m - 1, today - w + rel * 7 + X); if (sun.getTime() !== exp.getTime()) E(tag + ' week convention');
       } else {
@@ -417,6 +417,21 @@ if __name__ == '__main__':
         txt = pg.evaluate("document.body.innerText")
         check('是幾年' not in txt, 'year questions say 哪一年 not 幾年')
         check(pg.evaluate("!document.querySelector('.ycal') || !document.querySelector('.datebox')"), 'year view has no Hoy box')
+
+        print('== 上上/下下星期、前年/後年、聽力顯示念的題目')
+        r = pg.evaluate("""() => { const o = {};
+          for (const [id, lv] of [['relWeek','mid'],['tapRelWeek','mid'],['relWeek','easy'],['tapRelWeek','easy']]){ const k = id + lv; o[k] = new Set(); for (let i = 0; i < 400; i++){ const q = GEN[id](lv); const z = q.line ? q.line.zh : q.audio; const m = z.match(/^(上上|下下|上|下|這)星期/); if (m) o[k].add(m[1]); } o[k] = [...o[k]]; }
+          const y = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('mid'); y.add(q.line.zh.slice(0,2)); }
+          const ye = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('easy'); ye.add(q.line.zh.slice(0,2)); }
+          const t = GEN.tapAbs('mid'); o.say = t.fb.say === t.audio; o.y = [...y]; o.ye = [...ye]; return o; }""")
+        check('上上' in r['relWeekmid'] and '下下' in r['relWeekmid'] and '上上' in r['tapRelWeekmid'], 'mid has 上上/下下星期 (%s)' % r['relWeekmid'])
+        check('上上' not in r['relWeekeasy'] and '下下' not in r['tapRelWeekeasy'], 'easy has no 上上/下下')
+        check('前年' in r['y'] and '後年' in r['y'], 'mid year has 前年/後年 (%s)' % r['y'])
+        check('前年' not in r['ye'], 'easy year has no 前年')
+        check(r['say'], 'tap question feedback shows the spoken sentence')
+        pg.evaluate("startRound(['tapAbs'], 'mid', 't', false)"); pg.wait_for_timeout(50)
+        answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
+        check(pg.evaluate("!!document.querySelector('.fb .say')"), 'tap feedback renders .say')
 
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:

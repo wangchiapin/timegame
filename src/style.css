@@ -277,3 +277,4 @@ html.tod-night .vis > svg.clock > circle:first-child{fill:#c9b98a}
 .tod .tl{top:1px;font:700 8px Georgia,serif;color:rgba(255,255,255,.92);transform:translateX(-50%);text-shadow:0 1px 1px rgba(0,0,0,.4)}
 .tod .mk{top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:2px solid var(--edge);font-size:11px;display:flex;align-items:center;justify-content:center}
 .btn.primary .tr,.btn.primary .small{color:var(--onaccent)}
+.fb .say{margin:6px 0 2px;font-size:18px}

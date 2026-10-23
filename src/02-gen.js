@@ -28,7 +28,7 @@ const WHY = {
   heard:    L('', '', ''),   // 聽力選錯：不顯示說明（畫面上已有「你選的是…」和正確答案）
   otherEv:  L('那是同一天另一個行程的時間。', 'Esa es la hora de otro plan del mismo día.', 'That is the time of another plan on the same day.'),
   act:      L('聽到的行程不是這個，再聽一次。', 'No es la actividad que se oyó. Escucha otra vez.', 'That is not the activity you heard. Listen again.'),
-  weekShift:L('這是不同星期的同一天，要注意「上、這、下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上, 這, 下.', 'Same weekday, but a different week. Watch 上, 這 and 下.'),
+  weekShift:L('這是不同星期的同一天，要注意「上上、上、這、下、下下」。', 'Es el mismo día de la semana, pero de otra semana. Fíjate en 上上, 上, 這, 下, 下下.', 'Same weekday, but a different week. Watch 上上, 上, 這, 下 and 下下.'),
   dayShift: L('差了一天，再數一次。', 'Te equivocaste por un día; cuenta otra vez.', 'Off by one day; count again.'),
   rel:      L('要從標著「今天」的那一格開始算。', 'Cuenta a partir del día marcado como «hoy».', 'Count from the day marked “today”.'),
   month:    L('月份不對，再看一次年曆。', 'El mes no es correcto. Mira otra vez el calendario anual.', 'That is not the right month. Look at the year calendar again.'),
@@ -498,10 +498,10 @@ function gRelDay(lv){
     fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
 }
 
-const REL_WEEK = { '-1':['上', 'la semana pasada', 'last week'], '0':['這', 'esta semana', 'this week'], '1':['下', 'la próxima semana', 'next week'] };
+const REL_WEEK = { '-2':['上上', 'hace dos semanas', 'two weeks ago'], '2':['下下', 'dentro de dos semanas', 'two weeks from now'], '-1':['上', 'la semana pasada', 'last week'], '0':['這', 'esta semana', 'this week'], '1':['下', 'la próxima semana', 'next week'] };
 function gRelWeek(lv){
   for (let g = 0; g < 200; g++){
-    const T = randToday(), wOff = pick(lv === 'easy' ? [0, 1] : [-1, 0, 1]), X = randInt(1, 5);
+    const T = randToday(), wOff = pick(lv === 'easy' ? [0, 1] : [-2, -1, 0, 1, 2]), X = randInt(1, 5);
     if (wOff === 0 && X === T.w) continue;
     const mondayOff = -((T.w + 6) % 7);
     const tg = addDays(T.y, T.m, T.d, mondayOff + wOff * 7 + (X - 1));
@@ -525,7 +525,7 @@ function gRelWeek(lv){
 function gYearView(lv){
   const cross = lv === 'hard' && Math.random() < 0.5;
   const y = randInt(2025, 2028), m = cross ? pick([1, 12]) : randInt(2, 11), d = randInt(1, 28);
-  const kinds = lv === 'easy' ? ['pm', 'nm'] : lv === 'mid' ? ['pm', 'nm', 'ly', 'ny'] : ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'];
+  const kinds = lv === 'easy' ? ['pm', 'nm'] : lv === 'mid' ? ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'] : ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'];
   let kind = pick(kinds);
   if (cross){ kind = m === 1 ? pick(['pm', 'ly']) : pick(['nm', 'ny']); }
   const vis = { type:'ycal', y, m, d };
@@ -557,7 +557,7 @@ function tapQuestion(T, tg, zh, whenTrans, ev, past){
   return { id:'tap', kind:'tap',
     instr:L('請聽，然後點月曆上正確的日子，再按「確定」。', 'Escucha, toca el día correcto del calendario y pulsa «Confirmar».', 'Listen, tap the right day on the calendar, then press “Confirm”.'),
     line:null, visual:todayVisual(T, { mode:'pick' }), audio:zh, peek:zh, target:{ y:tg.y, m:tg.m, d:tg.d },
-    fb:{ ansZh:monthZh(tg.m) + dayZh(tg.d, '號'), extra:fmtDate(tg.y, tg.m, tg.d, true), trans:{ es:trEs, en:trEn } } };
+    fb:{ ansZh:monthZh(tg.m) + dayZh(tg.d, '號'), extra:fmtDate(tg.y, tg.m, tg.d, true), say:zh, trans:{ es:trEs, en:trEn } } };
 }
 function gTapAbs(lv){
   const T = randToday(), ev = pick(EVENTS), N = dim(T.y, T.m);
@@ -576,7 +576,7 @@ function gTapRelDay(lv){
 }
 function gTapRelWeek(lv){
   for (let g = 0; g < 200; g++){
-    const T = randToday(), ev = pick(EVENTS), wOff = pick(lv === 'easy' ? [0, 1] : [-1, 0, 1]), X = randInt(1, 5);
+    const T = randToday(), ev = pick(EVENTS), wOff = pick(lv === 'easy' ? [0, 1] : [-2, -1, 0, 1, 2]), X = randInt(1, 5);
     if (wOff === 0 && X === T.w) continue;
     const tg = addDays(T.y, T.m, T.d, -((T.w + 6) % 7) + wOff * 7 + (X - 1));
     if (!sameMonth(T, tg)) continue;
@@ -604,7 +604,7 @@ const UNITS = [
   { id:'u4', t:L('單元四　月曆行事曆', 'Unidad 4 · Calendario de actividades', 'Unit 4 · Calendar plans'),
     subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')]] },
   { id:'u5', t:L('單元五　星期和日期推算', 'Unidad 5 · Calcular días y fechas', 'Unit 5 · Working out days'),
-    subs:[['relDay', L('大前天、前天、昨天、今天、明天、後天、大後天', 'Hace 3 días, anteayer, ayer, hoy, mañana, pasado mañana, en 3 días', '3 days ago … in 3 days (yesterday, today, tomorrow)')], ['relWeek', L('上星期、這星期、下星期', 'La semana pasada, esta, la próxima', 'Last, this, next week')], ['yearView', L('年曆：上個月、下個月、去年、明年', 'Año: mes pasado, próximo, año pasado…', 'Year view: last/next month, last/next year')]] },
+    subs:[['relDay', L('大前天、前天、昨天、今天、明天、後天、大後天', 'Hace 3 días, anteayer, ayer, hoy, mañana, pasado mañana, en 3 días', '3 days ago … in 3 days (yesterday, today, tomorrow)')], ['relWeek', L('上上星期、上星期、這星期、下星期、下下星期', 'Hace 2 semanas, la pasada, esta, la próxima, dentro de 2', '2 weeks ago … in 2 weeks (last, this, next week)')], ['yearView', L('年曆：上個月、下個月、前年、去年、明年、後年', 'Año: mes pasado, próximo, hace 2 años, año pasado…', 'Year view: last/next month, 2 years ago … next year…')]] },
   { id:'u6', t:L('單元六　聽力點日期', 'Unidad 6 · Escucha y señala el día', 'Unit 6 · Listen and tap the day'),
     subs:[['tapAbs', L('聽幾月幾號', 'Escucha la fecha', 'Listen to the date')], ['tapRelDay', L('聽昨天、明天、後天', 'Escucha ayer, mañana…', 'Listen to yesterday, tomorrow…')], ['tapRelWeek', L('聽上星期、下星期', 'Escucha la semana pasada / próxima', 'Listen to last / next week')]] }
 ];
