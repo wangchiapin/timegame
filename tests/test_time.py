@@ -375,6 +375,9 @@ if __name__ == '__main__':
         check(gp('二零二六年五月二十日五點十五分') == '年月日點', 'gap after 年月日點, none after final 分')
         check(gp('二零二六年五月二十日五點十五分三十秒') == '年月日點分', 'gap after 分 before 秒; final 秒 none')
         check(gp('五點半') == '', '五點半: no gap before 半')
+        check(gp('九點半早上') == '半', '九點半 + 早上: gap after 半 (not inside 早上 end)')
+        check(gp('十點整晚上') == '整', '十點整 + 晚上: gap after 整')
+        check(gp('一個半小時') == '', '一個半小時: no gap after 半 (only 點半)')
         check(gp('十五分鐘') == '', '分鐘 stays together')
         check(gp('二個月') == '', '二個月 final: no trailing gap')
         check(gp('二個月十五日') == '月', '二個月 then 日: gap after 月')
@@ -452,6 +455,8 @@ if __name__ == '__main__':
         r = pg.evaluate("({ h:!!document.querySelector('.fb .fbh'), n:document.querySelectorAll('.fb .fbr').length, m:App.cur.slots.length, tm:[...document.querySelectorAll('.fb .fbr .tm')].map(e=>e.innerText).join() === App.cur.slots.map(s=>s.label).join() })")
         check(r['h'] and r['n'] == r['m'] and r['tm'], 'match feedback: header bar + one row per slot, times in order (%s)' % r)
         pg.evaluate("startRound(['relDay'], 'mid', 'q', false, 10)"); pg.wait_for_timeout(50)
+        r = pg.evaluate("(() => { const o = document.querySelector('.opt'); return { line:getComputedStyle(o, '::after').content, w:getComputedStyle(o).fontWeight }; })()")
+        check(r['line'] in ('none', 'normal') and r['w'] == '500', 'options: no centre line through the text, medium weight (%s)' % r)
         answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("document.querySelector('.fb.ok .fbh') && !document.querySelector('.fb .fbr')"), 'ok feedback: green header, no list')
 

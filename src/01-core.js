@@ -240,11 +240,12 @@ function gapAfter(items){
     if ('年日號點秒'.includes(c)) ok = isNum(p);
     else if (c === '月') ok = isNum(p) || (p === '個' && isNum(arr[i - 2]));
     else if (c === '分') ok = isNum(p) && nx !== '鐘';
+    else if (c === '半' || c === '整') ok = p === '點';        // 五點半／五點整 後面也空一格（句中才會有，句尾不加）
     if (ok) set.add(i);
   }
   const str = arr.join(''); let m; GAP_WORDS.lastIndex = 0;
   while ((m = GAP_WORDS.exec(str))) set.add(m.index + m[0].length - 1);
-  return [...set].filter(i => i < n - 1 && !/[，。？！、：；,.?!:;\s（）()「」]/.test(arr[i + 1]) && !'半鐘'.includes(arr[i + 1]));
+  return [...set].filter(i => i < n - 1 && !/[，。？！、：；,.?!:;\s（）()「」]/.test(arr[i + 1]) && !'半鐘整'.includes(arr[i + 1]));
 }
 function lineHTML(text){
   const simp = Settings.script === 'simp', ph = Settings.phon;

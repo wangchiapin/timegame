@@ -18,8 +18,8 @@ h1,h2,h3{margin:0;font-weight:600}
 .ch .h{line-height:1.25}
 .ch .ph{font-size:.5em;line-height:1.15;color:var(--sub);white-space:nowrap;min-height:1.15em;font-weight:400}
 .ch.np{margin:0}
-.ch.gap{margin-right:.5em}
-.ch.np.gap{margin-right:.5em}
+.ch.gap{margin-right:.75em}
+.ch.np.gap{margin-right:.75em}
 
 /* 版面 */
 .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:10px 0}
@@ -232,9 +232,7 @@ html.tod-night body{background-image:repeating-linear-gradient(0deg,transparent 
 input[type=text]{background:var(--card)}
 
 /* 選項：像車站的翻牌時刻表 */
-.opt{background:#262624;color:var(--boardink);border:2px solid var(--edge);border-radius:4px;box-shadow:0 3px 0 #000;position:relative}
-.opt::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.7);box-shadow:0 1px 0 rgba(255,255,255,.07);pointer-events:none}
-.opt.img::after{display:none}
+.opt{background:#262624;color:var(--boardink);border:2px solid var(--edge);border-radius:4px;box-shadow:0 3px 0 #000;position:relative;font-weight:500}
 .opt .ph,.opt .tr,.opt .badge,.opt .small{color:var(--boardsub)}
 .opt:active{background:#33332f}
 .opt.ok{background:#1f3a2a;border-color:#86c792}
