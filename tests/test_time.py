@@ -221,7 +221,7 @@ LOGIC_JS = r'''
       } else {
         const dy = { '去年':-1, '明年':1, '前年':-2, '後年':2 }[w2];
         if (c.zh !== yearZh(y + dy)) E(tag + ' year answer ' + c.zh);
-        if (lv === 'easy' && Math.abs(dy) === 2) E(tag + ' 前年/後年 in easy');
+        if (lv !== 'hard' && Math.abs(dy) === 2) E(tag + ' 前年/後年 outside hard');
       }
     }
     if (['tapAbs','tapRelDay','tapRelWeek'].includes(id)){
@@ -330,7 +330,7 @@ if __name__ == '__main__':
         pg.route('**/*', route)
         pg.goto(PAGE); pg.wait_for_timeout(500)
         check(pg.evaluate("typeof GEN") == 'object', 'game loaded')
-        check(pg.evaluate("document.querySelectorAll('.unit').length") == 6, 'six units on start screen')
+        check(pg.evaluate("document.querySelectorAll('.unit').length") == 5, 'five units on start screen')
         # 齒輪設定：開始畫面和遊戲中都能打開、能改
         check(pg.evaluate("!document.querySelector('.setrow')") and pg.evaluate("!!document.querySelector('#gear')"), 'start screen has gear, no inline settings')
         pg.click('#gear'); check(pg.evaluate("document.querySelectorAll('.overlay .setrow').length") == 5, 'settings panel has 5 rows')
@@ -368,8 +368,8 @@ if __name__ == '__main__':
         check(bad == 0, 'makeMonth: right count, no look-alike events together')
         print('== 大前天、大後天')
         cnt = pg.evaluate("(() => { const r = {}; for (const lv of ['easy','mid','hard']) for (const g of ['relDay','tapRelDay']){ let n = 0; for (let k = 0; k < 400; k++){ const q = GEN[g](lv); const z = q.line ? q.line.zh : q.audio; if (/^大(前|後)天/.test(z)) n++; } r[lv + '/' + g] = n; } return r; })()")
-        check(cnt['easy/relDay'] == 0 and cnt['easy/tapRelDay'] == 0, 'easy never uses 大前天/大後天: %s' % cnt)
-        check(all(cnt[k] > 20 for k in cnt if not k.startswith('easy')), 'mid/hard use 大前天/大後天 regularly: %s' % cnt)
+        check(all(cnt[k] == 0 for k in cnt if not k.startswith('hard')), 'easy/mid never use 大前天/大後天: %s' % cnt)
+        check(all(cnt[k] > 20 for k in cnt if k.startswith('hard')), 'hard uses 大前天/大後天 regularly: %s' % cnt)
         print('== 詞間空隔（只影響畫面）')
         gp = lambda z: pg.evaluate("(z) => gapAfter(parseLine(z)).map(i => Array.from(z)[i]).join('')", z)
         check(gp('二零二六年五月二十日五點十五分') == '年月日點', 'gap after 年月日點, none after final 分')
@@ -420,14 +420,16 @@ if __name__ == '__main__':
 
         print('== 上上/下下星期、前年/後年、聽力顯示念的題目')
         r = pg.evaluate("""() => { const o = {};
-          for (const [id, lv] of [['relWeek','mid'],['tapRelWeek','mid'],['relWeek','easy'],['tapRelWeek','easy']]){ const k = id + lv; o[k] = new Set(); for (let i = 0; i < 400; i++){ const q = GEN[id](lv); const z = q.line ? q.line.zh : q.audio; const m = z.match(/^(上上|下下|上|下|這)星期/); if (m) o[k].add(m[1]); } o[k] = [...o[k]]; }
-          const y = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('mid'); y.add(q.line.zh.slice(0,2)); }
+          for (const [id, lv] of [['relWeek','hard'],['tapRelWeek','hard'],['relWeek','mid'],['tapRelWeek','mid'],['relWeek','easy'],['tapRelWeek','easy']]){ const k = id + lv; o[k] = new Set(); for (let i = 0; i < 400; i++){ const q = GEN[id](lv); const z = q.line ? q.line.zh : q.audio; const m = z.match(/^(上上|下下|上|下|這)星期/); if (m) o[k].add(m[1]); } o[k] = [...o[k]]; }
+          const y = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('mid'); y.add(q.line.zh.slice(0,2)); } const yh = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('hard'); yh.add(q.line.zh.slice(0,2)); } o.yh = [...yh];
           const ye = new Set(); for (let i = 0; i < 400; i++){ const q = GEN.yearView('easy'); ye.add(q.line.zh.slice(0,2)); }
-          const t = GEN.tapAbs('mid'); o.say = t.fb.say === t.audio; o.y = [...y]; o.ye = [...ye]; return o; }""")
-        check('上上' in r['relWeekmid'] and '下下' in r['relWeekmid'] and '上上' in r['tapRelWeekmid'], 'mid has 上上/下下星期 (%s)' % r['relWeekmid'])
-        check('上上' not in r['relWeekeasy'] and '下下' not in r['tapRelWeekeasy'], 'easy has no 上上/下下')
-        check('前年' in r['y'] and '後年' in r['y'], 'mid year has 前年/後年 (%s)' % r['y'])
-        check('前年' not in r['ye'], 'easy year has no 前年')
+          const t = GEN.tapAbs('mid'); o.say = t.fb.say === t.audio; o.hasDbl = o.relWeekhard.includes('上上') && o.relWeekhard.includes('下下') && o.tapRelWeekhard.includes('上上'); o.y = [...y]; o.ye = [...ye]; return o; }""")
+        check('上' in r['relWeekmid'] and '上上' not in r['relWeekmid'] and '下下' not in r['tapRelWeekmid'], 'mid has 上星期 but no 上上/下下 (%s)' % r['relWeekmid'])
+        check('上' not in r['relWeekeasy'] and '上上' not in r['relWeekeasy'], 'easy only 這/下 星期 (%s)' % r['relWeekeasy'])
+        check('前年' not in r['y'] and '後年' not in r['y'] and '去年' in r['y'], 'mid year has 去年/明年 but no 前年/後年 (%s)' % r['y'])
+        check('去年' not in r['ye'] and '前年' not in r['ye'], 'easy year has no year words')
+        check(r['hasDbl'], 'hard has 上上/下下星期')
+        check('前年' in r['yh'] and '後年' in r['yh'], 'hard year has 前年/後年 (%s)' % r['yh'])
         check(r['say'], 'tap question feedback shows the spoken sentence')
         pg.evaluate("startRound(['tapAbs'], 'mid', 't', false)"); pg.wait_for_timeout(50)
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
@@ -452,6 +454,17 @@ if __name__ == '__main__':
         pg.evaluate("startRound(['relDay'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
         answer(pg, True); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("document.querySelector('.fb.ok .fbh') && !document.querySelector('.fb .fbr')"), 'ok feedback: green header, no list')
+
+        print('== 五個單元（聽力點日期併入單元四、五）')
+        u = pg.evaluate("UNITS.map(x => [x.id, x.subs.map(s => s[0])])")
+        check(len(u) == 5 and [x[0] for x in u] == ['u1','u2','u3','u4','u5'], 'five units (%s)' % [x[0] for x in u])
+        d = dict(u)
+        check('tapAbs' in d['u4'] and 'tapRelDay' in d['u5'] and 'tapRelWeek' in d['u5'], 'tap questions moved into u4/u5')
+        check(sorted(sum(d.values(), [])) == sorted(pg.evaluate("Object.keys(GEN)")), 'every question type is in exactly one unit')
+        r = pg.evaluate("""() => { const o = {}; for (const lv of ['easy','mid','hard']) for (const g of ['relDay','tapRelDay']){ const s = new Set(); for (let k = 0; k < 500; k++){ const q = GEN[g](lv); const z = q.line ? q.line.zh : q.audio; const m = z.match(/^(大前天|大後天|前天|後天|昨天|明天)/); if (m) s.add(m[1]); } o[lv + '/' + g] = [...s].sort().join(); } return o; }""")
+        check(all(v == '明天,昨天' for k, v in r.items() if k.startswith('easy')), 'easy 昨天/明天 only: %s' % r)
+        check(all(v == '前天,後天,明天,昨天' for k, v in r.items() if k.startswith('mid')), 'mid adds 前天/後天: %s' % r)
+        check(all(len(v.split(',')) == 6 for k, v in r.items() if k.startswith('hard')), 'hard has all six: %s' % r)
 
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:

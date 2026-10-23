@@ -473,7 +473,7 @@ function todayVisual(T, extra){ return Object.assign({ type:'cal', y:T.y, m:T.m,
 function dateOpt(t, why){ return { zh:monthZh(t.m) + dayZh(t.d, '號'), why:why || 'val', d:fmtDate(t.y, t.m, t.d, false) }; }
 
 function gRelDay(lv){
-  const T = randToday(), offs = lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3], off = pick(offs), ring = lv === 'easy' ? [-2, -1, 0, 1, 2] : [-3, -2, -1, 0, 1, 2, 3];
+  const T = randToday(), offs = REL_OFFS[lv] || REL_OFFS.hard, off = pick(offs), ring = lv === 'hard' ? [-3, -2, -1, 0, 1, 2, 3] : [-2, -1, 0, 1, 2];
   const askWeek = lv === 'easy' ? true : lv === 'mid' ? Math.random() < 0.5 : Math.random() < 0.3;
   const tg = addDays(T.y, T.m, T.d, off), word = REL_DAYS[String(off)];
   const lt = REL_DAYS_L[String(off)];
@@ -498,10 +498,12 @@ function gRelDay(lv){
     fb:{ ansZh, extra:'今天 ' + fmtDate(T.y, T.m, T.d, true) + '（' + dayName(T.w) + '）' } };
 }
 
+const REL_OFFS = { easy:[-1, 1], mid:[-2, -1, 1, 2], hard:[-3, -2, -1, 1, 2, 3] };
+const REL_WOFFS = { easy:[0, 1], mid:[-1, 0, 1], hard:[-2, -1, 0, 1, 2] };
 const REL_WEEK = { '-2':['上上', 'hace dos semanas', 'two weeks ago'], '2':['下下', 'dentro de dos semanas', 'two weeks from now'], '-1':['上', 'la semana pasada', 'last week'], '0':['這', 'esta semana', 'this week'], '1':['下', 'la próxima semana', 'next week'] };
 function gRelWeek(lv){
   for (let g = 0; g < 200; g++){
-    const T = randToday(), wOff = pick(lv === 'easy' ? [0, 1] : [-2, -1, 0, 1, 2]), X = randInt(1, 5);
+    const T = randToday(), wOff = pick(REL_WOFFS[lv] || REL_WOFFS.hard), X = randInt(1, 5);
     if (wOff === 0 && X === T.w) continue;
     const mondayOff = -((T.w + 6) % 7);
     const tg = addDays(T.y, T.m, T.d, mondayOff + wOff * 7 + (X - 1));
@@ -525,7 +527,7 @@ function gRelWeek(lv){
 function gYearView(lv){
   const cross = lv === 'hard' && Math.random() < 0.5;
   const y = randInt(2025, 2028), m = cross ? pick([1, 12]) : randInt(2, 11), d = randInt(1, 28);
-  const kinds = lv === 'easy' ? ['pm', 'nm'] : lv === 'mid' ? ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'] : ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'];
+  const kinds = lv === 'easy' ? ['pm', 'nm'] : lv === 'mid' ? ['pm', 'nm', 'ly', 'ny'] : ['pm', 'nm', 'ly', 'ny', 'l2', 'n2'];
   let kind = pick(kinds);
   if (cross){ kind = m === 1 ? pick(['pm', 'ly']) : pick(['nm', 'ny']); }
   const vis = { type:'ycal', y, m, d };
@@ -568,7 +570,7 @@ function gTapAbs(lv){
   q.id = 'tapAbs'; return q;
 }
 function gTapRelDay(lv){
-  const T = randToday(), ev = pick(EVENTS), off = pick(lv === 'easy' ? [-1, 1] : [-3, -2, -1, 1, 2, 3]);
+  const T = randToday(), ev = pick(EVENTS), off = pick(REL_OFFS[lv] || REL_OFFS.hard);
   const tg = addDays(T.y, T.m, T.d, off), past = off < 0, lt = REL_DAYS_L[String(off)];
   const zh = REL_DAYS[String(off)] + '我' + (past ? ev.past : ev.fut);
   const q = tapQuestion(T, tg, zh, [lt[0][0].toUpperCase() + lt[0].slice(1), lt[1][0].toUpperCase() + lt[1].slice(1)], ev, past);
@@ -576,7 +578,7 @@ function gTapRelDay(lv){
 }
 function gTapRelWeek(lv){
   for (let g = 0; g < 200; g++){
-    const T = randToday(), ev = pick(EVENTS), wOff = pick(lv === 'easy' ? [0, 1] : [-2, -1, 0, 1, 2]), X = randInt(1, 5);
+    const T = randToday(), ev = pick(EVENTS), wOff = pick(REL_WOFFS[lv] || REL_WOFFS.hard), X = randInt(1, 5);
     if (wOff === 0 && X === T.w) continue;
     const tg = addDays(T.y, T.m, T.d, -((T.w + 6) % 7) + wOff * 7 + (X - 1));
     if (!sameMonth(T, tg)) continue;
@@ -602,11 +604,9 @@ const UNITS = [
   { id:'u3', t:L('單元三　一天的行程', 'Unidad 3 · El horario del día', 'Unit 3 · A day’s schedule'),
     subs:[['schedMatch', L('行程配對時間', 'Une cada actividad con su hora', 'Match plans to times')], ['schedListen', L('聽行程選答案', 'Escucha la actividad y elige', 'Listen to the plan')], ['periodChoice', L('早上、中午、下午、晚上', 'Mañana, mediodía, tarde, noche', 'Morning, noon, afternoon, evening')]] },
   { id:'u4', t:L('單元四　月曆行事曆', 'Unidad 4 · Calendario de actividades', 'Unit 4 · Calendar plans'),
-    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')]] },
+    subs:[['calFindDay', L('哪一天要做什麼？（點日期）', '¿Qué día? (toca el día)', 'Which day? (tap it)')], ['calWhatDo', L('這一天要做什麼？', '¿Qué hay ese día?', 'What is on that day?')], ['calWhatTime', L('幾點要做？', '¿A qué hora?', 'At what time?')], ['tapAbs', L('聽幾月幾號，點日期', 'Escucha la fecha y toca el día', 'Listen to the date, tap the day')]] },
   { id:'u5', t:L('單元五　星期和日期推算', 'Unidad 5 · Calcular días y fechas', 'Unit 5 · Working out days'),
-    subs:[['relDay', L('大前天、前天、昨天、今天、明天、後天、大後天', 'Hace 3 días, anteayer, ayer, hoy, mañana, pasado mañana, en 3 días', '3 days ago … in 3 days (yesterday, today, tomorrow)')], ['relWeek', L('上上星期、上星期、這星期、下星期、下下星期', 'Hace 2 semanas, la pasada, esta, la próxima, dentro de 2', '2 weeks ago … in 2 weeks (last, this, next week)')], ['yearView', L('年曆：上個月、下個月、前年、去年、明年、後年', 'Año: mes pasado, próximo, hace 2 años, año pasado…', 'Year view: last/next month, 2 years ago … next year…')]] },
-  { id:'u6', t:L('單元六　聽力點日期', 'Unidad 6 · Escucha y señala el día', 'Unit 6 · Listen and tap the day'),
-    subs:[['tapAbs', L('聽幾月幾號', 'Escucha la fecha', 'Listen to the date')], ['tapRelDay', L('聽昨天、明天、後天', 'Escucha ayer, mañana…', 'Listen to yesterday, tomorrow…')], ['tapRelWeek', L('聽上星期、下星期', 'Escucha la semana pasada / próxima', 'Listen to last / next week')]] }
+    subs:[['relDay', L('昨天、今天、明天（到大前天、大後天）', 'Ayer, hoy, mañana (hasta hace 3 días / en 3 días)', 'Yesterday, today, tomorrow (up to 3 days)')], ['relWeek', L('上星期、這星期、下星期（到上上、下下）', 'La semana pasada, esta, la próxima (hasta 2 semanas)', 'Last, this, next week (up to 2 weeks)')], ['yearView', L('年曆：上個月、下個月、去年、明年（到前年、後年）', 'Año: mes pasado, próximo, año pasado… (hasta 2 años)', 'Year view: last/next month, year (up to 2 years)')], ['tapRelDay', L('聽昨天、明天…，點日期', 'Escucha ayer, mañana… y toca el día', 'Listen to yesterday, tomorrow… and tap')], ['tapRelWeek', L('聽上星期、下星期…，點日期', 'Escucha la semana pasada / próxima y toca el día', 'Listen to last / next week and tap')]] }
 ];
 const ALL_IDS = Object.keys(GEN);
 const qSig = q => [q.id, q.line && q.line.zh, q.audio, JSON.stringify(q.visual), JSON.stringify(q.target), q.cards && q.cards.map(c => c.zh + '|' + c.slot).join(',')].join('#');
