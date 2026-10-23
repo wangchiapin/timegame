@@ -75,6 +75,8 @@ input[type=text]{width:100%;border:1px solid var(--line);border-radius:8px;paddi
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
 .opts.one{grid-template-columns:1fr}
 .opt{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 8px;min-height:64px;font-size:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.opt .zrow{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;column-gap:.7em}
+.opt .zrow .badge{line-height:1.25;padding-bottom:.1em}
 .opt .badge{font-size:15px;color:var(--sub);font-variant-numeric:tabular-nums}
 .opt .tr{font-size:12px}
 .opt svg{width:100%;max-width:150px;height:auto}
@@ -730,7 +732,7 @@ function gClockListen(lv){
   return { id:'clockListen', kind:'choice',
     instr:variant === 'text' ? L('請聽，選出正確的時間。', 'Escucha y elige la hora correcta.', 'Listen and choose the correct time.')
                              : L('請聽，選出正確的時鐘。', 'Escucha y elige el reloj correcto.', 'Listen and choose the correct clock.'),
-    line:null, visual:null, audio:zh, peek:zh, optClass:variant === 'clock' ? 'clk' : '',
+    line:null, visual:null, audio:zh, peek:variant === 'clock' ? zh : undefined, optClass:variant === 'clock' ? 'clk' : '',
     options, fb:{ ansZh:zh, extra:digital(h, m, s) } };
 }
 
@@ -868,7 +870,7 @@ function gSchedListen(lv){
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
   return { id:'schedListen', kind:'choice',
     instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
-    line:null, visual:null, audio:zh, peek:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
+    line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
     fb:{ ansZh:zh, extra:lab } };
 }
@@ -1370,8 +1372,11 @@ function startRound(spec, lv, label, isMix){
 function optHTML(o){
   let h = '';
   if (o.svg) h += o.svg;
-  if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
-  if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
+  if (o.zh && o.badge) h += `<div class="zrow"><span>${lineHTML(o.zh)}</span><span class="badge">${esc(o.badge)}</span></div>`;
+  else {
+    if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
+    if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
+  }
   if (o.gloss){ const t = trOf(o.gloss); if (t) h += `<span class="tr">${esc(t)}</span>`; }
   return h;
 }

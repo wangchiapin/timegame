@@ -328,6 +328,18 @@ if __name__ == '__main__':
         pg.evaluate("startRound(['dateListen'], 'easy', 'dateListen', false)")
         check(pg.evaluate("!document.querySelector('#peek') && !document.querySelector('#peekBox') && !!document.querySelector('#hear')") and 'undefined' not in pg.evaluate("document.body.innerText"), 'dateListen: no 看文字 button, no undefined, 聽 button present')
         pg.evaluate("renderStart()")
+        for sub, lvl in [('schedListen','easy'),('clockListen','easy')]:
+            pk = []
+            for _ in range(30):
+                pg.evaluate("startRound(['%s'], '%s', '%s', false)" % (sub, lvl, sub))
+                pk.append(pg.evaluate("[App.cur.options[0].svg ? 'clock' : 'text', !!document.querySelector('#peek')]"))
+            if sub == 'schedListen':
+                check(all(not x[1] for x in pk), 'schedListen: never a 看文字 button')
+            else:
+                check(all(x[1] == (x[0] == 'clock') for x in pk) and any(x[0]=='text' for x in pk) and any(x[0]=='clock' for x in pk), 'clockListen: 看文字 only on the clock-face version')
+        pg.evaluate("startRound(['schedListen'], 'easy', 's', false)")
+        check(pg.evaluate("document.querySelectorAll('.opt .zrow .badge').length") == 4 or pg.evaluate("document.querySelectorAll('.opt .zrow .badge').length") >= 4, 'schedListen cards: time sits next to the Chinese')
+        pg.evaluate("renderStart()")
         print('== 詞間空隔（只影響畫面）')
         gp = lambda z: pg.evaluate("(z) => gapAfter(parseLine(z)).map(i => Array.from(z)[i]).join('')", z)
         check(gp('二零二六年五月二十日五點十五分') == '年月日點', 'gap after 年月日點, none after final 分')

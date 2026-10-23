@@ -157,7 +157,7 @@ function gClockListen(lv){
   return { id:'clockListen', kind:'choice',
     instr:variant === 'text' ? L('請聽，選出正確的時間。', 'Escucha y elige la hora correcta.', 'Listen and choose the correct time.')
                              : L('請聽，選出正確的時鐘。', 'Escucha y elige el reloj correcto.', 'Listen and choose the correct clock.'),
-    line:null, visual:null, audio:zh, peek:zh, optClass:variant === 'clock' ? 'clk' : '',
+    line:null, visual:null, audio:zh, peek:variant === 'clock' ? zh : undefined, optClass:variant === 'clock' ? 'clk' : '',
     options, fb:{ ansZh:zh, extra:digital(h, m, s) } };
 }
 
@@ -295,7 +295,7 @@ function gSchedListen(lv){
   const wr = [].concat(sameAct.slice(0, 1), otherAct.filter(w => w.badge === lab).slice(0, 1), picked);
   return { id:'schedListen', kind:'choice',
     instr:L('請聽，選出正確的行程和時間。', 'Escucha y elige la actividad y la hora correctas.', 'Listen and choose the right activity and time.'),
-    line:null, visual:null, audio:zh, peek:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
+    line:null, visual:null, audio:zh, optClass:'cardopt', dbg:{ short:a.short, H, m, withPeriod },
     options:mkOptions(card(a, H, m, null), wr),
     fb:{ ansZh:zh, extra:lab } };
 }

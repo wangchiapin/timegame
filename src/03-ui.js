@@ -219,8 +219,11 @@ function startRound(spec, lv, label, isMix){
 function optHTML(o){
   let h = '';
   if (o.svg) h += o.svg;
-  if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
-  if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
+  if (o.zh && o.badge) h += `<div class="zrow"><span>${lineHTML(o.zh)}</span><span class="badge">${esc(o.badge)}</span></div>`;
+  else {
+    if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
+    if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
+  }
   if (o.gloss){ const t = trOf(o.gloss); if (t) h += `<span class="tr">${esc(t)}</span>`; }
   return h;
 }
