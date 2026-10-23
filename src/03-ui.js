@@ -217,6 +217,7 @@ function startRound(spec, lv, label, isMix, nOver){
   const n = nOver || (isMix ? 50 : 25);
   App.round = { spec, lv, label, isMix, n };
   App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
+  try{ if (window.HGPlays) HGPlays.start(String(label) + '-' + lv); }catch(e){}   // 遊玩紀錄：真的開始一局
   renderQ();
 }
 /* 時間放在中文前面（語序同中文），字體大小、格式和旁邊的漢字一樣；上下留空白行，跟有拼音／注音的漢字對齊 */
@@ -422,6 +423,7 @@ function showResult(){
   const msg = ratio >= 0.9 ? L('太棒了！', '¡Excelente!', 'Excellent!') : ratio >= 0.7 ? L('很好！', '¡Muy bien!', 'Well done!') : ratio >= 0.5 ? L('不錯，再練習一下。', 'Bien, practica un poco más.', 'Good, keep practicing.') : L('再試一次，你可以的！', 'Inténtalo otra vez, ¡puedes!', 'Try again, you can do it!');
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
+  try{ if (window.HGPlays) HGPlays.end({ score: App.score, secs: Math.round((Date.now() - App.t0) / 1000) }); }catch(e){}   // 遊玩紀錄：跑到結算畫面
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h; window.scrollTo(0, 0);
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));

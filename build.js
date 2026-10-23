@@ -33,6 +33,7 @@ ${K('voicehint.js')}
 <script>
 ${K('copyright.js')}
 </script>
+${K('plays.js').replace(/REPLACE_GAME_ID/g, 'hora')}
 </body>
 </html>
 `;

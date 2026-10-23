@@ -4,7 +4,7 @@
 
 - **網址：** https://wangchiapin.github.io/timegame/
 - **形式：** 單一檔案 `index.html`（由 `src/` 底下的檔案和 game-kit 的共用零件合成，見下方「修改程式」）
-- **Firebase：** 沒有接（沒有排行榜、遊玩紀錄、名字欄）；也不記錄最高分
+- **Firebase：** 只接「遊玩紀錄」（game-kit 的 `plays.js`，遊戲代號 `hora`，寫到 memorma 的 `plays`／`visits`，匿名登入）；沒有排行榜、名字欄，也不記錄最高分
 - **狀態：** 第一版（2026-10-22）
 
 ## 玩法
@@ -84,7 +84,8 @@
 - 已檢查三種時段 × 拼音／注音／兩者並列，答對、答錯狀態的文字對比度都在 4.5 以上（月曆週末紅色與答對標題條的顏色因此略為調深）。
 
 ## 其他
-- 沒有 Firebase：不需要 Firestore 規則，也不會出現在分享區的排行榜總覽與遊玩紀錄後台。
+- 遊玩紀錄：`build.js` 把 `plays.js` 貼在 `</body>` 前；`startRound()` 呼叫 `HGPlays.start('單元代號-難度')`，`showResult()` 呼叫 `HGPlays.end({score, secs})`；中途回主選單的那一局後台會顯示「沒玩完」。沒有暱稱欄，後台顯示「匿名裝置」。用既有的 plays／visits 規則，不用另外貼規則；失敗時靜默，不影響遊戲。後台「📈 遊玩紀錄」的遊戲名單已加「練習時間」。
+- 沒有排行榜，所以不會出現在分享區的排行榜總覽。
 - 靜音鈕用 game-kit 的 `mute.js`；語音提示用 `voicehint.js`。
 - 版權說明用 game-kit 的 `copyright.js`（放在頁面最後面，不釘在畫面上）。
 

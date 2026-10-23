@@ -524,7 +524,7 @@ if __name__ == '__main__':
         run_round(pg, True)
         check(pg.evaluate("App.score") == 100, 'mixed challenge perfect = 100')
         pg.wait_for_timeout(600)
-        check(pg.evaluate("!document.body.innerHTML.includes('firebase')"), 'no firebase')
+        check(pg.evaluate("!document.querySelector('#app').innerHTML.toLowerCase().includes('firebase') && !document.querySelector('input')"), 'no firebase text or name field in the game UI')
 
         print('== 設定組合（字形 × 語言 × 拼音）：每種都跑完一輪')
         combos = [('trad','es','pinyin'), ('simp','en','zhuyin'), ('trad','zh','both'), ('simp','es','off')]
@@ -535,6 +535,22 @@ if __name__ == '__main__':
                 run_round(pg, True)
             check(pg.evaluate("document.body.innerText.length") > 20, 'settings %s/%s/%s ok' % (s, l, ph))
         pg.evaluate("Settings.script='trad'; Settings.lang='es'; Settings.phon='pinyin'; writeSettings(Settings)")
+
+        # 遊玩紀錄（HGPlays）：訪客、開始、結算
+        pg.evaluate("localStorage.removeItem('hg.visit.hora')")
+        pg.goto(PAGE); pg.wait_for_timeout(3600)
+        def pops(k): return pg.evaluate("(window.__ops||[]).filter(o=>o.k=='%s')" % k)
+        vis = [o for o in pops('set') if o['p'].startswith('visits/')]
+        check(len(vis) == 1 and vis[0]['d']['game'] == 'hora' and vis[0]['p'].endswith('_hora_UID1'), 'plays: visit doc %s' % (vis[0]['p'] if vis else None))
+        pg.evaluate("startRound(['clockChoice'],'easy','u1',false, 3)"); pg.wait_for_timeout(300)
+        a = pops('add')
+        check(len(a) == 1 and a[0]['p'] == 'plays' and a[0]['d']['game'] == 'hora' and a[0]['d']['level'] == 'u1-easy' and a[0]['d']['done'] == False, 'plays: start doc %s' % (a[0]['d'] if a else None))
+        run_round(pg, True); pg.wait_for_timeout(400)
+        u2 = pops('update')
+        check(len(u2) == 1 and u2[0]['d']['done'] == True and u2[0]['d']['score'] > 0, 'plays: end doc %s' % (u2[0]['d'] if u2 else None))
+        pg.evaluate("startRound(['clockChoice'],'easy','u1',false, 3)"); pg.wait_for_timeout(300)
+        pg.evaluate("renderStart()"); pg.wait_for_timeout(300)
+        check(len(pops('add')) == 2 and len(pops('update')) == 1, 'plays: unfinished round stays 沒玩完')
 
         check(not errs, 'no page errors / console errors: %s' % errs[:5])
 
