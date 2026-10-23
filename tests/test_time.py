@@ -338,7 +338,7 @@ if __name__ == '__main__':
             else:
                 check(all(x[1] == (x[0] == 'clock') for x in pk) and any(x[0]=='text' for x in pk) and any(x[0]=='clock' for x in pk), 'clockListen: 看文字 only on the clock-face version')
         pg.evaluate("startRound(['schedListen'], 'easy', 's', false)")
-        check(pg.evaluate("document.querySelectorAll('.opt .zrow .badge').length") == 4 or pg.evaluate("document.querySelectorAll('.opt .zrow .badge').length") >= 4, 'schedListen cards: time sits next to the Chinese')
+        check(pg.evaluate("[...document.querySelectorAll('.opt .zrow')].length >= 4 && [...document.querySelectorAll('.opt .zrow')].every(r => /^\\d{1,2}:\\d\\d$/.test(r.children[0].textContent.replace(/\\s/g,'')) && r.children[1].textContent.replace(/\\s/g,'').length > 0)"), 'schedListen cards: time comes first, same order as Chinese, in the same character format')
         pg.evaluate("renderStart()")
         print('== 詞間空隔（只影響畫面）')
         gp = lambda z: pg.evaluate("(z) => gapAfter(parseLine(z)).map(i => Array.from(z)[i]).join('')", z)

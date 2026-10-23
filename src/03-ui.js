@@ -216,10 +216,15 @@ function startRound(spec, lv, label, isMix){
   App.qs = makeQuestions(spec, lv, n); App.i = 0; App.score = 0; App.right = 0; App.t0 = Date.now();
   renderQ();
 }
+/* 時間放在中文前面（語序同中文），字體大小、格式和旁邊的漢字一樣；上下留空白行，跟有拼音／注音的漢字對齊 */
+function timeChunk(t){
+  const ph = Settings.phon, top = ph === 'pinyin' || ph === 'both', bot = ph === 'zhuyin' || ph === 'both';
+  return `<span class="ch np">${top ? '<span class="ph">&nbsp;</span>' : ''}<span class="h">${esc(t)}</span>${bot ? '<span class="ph">&nbsp;</span>' : ''}</span>`;
+}
 function optHTML(o){
   let h = '';
   if (o.svg) h += o.svg;
-  if (o.zh && o.badge) h += `<div class="zrow"><span>${lineHTML(o.zh)}</span><span class="badge">${esc(o.badge)}</span></div>`;
+  if (o.zh && o.badge) h += `<div class="zrow"><span>${timeChunk(o.badge)}</span><span>${lineHTML(o.zh)}</span></div>`;
   else {
     if (o.zh) h += `<div>${lineHTML(o.zh)}</div>`;
     if (o.badge) h += `<div class="badge">${esc(o.badge)}</div>`;
