@@ -433,6 +433,17 @@ if __name__ == '__main__':
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("!!document.querySelector('.fb .say')"), 'tap feedback renders .say')
 
+        print('== 所有聽力題答完都顯示念的句子')
+        for sub in ['clockListen', 'dateListen', 'schedListen', 'tapAbs', 'tapRelDay', 'tapRelWeek', 'clockSet']:
+            pg.evaluate("startRound(['%s'], 'mid', 'q', false)" % sub); pg.wait_for_timeout(50)
+            has_audio = pg.evaluate("!!document.querySelector('#hear')")
+            answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
+            say = pg.evaluate("(document.querySelector('.fb .say')||{}).innerText||''")
+            if has_audio: check(len(say) > 1, '%s shows spoken sentence after answer (%r)' % (sub, say[:20]))
+        pg.evaluate("startRound(['relDay'], 'mid', 'q', false)"); pg.wait_for_timeout(50)
+        answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
+        check(pg.evaluate("!document.querySelector('.fb .say')"), 'non-listening question shows no .say')
+
         print('== 故意答錯：不當機、不給分')
         for sub in ALL_SUBS:
             pg.evaluate("startRound(['%s'], 'mid', '%s', false)" % (sub, sub))

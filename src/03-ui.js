@@ -314,7 +314,8 @@ function showFeedback(ok, q, chosen, extraHTML){
   if (!ok) h += `<div class="small" style="margin-top:8px">${Li(STR.correctIs)}</div>`;
   h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
   if (q.fb.extra) h += `<div class="small">${esc(q.fb.extra)}</div>`;
-  if (q.fb.say) h += `<div class="say">${lineHTML(q.fb.say)}</div>`;
+  const say = q.fb.say || q.audio;
+  if (say) h += `<div class="say">${lineHTML(say)}</div>`;
   if (q.fb.trans){ const t = Settings.lang === 'es' ? q.fb.trans.es : Settings.lang === 'en' ? q.fb.trans.en : ''; if (t) h += `<div class="small">${esc(t)}</div>`; }
   h += '</div>';
   $('#fb').innerHTML = h;
