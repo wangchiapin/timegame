@@ -12,7 +12,7 @@ const html = `<!doctype html>
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#ebe5d6">
 <title>練習時間 · ¿Qué hora es?</title>
 <style>

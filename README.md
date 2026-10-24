@@ -153,3 +153,11 @@ build.js         合成單一 index.html（需要 game-kit/parts/ 的零件；�
 
 ## 測試
 `python3 tests/test_time.py [截圖資料夾]`（Playwright；語音用替身，網路全部封鎖）：獨立重算答案檢查出題、字典涵蓋、整個流程點擊、畫面截圖。
+
+## 手機瀏覽器備註：捲動後回不到頂端（2026-10-24）
+iPhone 版 Chrome 上，頁面可以捲動時，往下捲之後有時回不到最上面（Safari 正常）。
+處理方式（已套用在本遊戲）：
+- `<meta name="viewport">` 設 `maximum-scale=1`，不使用 `viewport-fit=cover`。
+- `<html>` 加 `html{color-scheme:light}`。
+
+兩項一起改後，手機 Chrome 測試恢復正常；尚未分開測是哪一項有效。新增頁面請照這個寫。
