@@ -501,6 +501,7 @@ const DICT_SRC = `
 號 hào 号
 星 xīng
 期 qí
+週 zhōu 周
 天 tiān
 上 shàng
 下 xià
@@ -781,6 +782,7 @@ const WHY = {
   val:      L('日期的數字不對，再看一次月曆。', 'Los números de la fecha no coinciden. Mira otra vez el calendario.', 'The numbers in the date do not match. Look at the calendar again.'),
   weekWrong:L('星期不對，看一下月曆最上面的星期。', 'El día de la semana no es correcto; mira la cabecera del calendario.', 'The weekday is wrong; check the header of the calendar.'),
   sevenWk:  L('星期天（星期日）不說「星期七」。', 'El domingo es 星期天 o 星期日, no 星期七.', 'Sunday is 星期天 or 星期日, never 星期七.'),
+  zhouTian: L('星期日只說「星期天」或「星期日」，不說「週天」。', 'El domingo se dice 星期天 o 星期日, no 週天.', 'Sunday is 星期天 or 星期日, never 週天.'),
   wk:       L('星期不對，再看一次月曆。', 'El día de la semana no es correcto. Mira otra vez el calendario.', 'That is not the right weekday. Look at the calendar again.'),
   periodOrder:L('時段要放在前面：「早上七點」，不是「七點早上」。', 'El momento del día va primero: 早上七點, no 七點早上.', 'The part of the day comes first: 早上七點, not 七點早上.'),
   pmAm:     L('早上、中午、下午、晚上要和 24 小時制對起來：下午三點是 15:00。', 'Mañana, mediodía, tarde y noche se corresponden con el reloj de 24 horas: 下午三點 son las 15:00.', 'Morning, noon, afternoon and evening map to the 24-hour clock: 下午三點 is 15:00.'),
@@ -966,6 +968,8 @@ function gWeekdayChoice(lv){
   const correct = wkZh(dow, sun);
   const wrongs = shuffle([0, 1, 2, 3, 4, 5, 6].filter(x => x !== dow)).map(x => ({ zh:wkZh(x, sun), why:'wk' }));
   if (lv !== 'easy' && Math.random() < (dow === 0 ? 0.9 : 0.4)) wrongs.unshift({ zh:'星期七', why:'sevenWk' });
+  // 答案是星期天／星期日時，另外有機會放「週天」當錯誤選項（沒有人把週天當星期日說）
+  if (lv !== 'easy' && dow === 0 && Math.random() < 0.5) wrongs.unshift({ zh:'週天', why:'zhouTian' });
   return { id:'weekdayChoice', kind:'choice',
     instr:L('找到那一天，選出星期幾。', 'Busca el día y elige el día de la semana.', 'Find the day and choose the weekday.'),
     line:{ zh:numZh(m) + '月' + numZh(d) + st + '是星期幾？', es:'¿Qué día de la semana es el ' + d + ' de ' + MONTHS_ES[m - 1] + '?', en:'What day of the week is ' + MONTHS_EN[m - 1] + ' ' + d + '?' },

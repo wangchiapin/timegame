@@ -106,6 +106,14 @@ LOGIC_JS = r'''
       if (q.line.zh !== numZh(m) + '月' + numZh(d) + st + '是星期幾？') E(tag + ' bad line ' + q.line.zh);
       q.options.filter(o => !o.ok).forEach(o => { if (valid.has(o.zh)) E(tag + ' wrong valid ' + o.zh); });
       const sundays = q.options.filter(o => o.zh === '星期天' || o.zh === '星期日'); if (sundays.length > 1) E(tag + ' both 天 and 日');
+      // 「週天」只能是錯誤選項，只出現在答案是星期天／星期日的題目，簡單難度不出現，說明用 zhouTian
+      q.options.forEach(o => {
+        if (o.zh !== '週天') return;
+        if (o.ok) E(tag + ' 週天 must be wrong');
+        if (weekdayOf(y, m, d) !== 0) E(tag + ' 週天 on non-Sunday answer');
+        if (lv === 'easy') E(tag + ' 週天 in easy');
+        if (o.why !== 'zhouTian') E(tag + ' 週天 bad why ' + o.why);
+      });
     }
     if (id === 'dateListen'){
       if (q.peek) E(tag + ' dateListen must have no peek');

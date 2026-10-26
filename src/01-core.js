@@ -94,6 +94,7 @@ const DICT_SRC = `
 號 hào 号
 星 xīng
 期 qí
+週 zhōu 周
 天 tiān
 上 shàng
 下 xià
