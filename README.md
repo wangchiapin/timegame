@@ -90,6 +90,9 @@
 - 靜音鈕用 game-kit 的 `mute.js`；語音提示用 `voicehint.js`。
 - 版權說明用 game-kit 的 `copyright.js`（放在頁面最後面，不釘在畫面上）。
 
+## 分享連結預覽（2026-10-28）
+把網址貼到 LINE、WhatsApp 時，會顯示遊戲名稱「練習時間 · ¿Qué hora es?」和縮圖。縮圖是根目錄的 `og.jpg`（1200x630）；名稱與說明文字寫在 `index.html` `<head>` 的 `og:title`、`og:description`（由 `build.js` 合成進 `index.html`）。
+
 ## 說明文字總表
 
 改任何一句說明，這張表都要一起更新。程式裡每種題型的提示寫在 `src/02-gen.js` 的 `instr`，畫面按鈕和標題的字在 `src/03-ui.js` 最上面的 `STR`。
