@@ -13,6 +13,8 @@ const html = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <meta name="theme-color" content="#ebe5d6">
 <title>練習時間 · ¿Qué hora es?</title>
 <style>
