@@ -335,9 +335,6 @@ body:has(.overlay){overflow:hidden}                        /* 設定或確認視
 .seg[data-seg=phon] button{border-right:1px solid #55524a}
 .seg[data-seg=phon] button:nth-child(2n){border-right:0}
 .seg[data-seg=phon] button:nth-child(-n+2){border-bottom:1px solid #55524a}
-.lvbar{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;margin:12px 0 4px}
-.lvbar label{font-size:14px;font-weight:600;line-height:1.25}
-.lvbar label .tr{font-weight:400}
 .overlay .panel h3{position:relative;padding-right:56px}
 .overlay .panel h3 .x{position:absolute;right:6px;top:50%;margin-top:-22px;width:44px;height:44px;border:0;background:transparent;color:inherit;font-size:20px}
 .overlay.dlg{align-items:center}
@@ -355,3 +352,11 @@ body:has(.overlay){overflow:hidden}                        /* 設定或確認視
 .hitem .tr{display:inline;margin-left:8px;font-size:13px;color:var(--sub)}
 .hitem p{margin:4px 0 0;font-size:15px;line-height:1.5}
 .hitem p.tr{display:block;margin-left:0;font-size:13px;line-height:1.45}
+
+/* 2026-11-04 手機版：網頁固定成螢幕高度、不整頁捲動，改由 #app 在裡面捲
+   （照 把／被 的做法，避開 iPhone Chrome 往下捲後上面被網址列切掉、回不到頂端）；電腦版（860px 以上）照舊整頁捲動 */
+@media (max-width:859px){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{display:flex;flex-direction:column;min-height:0;height:100vh;height:100dvh}
+  #app{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+}

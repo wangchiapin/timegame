@@ -46,6 +46,7 @@ const Ti = k => Li(STR[k]);
 const App = { name:'', lv:'mid', open:null, round:null, qs:[], i:0, score:0, right:0, t0:0, cur:null, answered:false, sel:null, dial:null, match:null };
 try{ App.name = localStorage.getItem('timegame.name') || ''; const l = localStorage.getItem('timegame.lv'); if (['easy', 'mid', 'hard'].includes(l)) App.lv = l; }catch(e){}
 const root = () => $('#app');
+function toTop(){ window.scrollTo(0, 0); const a = root(); if (a) a.scrollTop = 0; }    // 手機版是 #app 在捲，換畫面時兩個都回到頂端
 
 /* ---------- 音效（只有答對／答錯的提示音；開關在設定裡） ---------- */
 /* 沿用原本靜音鈕的存放位置 hg.mute.time（'1' = 靜音），已經按過靜音的人維持靜音 */
@@ -156,7 +157,8 @@ function seg(key, opts, cur){
 }
 const LV_OPTS = () => [['easy', L('簡單', 'Fácil', 'Easy')], ['mid', L('普通', 'Normal', 'Medium')], ['hard', L('困難', 'Difícil', 'Hard')]];
 function settingsRows(){
-  let h = `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
+  let h = App.round ? '' : `<div class="setrow"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;   // 難度：只在開始畫面開的設定裡有，遊戲中不能換
+  h += `<div class="setrow"><label>${Lh(STR.setScript)}</label>${seg('script', [['trad', '繁體'], ['simp', '简体']], Settings.script)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
@@ -184,6 +186,7 @@ function openSettings(){
     $$('[data-seg]', ov).forEach(box => box.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = box.dataset.seg, v = b.dataset.v;
+      if (k === 'lv'){ App.lv = v; try{ localStorage.setItem('timegame.lv', App.lv); }catch(err){} draw(); return; }   // 難度：只記下來，下一回開始時才用
       if (k === 'sound'){ setSound(v === 'on'); if (soundOn) sfx(true); draw(); return; }   // 音效開關：不影響畫面，開啟時叮一聲讓學生聽聽
       Settings[k] = v; writeSettings(Settings);
       if (k === 'rate') speak('現在三點半'); else changed = true;      // 選語速時念一句給學生聽聽看
@@ -205,17 +208,17 @@ const HELP = [
      'Unidad 1: la hora. Unidad 2: fecha y día de la semana. Unidad 3: horario del día. Unidad 4: calendario mensual y anual. El desafío mixto junta las cuatro unidades: 50 preguntas.',
      'Unit 1: clock time. Unit 2: date and weekday. Unit 3: daily schedule. Unit 4: month and year calendars. The mixed challenge combines all four: 50 questions.')],
   [L('難度', 'Nivel', 'Level'),
-   L('簡單、普通、困難，在開始畫面上方一點就換，遊戲中不能換。越難，時間越細、用的詞越多。',
-     'Fácil, Normal y Difícil. Se cambia en la pantalla de inicio, no durante el juego. Cuanto más difícil, más detalle en la hora y más palabras.',
-     'Easy, Medium and Hard. Change it on the start screen, not during a round. The harder it is, the more detailed the times and the more words you see.')],
+   L('簡單、普通、困難，在開始畫面右上角的齒輪裡選，遊戲中不能換。越難，時間越細、用的詞越多。',
+     'Fácil, Normal y Difícil. Se elige en los ajustes (la rueda de la pantalla de inicio), no durante el juego. Cuanto más difícil, más detalle en la hora y más palabras.',
+     'Easy, Medium and Hard. Choose it in the settings (the gear on the start screen), not during a round. The harder it is, the more detailed the times and the more words you see.')],
   [L('怎麼玩', 'Cómo jugar', 'How to play'),
    L('有聲音的題目，先按「🔊 聽」。選好答案後，畫面下方會告訴你對或錯，還有正確答案。按「下一題」繼續。一回 25 題。',
      'En las preguntas con audio, toca primero «🔊 Escuchar». Al responder, abajo verás si acertaste y la respuesta correcta. Toca «Siguiente» para continuar. Cada ronda tiene 25 preguntas.',
      'For questions with sound, tap “🔊 Listen” first. After you answer, the bar at the bottom shows right or wrong and the correct answer. Tap “Next” to continue. A round has 25 questions.')],
   [L('分數和設定', 'Puntos y ajustes', 'Score and settings'),
-   L('滿分 100 分，答對越多分數越高。右上角的齒輪可以改字形、語言、拼音／注音、語速和音效。',
-     'El máximo es 100 puntos; cuantas más respuestas correctas, más puntos. La rueda de arriba a la derecha cambia la escritura, el idioma, pinyin / zhuyin, la voz y los sonidos.',
-     'The maximum is 100 points; the more you get right, the higher the score. The gear at the top right changes script, language, pinyin / zhuyin, voice speed and sound.')]
+   L('滿分 100 分，答對越多分數越高。右上角的齒輪可以改難度、字形、語言、拼音／注音、語速和音效。',
+     'El máximo es 100 puntos; cuantas más respuestas correctas, más puntos. La rueda de arriba a la derecha cambia el nivel, la escritura, el idioma, pinyin / zhuyin, la voz y los sonidos.',
+     'The maximum is 100 points; the more you get right, the higher the score. The gear at the top right changes level, script, language, pinyin / zhuyin, voice speed and sound.')]
 ];
 function openHelp(){
   if (document.querySelector('.overlay')) return;
@@ -251,7 +254,6 @@ function renderStart(){
   let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
   h += `<button class="gear" id="gear" aria-label="settings">${GEAR}</button>`;
   h += `<button id="help" aria-label="help">${HELPICON}</button>`;
-  h += `<div class="lvbar"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
     h += `<div class="unit" data-u="${u.id}"><button class="uh" data-ustart="${u.id}"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button></div>`;
@@ -260,7 +262,6 @@ function renderStart(){
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings);
   $('#help').addEventListener('click', openHelp);
-  $$('[data-seg=lv] button').forEach(b => b.addEventListener('click', () => { App.lv = b.dataset.v; try{ localStorage.setItem('timegame.lv', App.lv); }catch(err){} renderStart(); }));
   $$('[data-ustart]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.ustart); startRound(u.subs.map(x => x[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
 }
@@ -342,7 +343,7 @@ function renderQ(){
   h += '<div class="sheet" id="sheet" hidden><div class="sheetin"><div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div></div></div>';
   document.body.classList.remove('has-sheet');
   root().innerHTML = h;
-  window.scrollTo(0, 0);
+  toTop();
   $('#home').addEventListener('click', confirmLeave);          // 遊戲中按回主選單一律先確認（包括第 1 題還沒作答）
   $('#gearq').addEventListener('click', openSettings);
   $('#helpq').addEventListener('click', openHelp);
@@ -481,7 +482,7 @@ function showResult(){
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
   try{ if (window.HGPlays) HGPlays.end({ score: App.score, secs: Math.round((Date.now() - App.t0) / 1000) }); }catch(e){}   // 遊玩紀錄：跑到結算畫面
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
-  root().innerHTML = h; window.scrollTo(0, 0);
+  root().innerHTML = h; toTop();
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);
 }
