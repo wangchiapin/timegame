@@ -341,7 +341,7 @@ if __name__ == '__main__':
         check(pg.evaluate("document.querySelectorAll('.unit').length") == 4, 'four units on start screen')
         # 齒輪設定：開始畫面和遊戲中都能打開、能改
         check(pg.evaluate("!document.querySelector('.setrow')") and pg.evaluate("!!document.querySelector('#gear')"), 'start screen has gear, no inline settings')
-        pg.click('#gear'); check(pg.evaluate("document.querySelectorAll('.overlay .setrow').length") == 4, 'settings panel has 4 rows (level moved to start screen)')
+        pg.click('#gear'); check(pg.evaluate("document.querySelectorAll('.overlay .setrow').length") == 5, 'settings panel has 5 rows (script, language, phonetics, voice speed, sound; level is on the start screen)')
         check('Chino + Español' in pg.inner_text('.overlay'), 'language label reads Chino + Español')
         check(pg.evaluate("!document.querySelector('.overlay [data-seg=lv]') && !!document.querySelector('.overlay #sx')"), 'settings: no level row, has ✕ close')
         r = pg.evaluate("(() => { const b = [...document.querySelectorAll('.overlay [data-seg=phon] button')].map(x => x.getBoundingClientRect()); return { n:b.length, rows:new Set(b.map(x => Math.round(x.top))).size, clipped:[...document.querySelectorAll('.overlay [data-seg=phon] button')].some(x => x.scrollWidth > x.clientWidth + 1) }; })()")
@@ -506,7 +506,7 @@ if __name__ == '__main__':
         check(r['bw'] == '2px' and r['hbg'] != 'rgba(0, 0, 0, 0)' and r['round'] in ('50%', '21px'), 'title plate + round gear knob (%s)' % r)
         pg.evaluate("openSettings()")
         r = pg.evaluate("""() => { const h3 = getComputedStyle(document.querySelector('.overlay .panel h3')); const on = getComputedStyle(document.querySelector('.overlay .seg button.on')); const off = getComputedStyle(document.querySelector('.overlay .seg button:not(.on)')); return { h3:h3.backgroundColor, on:on.backgroundColor, off:off.color, n:document.querySelectorAll('.overlay .seg').length }; }""")
-        check(r['n'] == 4 and r['h3'] != 'rgba(0, 0, 0, 0)' and r['on'] != r['h3'], 'settings: dark header, 4 rows, lit selected segment (%s)' % r)
+        check(r['n'] == 5 and r['h3'] != 'rgba(0, 0, 0, 0)' and r['on'] != r['h3'], 'settings: dark header, 5 rows, lit selected segment (%s)' % r)
         pg.evaluate("document.querySelector('.overlay').remove()")
 
         print('== 單元：點一下直接開始 25 題；綜合 50 題；百分制')
@@ -548,6 +548,25 @@ if __name__ == '__main__':
                 run_round(pg, True)
             check(pg.evaluate("document.body.innerText.length") > 20, 'settings %s/%s/%s ok' % (s, l, ph))
         pg.evaluate("Settings.script='trad'; Settings.lang='es'; Settings.phon='pinyin'; writeSettings(Settings)")
+
+        print('== 音效開關在設定裡（沒有左下角靜音鈕）')
+        pg.evaluate("localStorage.removeItem('hg.mute.time')"); pg.goto(PAGE); pg.wait_for_timeout(500)
+        check(pg.evaluate("!document.getElementById('hgMute')"), 'no corner mute button')
+        pg.evaluate("openSettings()")
+        check(pg.evaluate("!!document.querySelector('.overlay [data-seg=sound]')"), 'settings has a 音效 row')
+        check(pg.evaluate("document.querySelector('.overlay [data-seg=sound] .on').dataset.v") == 'on', 'sound defaults to on')
+        pg.click('.overlay [data-seg=sound] button[data-v=off]')
+        check(pg.evaluate("localStorage.getItem('hg.mute.time')") == '1' and pg.evaluate("soundOn") is False, 'turning off saves hg.mute.time=1')
+        pg.evaluate("window.__beeps=0; const OC=AudioContext.prototype.createOscillator; AudioContext.prototype.createOscillator=function(){window.__beeps++; return OC.call(this)}; sfx(true); sfx(false)")
+        check(pg.evaluate("window.__beeps") == 0, 'no beep when sound is off')
+        pg.click('.overlay [data-seg=sound] button[data-v=on]')
+        check(pg.evaluate("soundOn") is True and pg.evaluate("localStorage.getItem('hg.mute.time')") == '0', 'turning on saves hg.mute.time=0')
+        check(pg.evaluate("window.__beeps") > 0, 'beep plays when sound is on')
+        pg.evaluate("localStorage.setItem('hg.mute.time','1')"); pg.goto(PAGE); pg.wait_for_timeout(500)
+        check(pg.evaluate("soundOn") is False, 'old muted users stay muted')
+        pg.evaluate("openSettings()")
+        check(pg.evaluate("document.querySelector('.overlay [data-seg=sound] .on').dataset.v") == 'off', 'settings shows off for old muted users')
+        pg.evaluate("localStorage.removeItem('hg.mute.time')"); pg.goto(PAGE); pg.wait_for_timeout(500)
 
         # 遊玩紀錄（HGPlays）：訪客、開始、結算
         pg.evaluate("localStorage.removeItem('hg.visit.hora')")

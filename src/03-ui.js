@@ -13,6 +13,7 @@ const STR = {
   setLang:  L('介面語言', 'Idioma', 'Language'),
   setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
   setRate:  L('語速', 'Voz', 'Voice'),
+  setSound: L('音效', 'Sonidos', 'Sound'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
   mixSub:   L('50 題，四個單元混合', '50 preguntas de las cuatro unidades', '50 questions from all four units'),
@@ -45,9 +46,14 @@ const App = { name:'', lv:'mid', open:null, round:null, qs:[], i:0, score:0, rig
 try{ App.name = localStorage.getItem('timegame.name') || ''; const l = localStorage.getItem('timegame.lv'); if (['easy', 'mid', 'hard'].includes(l)) App.lv = l; }catch(e){}
 const root = () => $('#app');
 
-/* ---------- 音效（有靜音鈕，見 mute.js） ---------- */
+/* ---------- 音效（只有答對／答錯的提示音；開關在設定裡） ---------- */
+/* 沿用原本靜音鈕的存放位置 hg.mute.time（'1' = 靜音），已經按過靜音的人維持靜音 */
+let soundOn = true;
+try{ soundOn = localStorage.getItem('hg.mute.time') !== '1'; }catch(e){}
+function setSound(on){ soundOn = on; try{ localStorage.setItem('hg.mute.time', on ? '0' : '1'); }catch(e){} }
 let _ac = null;
 function sfx(ok){
+  if (!soundOn) return;
   try{
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     if (!_ac) _ac = new AC();
@@ -153,6 +159,7 @@ function settingsRows(){
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setSound)}</label>${seg('sound', [['on', L('開', 'Activado', 'On')], ['off', L('關', 'Apagado', 'Off')]], soundOn ? 'on' : 'off')}</div>`;
   return h;
 }
 /* 齒輪：所有設定都在這裡，開始畫面和遊戲中都能打開 */
@@ -176,6 +183,7 @@ function openSettings(){
     $$('[data-seg]', ov).forEach(box => box.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = box.dataset.seg, v = b.dataset.v;
+      if (k === 'sound'){ setSound(v === 'on'); if (soundOn) sfx(true); draw(); return; }   // 音效開關：不影響畫面，開啟時叮一聲讓學生聽聽
       Settings[k] = v; writeSettings(Settings);
       if (k === 'rate') speak('現在三點半'); else changed = true;      // 選語速時念一句給學生聽聽看
       draw();

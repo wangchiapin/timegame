@@ -43,7 +43,7 @@
 難度：簡單／中等／困難／混合。同一回不會出現題幹一樣的題目。答完後，解答（對錯、原因、正確答案、下一題）顯示在螢幕底部的固定解答條，上面的題目和時鐘不會被推動。版面壓緊：手機（約 390×650）上，看時鐘、聽力、星期幾、時段等題型的題目和選項可以不捲動就同時看到；月曆類題型（月曆本身較高）在較矮的螢幕上仍需捲動。一到九分的時間，每題隨機用「八點零五分」或「八點五分」其中一種說法，同一題不混用。答錯會用中、西、英三種語言說明哪裡不對（聽行程題沒有「看文字」，行程卡的時間排在中文前面（語序同中文，字體大小和格式跟中文一樣）；聽時間題只有時鐘圖版本保留「看文字」；聽力題選錯時不再顯示「聽起來很像」那句，畫面上已有「你選的是…」和正確答案）。
 
 ## 設定
-設定（字形、介面語言、拼音／注音、語速）收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開。難度（簡單／普通／困難）不在設定裡，直接放在開始畫面單元上方，一點就換；遊戲中不能改難度。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
+設定（字形、介面語言、拼音／注音、語速、音效）收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開。難度（簡單／普通／困難）不在設定裡，直接放在開始畫面單元上方，一點就換；遊戲中不能改難度。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
 
 和其他遊戲共用 localStorage `hanziGames.settings`：繁／簡體、介面語言（西／英／只有中文）、拼音／注音、語速（慢 0.45／正常 0.65／快 0.85）。拼音一律台灣讀音；語音只選 zh-TW。
 
@@ -88,7 +88,7 @@
 ## 其他
 - 遊玩紀錄：`build.js` 把 `plays.js` 貼在 `</body>` 前；`startRound()` 呼叫 `HGPlays.start('單元代號-難度')`，`showResult()` 呼叫 `HGPlays.end({score, secs})`；中途回主選單的那一局後台會顯示「沒玩完」。沒有暱稱欄，後台顯示「匿名裝置」。用既有的 plays／visits 規則，不用另外貼規則；失敗時靜默，不影響遊戲。後台「📈 遊玩紀錄」的遊戲名單已加「練習時間」。
 - 沒有排行榜，所以不會出現在分享區的排行榜總覽。
-- 靜音鈕用 game-kit 的 `mute.js`；語音提示用 `voicehint.js`。
+- 音效（只有答對／答錯的提示音，沒有音樂）的開關放在設定裡的「音效」一列，沒有左下角的靜音鈕；開關記在 localStorage 的 `hg.mute.time`（沿用舊靜音鈕的位置，原本按過靜音的人維持靜音）。語音提示用 game-kit 的 `voicehint.js`。
 - 版權說明用 game-kit 的 `copyright.js`（放在頁面最後面，不釘在畫面上）。
 
 ## 分享連結預覽（2026-10-28）
@@ -133,7 +133,7 @@
 | 標題 | 練習時間 | Practica la hora y la fecha | Practice time and dates |
 | 副標 | 一起練習時間的中文！ | ¡Practiquemos juntos la hora en chino! | Let's practice time in Chinese together! |
 | 綜合挑戰 | 綜合挑戰／50 題，四個單元混合 | Desafío mixto／50 preguntas de las cuatro unidades | Mixed challenge／50 questions from all four units |
-| 設定各列 | 字形、介面語言、拼音／注音、語速 | Escritura、Idioma、Pinyin / Zhuyin、Voz | Script、Language、Pinyin / Zhuyin、Voice |
+| 設定各列 | 字形、介面語言、拼音／注音、語速、音效（開／關） | Escritura、Idioma、Pinyin / Zhuyin、Voz、Sonidos（Activado／Apagado） | Script、Language、Pinyin / Zhuyin、Voice、Sound（On／Off） |
 | 開始畫面難度 | 難度：簡單／普通／困難 | Nivel：Fácil／Normal／Difícil | Level：Easy／Medium／Hard |
 | 離開確認（作答中按「回主選單」） | 要離開嗎？這一回的進度不會保留。／繼續玩／離開 | ¿Salir? El progreso de esta ronda no se guardará.／Seguir／Salir | Leave? Progress in this round will not be saved.／Keep playing／Leave |
 | 作答畫面按鈕 | 回主選單、🔊 聽、看文字、確定、下一題、看結果 | Volver al inicio、Escuchar、Ver el texto、Confirmar、Siguiente、Ver resultado | Back to start、Listen、Show text、Confirm、Next、See result |

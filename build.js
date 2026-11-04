@@ -5,7 +5,6 @@ const KIT = process.env.KIT || '/home/claude/game-kit/parts/';
 const K = p => fs.readFileSync(path.join(KIT, p), 'utf8');
 const GAME_ID = 'time';
 
-const mute = K('mute.js').replace(/__GAME__/g, GAME_ID).replace(/__POS__/g, 'left:8px;bottom:22px').replace(/__MOUNT__/g, '');
 const main = ['01-core.js', '02-gen.js', '03-ui.js'].map(S).join('\n');
 
 const html = `<!doctype html>
@@ -23,9 +22,6 @@ ${S('style.css')}
 </head>
 <body>
 <div id="app"></div>
-<script>
-${mute}
-</script>
 <script>
 ${main}
 </script>

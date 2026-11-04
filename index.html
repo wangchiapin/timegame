@@ -336,7 +336,6 @@ html.tod-night .seg{background:#161824}
 /* ===== 手機操作：好按、不誤觸、不被蓋住 ===== */
 #app{padding-bottom:96px}                                  /* 讓最後一個按鈕能捲到喇叭鈕和版權字的上面 */
 body:has(.overlay){overflow:hidden}                        /* 設定或確認視窗打開時，背景不跟著捲 */
-body:has(.overlay) #hgMute{display:none}
 #gear,#gearq{width:44px;height:44px}
 .btn.gear{width:44px;min-height:44px}
 .bar .btn{min-height:44px;padding:6px 12px}
@@ -370,51 +369,6 @@ body:has(.overlay) #hgMute{display:none}
 </head>
 <body>
 <div id="app"></div>
-<script>
-/* ===== 一鍵靜音（只關音樂和音效，不影響念字的語音）— 每天一分鐘遊戲統一做法 ===== */
-(function(){
-  var KEY='hg.mute.time', MOUNT='', muted=false, masters=[];
-  try{ muted = localStorage.getItem(KEY)==='1'; }catch(e){}
-  /* 讓這個遊戲建立的所有 Web Audio 聲音，都先經過一個總音量；靜音＝總音量 0 */
-  try{
-    var BP = window.BaseAudioContext ? window.BaseAudioContext.prototype : (window.AudioContext||window.webkitAudioContext).prototype;
-    var desc = Object.getOwnPropertyDescriptor(BP,'destination');
-    if(desc && desc.get){
-      Object.defineProperty(BP,'destination',{configurable:true,get:function(){
-        var real = desc.get.call(this);
-        if(!this.__hgMaster){
-          try{ var g=this.createGain(); g.gain.value = muted?0:1; g.connect(real); this.__hgMaster=g; masters.push(g); }
-          catch(e){ return real; }
-        }
-        return this.__hgMaster;
-      }});
-    }
-  }catch(e){}
-  /* 備用的 <audio> 播放（例如 iPhone 的 Chrome）也一起靜音 */
-  try{
-    var op = HTMLMediaElement.prototype.play;
-    HTMLMediaElement.prototype.play = function(){ this.muted = muted; return op.apply(this, arguments); };
-  }catch(e){}
-  function apply(){ masters.forEach(function(g){ try{ g.gain.setValueAtTime(muted?0:1, g.context.currentTime); }catch(e){ g.gain.value = muted?0:1; } }); }
-  function build(){
-    if(document.getElementById('hgMute')) return;
-    var st=document.createElement('style');
-    st.textContent='#hgMute{position:fixed;left:8px;bottom:22px;z-index:2147483000;width:40px;height:40px;border-radius:50%;border:1px solid rgba(0,0,0,.28);background:rgba(255,255,255,.88);color:#222;font-size:19px;line-height:1;padding:0;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25);touch-action:manipulation;-webkit-tap-highlight-color:transparent}#hgMute:active{transform:scale(.94)}#hgMute.st{position:static;flex:0 0 40px;margin:0 0 0 8px}';
-    document.head.appendChild(st);
-    var b=document.createElement('button'); b.type='button'; b.id='hgMute';
-    function paint(){ b.textContent = muted?'🔇':'🔊'; b.setAttribute('aria-pressed', muted?'true':'false');
-      b.title = b.ariaLabel = muted ? '開啟音樂和音效 · Activar música y efectos' : '靜音（音樂和音效）· Silenciar música y efectos'; apply(); }
-    b.addEventListener('click',function(e){ e.stopPropagation(); muted=!muted; try{ localStorage.setItem(KEY, muted?'1':'0'); }catch(err){} paint(); });
-    b.addEventListener('pointerdown',function(e){ e.stopPropagation(); });
-    paint();
-    var anchor = MOUNT && document.querySelector(MOUNT);
-    if(anchor && anchor.parentNode){ b.className='st'; anchor.parentNode.insertBefore(b, anchor.nextSibling); } else document.body.appendChild(b);
-  }
-  if(document.body) build(); else document.addEventListener('DOMContentLoaded', build);
-})();
-/* ===== /一鍵靜音 ===== */
-
-</script>
 <script>
 'use strict';
 /* =====================================================================
@@ -1414,6 +1368,7 @@ const STR = {
   setLang:  L('介面語言', 'Idioma', 'Language'),
   setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
   setRate:  L('語速', 'Voz', 'Voice'),
+  setSound: L('音效', 'Sonidos', 'Sound'),
   setLv:    L('難度', 'Nivel', 'Level'),
   mix:      L('綜合挑戰', 'Desafío mixto', 'Mixed challenge'),
   mixSub:   L('50 題，四個單元混合', '50 preguntas de las cuatro unidades', '50 questions from all four units'),
@@ -1446,9 +1401,14 @@ const App = { name:'', lv:'mid', open:null, round:null, qs:[], i:0, score:0, rig
 try{ App.name = localStorage.getItem('timegame.name') || ''; const l = localStorage.getItem('timegame.lv'); if (['easy', 'mid', 'hard'].includes(l)) App.lv = l; }catch(e){}
 const root = () => $('#app');
 
-/* ---------- 音效（有靜音鈕，見 mute.js） ---------- */
+/* ---------- 音效（只有答對／答錯的提示音；開關在設定裡） ---------- */
+/* 沿用原本靜音鈕的存放位置 hg.mute.time（'1' = 靜音），已經按過靜音的人維持靜音 */
+let soundOn = true;
+try{ soundOn = localStorage.getItem('hg.mute.time') !== '1'; }catch(e){}
+function setSound(on){ soundOn = on; try{ localStorage.setItem('hg.mute.time', on ? '0' : '1'); }catch(e){} }
 let _ac = null;
 function sfx(ok){
+  if (!soundOn) return;
   try{
     const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
     if (!_ac) _ac = new AC();
@@ -1554,6 +1514,7 @@ function settingsRows(){
   h += `<div class="setrow"><label>${Lh(STR.setLang)}</label>${seg('lang', [['es', 'Chino + Español'], ['en', 'Chino + English'], ['zh', 'Solo chino']], Settings.lang)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setPhon)}</label>${seg('phon', [['pinyin', 'Pinyin'], ['zhuyin', 'Zhuyin\nㄅㄆㄇ'], ['both', L('兩者', 'Ambos', 'Both')], ['off', L('關', 'Apagado', 'Off')]], Settings.phon)}</div>`;
   h += `<div class="setrow"><label>${Lh(STR.setRate)}</label>${seg('rate', [['slow', L('慢', 'Lento', 'Slow')], ['normal', L('一般', 'Normal', 'Normal')], ['fast', L('快', 'Rápido', 'Fast')]], Settings.rate)}</div>`;
+  h += `<div class="setrow"><label>${Lh(STR.setSound)}</label>${seg('sound', [['on', L('開', 'Activado', 'On')], ['off', L('關', 'Apagado', 'Off')]], soundOn ? 'on' : 'off')}</div>`;
   return h;
 }
 /* 齒輪：所有設定都在這裡，開始畫面和遊戲中都能打開 */
@@ -1577,6 +1538,7 @@ function openSettings(){
     $$('[data-seg]', ov).forEach(box => box.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const k = box.dataset.seg, v = b.dataset.v;
+      if (k === 'sound'){ setSound(v === 'on'); if (soundOn) sfx(true); draw(); return; }   // 音效開關：不影響畫面，開啟時叮一聲讓學生聽聽
       Settings[k] = v; writeSettings(Settings);
       if (k === 'rate') speak('現在三點半'); else changed = true;      // 選語速時念一句給學生聽聽看
       draw();

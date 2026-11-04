@@ -326,7 +326,6 @@ html.tod-night .seg{background:#161824}
 /* ===== 手機操作：好按、不誤觸、不被蓋住 ===== */
 #app{padding-bottom:96px}                                  /* 讓最後一個按鈕能捲到喇叭鈕和版權字的上面 */
 body:has(.overlay){overflow:hidden}                        /* 設定或確認視窗打開時，背景不跟著捲 */
-body:has(.overlay) #hgMute{display:none}
 #gear,#gearq{width:44px;height:44px}
 .btn.gear{width:44px;min-height:44px}
 .bar .btn{min-height:44px;padding:6px 12px}
