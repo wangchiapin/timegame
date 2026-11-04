@@ -1467,8 +1467,10 @@ function clockSVG(o){
 }
 function setHands(svg, h, m){
   const pt = (a, len) => { const r = a * Math.PI / 180; return [(100 + len * Math.sin(r)).toFixed(2), (100 - len * Math.cos(r)).toFixed(2)]; };
-  const hp = pt((h % 12) * 30 + m * 0.5, 48), mp = pt(m * 6, 74), hh = $('.hh', svg), mh = $('.mh', svg);
-  hh.setAttribute('x2', hp[0]); hh.setAttribute('y2', hp[1]); mh.setAttribute('x2', mp[0]); mh.setAttribute('y2', mp[1]);
+  const hA = (h % 12) * 30 + m * 0.5, mA = m * 6;
+  const hp = pt(hA, 46), mp = pt(mA, 76), hb = pt(hA + 180, 9), mb = pt(mA + 180, 12), hh = $('.hh', svg), mh = $('.mh', svg);
+  hh.setAttribute('x1', hb[0]); hh.setAttribute('y1', hb[1]); hh.setAttribute('x2', hp[0]); hh.setAttribute('y2', hp[1]);
+  mh.setAttribute('x1', mb[0]); mh.setAttribute('y1', mb[1]); mh.setAttribute('x2', mp[0]); mh.setAttribute('y2', mp[1]);
 }
 function bindDial(svg, st, readout){
   let drag = null;

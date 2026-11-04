@@ -667,6 +667,15 @@ if __name__ == '__main__':
                 answer(pg, False); pg.wait_for_selector('#next:not([hidden])'); shot('a_' + sub)
             pg.evaluate("Settings.lang='zh'; Settings.phon='both'; startRound(['clockChoice'],'hard','x',false, 10)"); shot('z_both_clockChoice')
             pg.evaluate("Settings.script='simp'; Settings.lang='en'; Settings.phon='zhuyin'; startRound(['schedListen'],'hard','x',false, 10)"); shot('z_simp_schedListen')
+        # 撥時鐘：拖完之後兩根指針都要穿過圓心，不能歪
+        pg.evaluate("renderStart()")
+        pg.evaluate("startRound(['clockSet'],'mid','x',false, 10)"); pg.wait_for_timeout(100)
+        for (hh, mm) in [(3, 20), (9, 45), (12, 5)]:
+            pg.evaluate("(a) => { App.cur.target = {h:a[0], m:a[1]}; }", [hh, mm]); drag_dial(pg, {'h': hh, 'm': mm})
+            res = pg.evaluate("""(() => { const out = []; for (const c of ['hh','mh']) { const l = document.querySelector('#dial .' + c);
+                const x1 = +l.getAttribute('x1') - 100, y1 = +l.getAttribute('y1') - 100, x2 = +l.getAttribute('x2') - 100, y2 = +l.getAttribute('y2') - 100;
+                out.push(Math.abs(x1 * y2 - x2 * y1) / Math.hypot(x2 - x1, y2 - y1)); } return out; })()""")
+            check(all(d < 0.2 for d in res), 'dial hands pass through the centre after dragging %d:%02d %s' % (hh, mm, res))
         b.close()
     print('FAILS', fails)
     sys.exit(1 if fails else 0)
