@@ -1707,7 +1707,7 @@ function renderQ(){
   document.body.classList.remove('has-sheet');
   root().innerHTML = h;
   window.scrollTo(0, 0);
-  $('#home').addEventListener('click', () => { if (App.i > 0 || App.answered) confirmLeave(); else renderStart(); });
+  $('#home').addEventListener('click', confirmLeave);          // 遊戲中按回主選單一律先確認（包括第 1 題還沒作答）
   $('#gearq').addEventListener('click', openSettings);
   $('#helpq').addEventListener('click', openHelp);
   if (q.audio){
