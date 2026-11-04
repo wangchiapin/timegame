@@ -580,9 +580,11 @@ if __name__ == '__main__':
         pg.evaluate("document.querySelector('#app').scrollTop = 40"); answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         pg.evaluate("document.querySelector('#app').scrollTop = 9999"); pg.wait_for_timeout(50)
         check(pg.evaluate("(() => { const s = document.querySelector('#sheet').getBoundingClientRect(); const last = [...document.querySelectorAll('#app > *')].filter(e => e.getBoundingClientRect().height > 0 && e.id !== 'sheet').pop().getBoundingClientRect(); return last.bottom <= s.top + 2; })()"), 'phone: answer bar does not cover the last content when scrolled to the bottom')
+        check(pg.evaluate("(() => { const s = document.getElementById('sheet'); return !!s && s.parentElement === document.body && !s.closest('#app'); })()"), 'phone: answer bar lives outside the scrolling #app (iPhone clips fixed things inside it)')
+        check(pg.evaluate("(() => { const b = document.querySelector('#next').getBoundingClientRect(); const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); return b.bottom <= innerHeight && b.top >= 0 && !!e && (e.id === 'next' || !!e.closest('#next')); })()"), 'phone: the 下一題 button is fully on screen and can be tapped (nothing on top of it)')
         pg.click('#next'); pg.wait_for_timeout(100)
         check(page_state()['appTop'] == 0, 'phone: next question starts back at the top')
-        pg.evaluate("renderStart()"); pg.set_viewport_size({'width': 390, 'height': 800})
+        pg.evaluate("renderStart()"); check(pg.evaluate("!document.getElementById('sheet')"), 'back at the menu: no leftover answer bar'); pg.set_viewport_size({'width': 390, 'height': 800})
         # 電腦版（寬螢幕）：維持整頁捲動
         pg.set_viewport_size({'width': 1100, 'height': 500}); pg.evaluate("renderStart()"); pg.wait_for_timeout(100)
         check(pg.evaluate("getComputedStyle(document.documentElement).overflowY") != 'hidden' and pg.evaluate("document.scrollingElement.scrollHeight > innerHeight"), 'desktop: the whole page scrolls as before')

@@ -1415,6 +1415,9 @@ const Ti = k => Li(STR[k]);
 const App = { name:'', lv:'mid', open:null, round:null, qs:[], i:0, score:0, right:0, t0:0, cur:null, answered:false, sel:null, dial:null, match:null };
 try{ App.name = localStorage.getItem('timegame.name') || ''; const l = localStorage.getItem('timegame.lv'); if (['easy', 'mid', 'hard'].includes(l)) App.lv = l; }catch(e){}
 const root = () => $('#app');
+/* 解答條要放在 body 底下、#app 外面：手機版 #app 是會捲的區塊，iPhone 上固定在底部的東西放在裡面會被切掉下半截（「下一題」就看不到） */
+function unmountSheet(){ const s = document.getElementById('sheet'); if (s) s.remove(); }
+function mountSheet(html){ unmountSheet(); document.body.insertAdjacentHTML('beforeend', html); }
 function toTop(){ window.scrollTo(0, 0); const a = root(); if (a) a.scrollTop = 0; }    // 手機版是 #app 在捲，換畫面時兩個都回到頂端
 
 /* ---------- 音效（只有答對／答錯的提示音；開關在設定裡） ---------- */
@@ -1627,7 +1630,7 @@ function renderStart(){
   UNITS.forEach(u => {
     h += `<div class="unit" data-u="${u.id}"><button class="uh" data-ustart="${u.id}"><span><b>${esc(zhOf(u.t))}</b>${trOf(u.t) ? `<span class="tr">${esc(trOf(u.t))}</span>` : ''}</span><span class="arrow">▶</span></button></div>`;
   });
-  document.body.classList.remove('has-sheet'); applyTod(nowHour());
+  document.body.classList.remove('has-sheet'); unmountSheet(); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings);
   $('#help').addEventListener('click', openHelp);
@@ -1709,9 +1712,9 @@ function renderQ(){
     h += `<div class="match"><div class="small" style="text-align:center">${esc(zhOf(STR.hintLine))}${trOf(STR.hintLine) ? ' · ' + esc(trOf(STR.hintLine)) : ''}</div><div id="slots"></div><div class="cards" id="cards"></div></div>`;
   }
   if (q.kind !== 'choice') h += `<div class="foot"><button class="btn primary" id="confirm" disabled>${Lh(STR.confirm)}</button></div>`;
-  h += '<div class="sheet" id="sheet" hidden><div class="sheetin"><div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div></div></div>';
   document.body.classList.remove('has-sheet');
   root().innerHTML = h;
+  mountSheet('<div class="sheet" id="sheet" hidden><div class="sheetin"><div id="fb"></div><div class="foot"><button class="btn primary" id="next" hidden></button></div></div></div>');
   toTop();
   $('#home').addEventListener('click', confirmLeave);          // 遊戲中按回主選單一律先確認（包括第 1 題還沒作答）
   $('#gearq').addEventListener('click', openSettings);
@@ -1850,7 +1853,7 @@ function showResult(){
   let h = `<div class="card result"><div class="small">${esc(sc(r.isMix ? '綜合挑戰' : '練習完成'))}</div><div class="score">${App.score}<span class="small"> / ${max}</span></div><div class="msg">${Lh(msg)}</div><div class="small">${App.right} / ${n}</div></div>`;
   h += `<div class="row" style="justify-content:center"><button class="btn primary" id="again">${Lh(STR.again)}</button><button class="btn" id="home2">${Lh(STR.home)}</button></div>`;
   try{ if (window.HGPlays) HGPlays.end({ score: App.score, secs: Math.round((Date.now() - App.t0) / 1000) }); }catch(e){}   // 遊玩紀錄：跑到結算畫面
-  document.body.classList.remove('has-sheet'); applyTod(nowHour());
+  document.body.classList.remove('has-sheet'); unmountSheet(); applyTod(nowHour());
   root().innerHTML = h; toTop();
   $('#again').addEventListener('click', () => startRound(r.spec, r.lv, r.label, r.isMix));
   $('#home2').addEventListener('click', renderStart);
