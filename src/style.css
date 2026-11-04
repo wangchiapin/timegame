@@ -131,7 +131,7 @@ svg.clock.mini{width:100%;max-width:140px;margin:0 auto}
 .slot{display:flex;align-items:center;gap:8px;margin:6px 0}
 .slot .tm{flex:0 0 78px;text-align:center;border:1px solid var(--line);background:var(--card2);border-radius:8px;padding:6px 2px;font-size:19px;font-variant-numeric:tabular-nums;min-height:48px;display:flex;align-items:center;justify-content:center}
 .slot .tm svg{width:54px;height:54px}
-.slot .box{flex:1;min-height:52px;border:1px dashed var(--line);border-radius:8px;background:var(--card);padding:4px 6px;font-size:17px;display:flex;align-items:center;cursor:pointer}
+.slot .box{flex:1;min-width:0;flex-wrap:wrap;min-height:52px;border:1px dashed var(--line);border-radius:8px;background:var(--card);padding:4px 6px;font-size:17px;display:flex;align-items:center;cursor:pointer}
 .slot .box.filled{border-style:solid}
 .slot .box.ok{background:var(--okbg);border-color:var(--ok)}
 .slot .box.bad{background:var(--badbg);border-color:var(--bad)}

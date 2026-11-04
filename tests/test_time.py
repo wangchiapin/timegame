@@ -676,6 +676,20 @@ if __name__ == '__main__':
                 const x1 = +l.getAttribute('x1') - 100, y1 = +l.getAttribute('y1') - 100, x2 = +l.getAttribute('x2') - 100, y2 = +l.getAttribute('y2') - 100;
                 out.push(Math.abs(x1 * y2 - x2 * y1) / Math.hypot(x2 - x1, y2 - y1)); } return out; })()""")
             check(all(d < 0.2 for d in res), 'dial hands pass through the centre after dragging %d:%02d %s' % (hh, mm, res))
+        # 行程先後順序：不能出現「七點二十去學校、八點才起床」這種顛倒
+        bad = pg.evaluate("""(() => { let bad = []; for (const lv of ['easy','mid','hard']) for (let i = 0; i < 400; i++) {
+            const q = gSchedMatch(lv), it = q.dbg.items, T = Object.fromEntries(it.map(x => [x.short, x.H * 60 + x.m]));
+            if (!schedOrderOk(it.map(x => ({ a:{ short:x.short }, H:x.H, m:x.m })))) bad.push(JSON.stringify(it));
+            for (const [a, ls] of SCHED_ORDER) if (a in T) for (const l of ls) if (l in T && !(T[a] < T[l])) bad.push(a + '>=' + l); }
+          return bad.slice(0, 3); })()""")
+        check(not bad, 'schedule match: activities always in a sensible order over 1200 rounds %s' % bad)
+        # 行程配對：長句子在手機上不能超出螢幕
+        for w in (390, 360):
+            pg.set_viewport_size({'width': w, 'height': 800})
+            pg.evaluate("Settings.script='trad'; Settings.lang='en'; Settings.phon='zhuyin'; startRound(['schedMatch'],'hard','x',false, 10)"); pg.wait_for_timeout(150)
+            over = pg.evaluate("(() => { const W = document.documentElement.clientWidth; return [...document.querySelectorAll('.slot .box, .cardb')].filter(e => e.getBoundingClientRect().right > W + 1 || e.scrollWidth > e.clientWidth + 1).length; })()")
+            check(over == 0, 'schedule match at %dpx: no card runs off the right edge (%d)' % (w, over))
+        pg.set_viewport_size({'width': 390, 'height': 800})
         b.close()
     print('FAILS', fails)
     sys.exit(1 if fails else 0)

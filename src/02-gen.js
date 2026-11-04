@@ -259,7 +259,25 @@ const DAILY = [
   { short:'去學校', es:'ir a la escuela',   en:'go to school',    hours:[7, 8] }
 ];
 const schedMins = lv => (lv === 'easy' ? [0] : lv === 'mid' ? [0, 30] : [0, 10, 20, 30, 40, 50]);
+/* 一天裡的先後順序：[先, [後面的…]]；抽到顛倒的組合就重抽（例如 7:20 去學校、8:00 才起床） */
+const ALLSHORT = DAILY.map(a => a.short);
+const SCHED_ORDER = [
+  ['起床', ALLSHORT.filter(s => s !== '起床')],
+  ['吃早餐', ['去學校', '上班', '上課', '吃午飯']],
+  ['去學校', ['上課', '吃午飯', '做功課', '回家', '吃晚飯']],
+  ['上班', ['上課', '吃午飯', '做功課', '回家', '吃晚飯']],
+  ['回家', ['吃晚飯', '洗澡', '看電視', '睡覺']],
+  ['洗澡', ['睡覺']], ['看電視', ['睡覺']]
+];
+function schedOrderOk(items){
+  const t = {}; items.forEach(r => { t[r.a.short] = r.H * 60 + r.m; });
+  return SCHED_ORDER.every(([a, laters]) => !(a in t) || laters.every(b => !(b in t) || t[a] < t[b]));
+}
 function pickSchedule(n, lv, withPeriod){
+  for (let i = 0; i < 200; i++){ const r = pickScheduleRaw(n, lv, withPeriod); if (schedOrderOk(r)) return r; }
+  return pickScheduleRaw(n, lv, withPeriod);
+}
+function pickScheduleRaw(n, lv, withPeriod){
   const res = [], key = r => (withPeriod ? r.H * 100 + r.m : h12(r.H) * 100 + r.m);
   for (const a of shuffle(DAILY)){
     if (res.length >= n) break;
