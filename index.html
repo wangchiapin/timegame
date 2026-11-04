@@ -370,6 +370,10 @@ body:has(.overlay){overflow:hidden}                        /* 設定或確認視
   body{display:flex;flex-direction:column;min-height:0;height:100vh;height:100dvh}
   #app{flex:1 1 auto;min-height:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 }
+/* 遊戲中的說明、設定按鈕縮小（主選單的不動）；點擊範圍仍維持 44px */
+#gearq,#helpq{width:34px;height:34px;min-height:0;position:relative;box-shadow:0 2px 0 var(--edge)}
+#gearq svg,#helpq svg{width:19px;height:19px}
+#gearq::after,#helpq::after{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%}
 </style>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="每天一分鐘 · Cada día unos minutos">
