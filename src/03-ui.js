@@ -321,7 +321,9 @@ function showFeedback(ok, q, chosen, extraHTML){
   else h += `<div class="ans">${lineHTML(q.fb.ansZh)}</div>`;
   if (q.fb.extra) h += `<div class="small">${esc(q.fb.extra)}</div>`;
   const say = q.fb.say || q.audio;
-  if (say) h += `<div class="say">${lineHTML(say)}</div>`;
+  /* 念的那句和上面的正確答案文字一模一樣時，不再重複顯示 */
+  const sameAsAns = say && !q.fb.list && q.fb.ansZh && plainZh(say) === plainZh(q.fb.ansZh);
+  if (say && !sameAsAns) h += `<div class="say">${lineHTML(say)}</div>`;
   if (q.fb.trans){ const t = Settings.lang === 'es' ? q.fb.trans.es : Settings.lang === 'en' ? q.fb.trans.en : ''; if (t) h += `<div class="small">${esc(t)}</div>`; }
   h += '</div>';
   h += '</div>';

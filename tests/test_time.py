@@ -466,7 +466,12 @@ if __name__ == '__main__':
             has_audio = pg.evaluate("!!document.querySelector('#hear')")
             answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
             say = pg.evaluate("(document.querySelector('.fb .say')||{}).innerText||''")
-            if has_audio: check(len(say) > 1, '%s shows spoken sentence after answer (%r)' % (sub, say[:20]))
+            same = pg.evaluate("(()=>{const q=App.cur; return !!(q&&q.audio&&!q.fb.list&&q.fb.ansZh&&plainZh(q.audio)===plainZh(q.fb.ansZh));})()")
+            if has_audio:
+                if same:   # 念的句子 = 正確答案：只出現一次（不重複顯示 .say）
+                    check(len(say) == 0 and pg.evaluate("!!document.querySelector('.fb .ans')"), '%s spoken sentence equals answer: shown once, no duplicate' % sub)
+                else:
+                    check(len(say) > 1, '%s shows spoken sentence after answer (%r)' % (sub, say[:20]))
         pg.evaluate("startRound(['relDay'], 'mid', 'q', false, 10)"); pg.wait_for_timeout(50)
         answer(pg, False); pg.wait_for_selector('#next:not([hidden])')
         check(pg.evaluate("!document.querySelector('.fb .say')"), 'non-listening question shows no .say')
