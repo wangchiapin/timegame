@@ -9,6 +9,7 @@ const STR = {
   title:    L('練習時間', 'Practica la hora y la fecha', 'Practice time and dates'),
   sub:      L('一起練習時間的中文！','¡Practiquemos juntos la hora en chino!', 'Let\'s practice time in Chinese together!'),
   settings: L('設定', 'Ajustes', 'Settings'),
+  help:     L('遊戲說明', 'Cómo jugar', 'How to play'),
   setScript:L('字形', 'Escritura', 'Script'),
   setLang:  L('介面語言', 'Idioma', 'Language'),
   setPhon:  L('拼音／注音', 'Pinyin / Zhuyin', 'Pinyin / Zhuyin'),
@@ -194,6 +195,48 @@ function openSettings(){
   try{ history.pushState({ ov:1 }, ''); hist = true; window.addEventListener('popstate', onPop); }catch(e){}
   draw();
 }
+/* ===== 說明：左上角「?」（開始畫面）和答題列的「?」都打開同一個說明視窗 ===== */
+const HELPICON = '<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+const HELP = [
+  [L('這個遊戲在練什麼', '¿Qué se practica?', 'What you practice'),
+   L('用中文練習說時間、日期、行程和月曆。', 'Practica decir la hora, la fecha, el horario y el calendario en chino.', 'Practice telling the time, dates, daily plans and calendars in Chinese.')],
+  [L('四個單元和綜合挑戰', 'Cuatro unidades y el desafío mixto', 'Four units and the mixed challenge'),
+   L('單元一：幾點幾分。單元二：日期和星期。單元三：一日行程。單元四：月曆年曆。綜合挑戰把四個單元混在一起，一共 50 題。',
+     'Unidad 1: la hora. Unidad 2: fecha y día de la semana. Unidad 3: horario del día. Unidad 4: calendario mensual y anual. El desafío mixto junta las cuatro unidades: 50 preguntas.',
+     'Unit 1: clock time. Unit 2: date and weekday. Unit 3: daily schedule. Unit 4: month and year calendars. The mixed challenge combines all four: 50 questions.')],
+  [L('難度', 'Nivel', 'Level'),
+   L('簡單、普通、困難，在開始畫面上方一點就換，遊戲中不能換。越難，時間越細、用的詞越多。',
+     'Fácil, Normal y Difícil. Se cambia en la pantalla de inicio, no durante el juego. Cuanto más difícil, más detalle en la hora y más palabras.',
+     'Easy, Medium and Hard. Change it on the start screen, not during a round. The harder it is, the more detailed the times and the more words you see.')],
+  [L('怎麼玩', 'Cómo jugar', 'How to play'),
+   L('有聲音的題目，先按「🔊 聽」。選好答案後，畫面下方會告訴你對或錯，還有正確答案。按「下一題」繼續。一回 25 題。',
+     'En las preguntas con audio, toca primero «🔊 Escuchar». Al responder, abajo verás si acertaste y la respuesta correcta. Toca «Siguiente» para continuar. Cada ronda tiene 25 preguntas.',
+     'For questions with sound, tap “🔊 Listen” first. After you answer, the bar at the bottom shows right or wrong and the correct answer. Tap “Next” to continue. A round has 25 questions.')],
+  [L('分數和設定', 'Puntos y ajustes', 'Score and settings'),
+   L('滿分 100 分，答對越多分數越高。右上角的齒輪可以改字形、語言、拼音／注音、語速和音效。',
+     'El máximo es 100 puntos; cuantas más respuestas correctas, más puntos. La rueda de arriba a la derecha cambia la escritura, el idioma, pinyin / zhuyin, la voz y los sonidos.',
+     'The maximum is 100 points; the more you get right, the higher the score. The gear at the top right changes script, language, pinyin / zhuyin, voice speed and sound.')]
+];
+function openHelp(){
+  if (document.querySelector('.overlay')) return;
+  const ov = document.createElement('div'); ov.className = 'overlay'; document.body.appendChild(ov);
+  let popped = false, hist = false;
+  const onKey = e => { if (e.key === 'Escape') close(); };
+  const onPop = () => { popped = true; close(); };
+  const close = () => {
+    if (!ov.isConnected) return;
+    ov.remove(); document.removeEventListener('keydown', onKey); window.removeEventListener('popstate', onPop);
+    if (hist && !popped){ try{ history.back(); }catch(e){} }
+  };
+  ov.innerHTML = `<div class="panel"><h3>? ${Lh(STR.help)}<button class="x" id="hx" aria-label="close">✕</button></h3><div class="helpbody">` +
+    HELP.map(([t, b]) => `<div class="hitem"><b>${esc(zhOf(t))}</b><span class="tr">${esc(trOf(t))}</span><p>${esc(zhOf(b))}</p>${trOf(b) ? `<p class="tr">${esc(trOf(b))}</p>` : ''}</div>`).join('') +
+    `</div><button class="btn wide" id="hclose">${Lh(STR.close)}</button></div>`;
+  $('#hclose', ov).addEventListener('click', close);
+  $('#hx', ov).addEventListener('click', close);
+  ov.addEventListener('click', e => { if (e.target === ov) close(); });
+  document.addEventListener('keydown', onKey);
+  try{ history.pushState({ ov:1 }, ''); hist = true; window.addEventListener('popstate', onPop); }catch(e){}
+}
 /* 作答中按「回主選單」：先確認，避免誤觸丟掉整回 */
 function confirmLeave(){
   if (document.querySelector('.overlay')) return;
@@ -207,6 +250,7 @@ function renderStart(){
   App.round = null; try{ speechSynthesis.cancel(); }catch(e){}
   let h = `<div class="title"><h1>${esc(zhOf(STR.title))}</h1><div class="sub">${Lh(STR.sub)}</div></div>`;
   h += `<button class="gear" id="gear" aria-label="settings">${GEAR}</button>`;
+  h += `<button id="help" aria-label="help">${HELPICON}</button>`;
   h += `<div class="lvbar"><label>${Lh(STR.setLv)}</label>${seg('lv', LV_OPTS(), App.lv)}</div>`;
   h += `<button class="mixbtn" id="mix"><b>${esc(zhOf(STR.mix))}</b><span class="tr" style="font-size:14px">${esc(zhOf(STR.mixSub))}${trOf(STR.mixSub) ? '<br>' + esc(trOf(STR.mixSub)) : ''}</span></button>`;
   UNITS.forEach(u => {
@@ -215,6 +259,7 @@ function renderStart(){
   document.body.classList.remove('has-sheet'); applyTod(nowHour());
   root().innerHTML = h;
   $('#gear').addEventListener('click', openSettings);
+  $('#help').addEventListener('click', openHelp);
   $$('[data-seg=lv] button').forEach(b => b.addEventListener('click', () => { App.lv = b.dataset.v; try{ localStorage.setItem('timegame.lv', App.lv); }catch(err){} renderStart(); }));
   $$('[data-ustart]').forEach(b => b.addEventListener('click', () => { const u = UNITS.find(x => x.id === b.dataset.ustart); startRound(u.subs.map(x => x[0]), App.lv, u.id, false); }));
   $('#mix').addEventListener('click', () => startRound('all', 'mix', 'mix', true));
@@ -261,7 +306,7 @@ function renderQ(){
   const q = App.qs[App.i], n = App.qs.length;
   App.cur = q; App.answered = false; App.sel = null; App.dial = null; App.match = null;
   try{ speechSynthesis.cancel(); }catch(e){}
-  let h = `<div class="bar"><button class="btn" id="home">${esc(zhOf(STR.home))}</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="gearq" aria-label="settings">${GEAR}</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
+  let h = `<div class="bar"><button class="btn" id="home">${esc(zhOf(STR.home))}</button><div class="small">${esc(sc('第')) } ${App.i + 1} / ${n} ${esc(sc('題'))}</div><div class="rgt"><button class="btn gear" id="helpq" aria-label="help">${HELPICON}</button><button class="btn gear" id="gearq" aria-label="settings">${GEAR}</button><span><b>${App.score}</b> <span class="small">${esc(zhOf(STR.score))}</span></span></div></div>`;
   const th = todOf(q); applyTod(th); h += todBand(th);
   h += `<div class="prog"><i style="width:${(App.i / n) * 100}%"></i></div>`;
   h += `<div class="instr">${Lh(q.instr)}</div>`;
@@ -300,6 +345,7 @@ function renderQ(){
   window.scrollTo(0, 0);
   $('#home').addEventListener('click', () => { if (App.i > 0 || App.answered) confirmLeave(); else renderStart(); });
   $('#gearq').addEventListener('click', openSettings);
+  $('#helpq').addEventListener('click', openHelp);
   if (q.audio){
     $('#hear').addEventListener('click', () => speak(q.audio));
     if ($('#peek')) $('#peek').addEventListener('click', () => { const b = $('#peekBox'); b.hidden = !b.hidden; });

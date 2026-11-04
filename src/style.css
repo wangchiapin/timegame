@@ -191,6 +191,7 @@ svg.clock{margin:2px auto;width:min(74vw,250px,31vh)}
 #app{position:relative}
 button.gear{font-size:20px;line-height:1}
 .title + .gear, #gear{position:absolute;right:14px;top:10px;width:42px;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:22px}
+#help{position:absolute;left:14px;top:10px;padding:0}
 .btn.gear{width:38px;min-height:34px;padding:2px 0;position:static}
 .bar .rgt{display:flex;align-items:center;gap:8px}
 .seg button .tr{display:block;font-size:13px;opacity:.85;margin-top:1px}
@@ -221,7 +222,7 @@ body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(31,
 html.tod-night body{background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(255,255,255,.035) 23px 24px)}
 
 /* 粗框、小圓角、硬陰影：像實體的機械按鈕 */
-.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb,.fb,.slot .tm,.slot .box,.seg,.overlay .panel,#gear,.prog{border:2px solid var(--edge);border-radius:4px}
+.btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb,.fb,.slot .tm,.slot .box,.seg,.overlay .panel,#gear,#help,.prog{border:2px solid var(--edge);border-radius:4px}
 .btn,.detail,.vis .datebox,.mixbtn,.unit,.cardb{box-shadow:0 3px 0 var(--edge)}
 .seg button{border-right-color:var(--edge)}
 .btn.primary{background:var(--accent);color:var(--onaccent)}
@@ -305,8 +306,8 @@ html.tod-night .fb.ok .fbh{background:var(--ok)}
 .title h1::before{left:11px}.title h1::after{right:11px}
 .title .sub{margin-top:12px}
 html.tod-night .title h1{background:#161824;color:#e6d6a6}
-#gear,#gearq{border-radius:50%;background:#2a2a27;color:#f3ecd8;box-shadow:0 3px 0 var(--edge)}
-html.tod-night #gear,html.tod-night #gearq{background:#161824;color:#e6d6a6}
+#gear,#gearq,#help,#helpq{border-radius:50%;background:#2a2a27;color:#f3ecd8;box-shadow:0 3px 0 var(--edge)}
+html.tod-night #gear,html.tod-night #gearq,html.tod-night #help,html.tod-night #helpq{background:#161824;color:#e6d6a6}
 .overlay .panel{padding:0 0 14px;overflow:hidden;box-shadow:0 4px 0 var(--edge)}
 .overlay .panel h3{margin:0 0 8px;padding:8px 14px;background:#2a2a27;color:#f3ecd8;border-bottom:2px solid var(--edge);font-size:17px;letter-spacing:.1em}
 .overlay .panel h3 .tr{display:inline;margin-left:10px;font-size:13px;color:#cfc7b0;letter-spacing:0}
@@ -326,7 +327,7 @@ html.tod-night .seg{background:#161824}
 /* ===== 手機操作：好按、不誤觸、不被蓋住 ===== */
 #app{padding-bottom:96px}                                  /* 讓最後一個按鈕能捲到喇叭鈕和版權字的上面 */
 body:has(.overlay){overflow:hidden}                        /* 設定或確認視窗打開時，背景不跟著捲 */
-#gear,#gearq{width:44px;height:44px}
+#gear,#gearq,#help,#helpq{width:44px;height:44px}
 .btn.gear{width:44px;min-height:44px}
 .bar .btn{min-height:44px;padding:6px 12px}
 .seg button{min-height:44px}
@@ -343,5 +344,14 @@ body:has(.overlay){overflow:hidden}                        /* 設定或確認視
 .overlay .panel .two{display:flex;gap:10px;margin:12px 14px 0}
 .overlay .panel .two .btn{flex:1}
 
-#gear,#gearq{display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:0}
-#gear svg,#gearq svg{display:block;width:24px;height:24px}
+#gear,#gearq,#help,#helpq{display:inline-flex;align-items:center;justify-content:center;padding:0;line-height:0}
+#gear svg,#gearq svg,#help svg,#helpq svg{display:block;width:24px;height:24px}
+
+/* 說明視窗 */
+.helpbody{margin:0 14px 10px}
+.hitem{padding:8px 0;border-bottom:1px dashed var(--line)}
+.hitem:last-child{border-bottom:0}
+.hitem b{font-size:16px}
+.hitem .tr{display:inline;margin-left:8px;font-size:13px;color:var(--sub)}
+.hitem p{margin:4px 0 0;font-size:15px;line-height:1.5}
+.hitem p.tr{display:block;margin-left:0;font-size:13px;line-height:1.45}

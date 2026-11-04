@@ -43,7 +43,7 @@
 難度：簡單／中等／困難／混合。同一回不會出現題幹一樣的題目。答完後，解答（對錯、原因、正確答案、下一題）顯示在螢幕底部的固定解答條，上面的題目和時鐘不會被推動。版面壓緊：手機（約 390×650）上，看時鐘、聽力、星期幾、時段等題型的題目和選項可以不捲動就同時看到；月曆類題型（月曆本身較高）在較矮的螢幕上仍需捲動。一到九分的時間，每題隨機用「八點零五分」或「八點五分」其中一種說法，同一題不混用。答錯會用中、西、英三種語言說明哪裡不對（聽行程題沒有「看文字」，行程卡的時間排在中文前面（語序同中文，字體大小和格式跟中文一樣）；聽時間題只有時鐘圖版本保留「看文字」；聽力題選錯時不再顯示「聽起來很像」那句，畫面上已有「你選的是…」和正確答案）。
 
 ## 設定
-設定（字形、介面語言、拼音／注音、語速、音效）收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開。難度（簡單／普通／困難）不在設定裡，直接放在開始畫面單元上方，一點就換；遊戲中不能改難度。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
+設定（字形、介面語言、拼音／注音、語速、音效）收在右上角的齒輪 ⚙，開始畫面和遊戲中都能打開。左上角（答題中是齒輪左邊）有一顆圓形「?」說明鈕，點開看遊戲說明（練什麼、四個單元和綜合挑戰、難度、怎麼玩、分數和設定），文字寫在 `03-ui.js` 的 `HELP`，跟著字形和語言設定走。難度（簡單／普通／困難）不在設定裡，直接放在開始畫面單元上方，一點就換；遊戲中不能改難度。介面語言標籤直接寫 Chino + Español／Chino + English／Solo chino。
 
 和其他遊戲共用 localStorage `hanziGames.settings`：繁／簡體、介面語言（西／英／只有中文）、拼音／注音、語速（慢 0.45／正常 0.65／快 0.85）。拼音一律台灣讀音；語音只選 zh-TW。
 
@@ -75,7 +75,7 @@
 - 如果念的那句和上面的「正確答案」文字完全一樣（例如聽時間選時鐘），就只顯示一次，不再重複；不一樣的（例如聽力點日期）兩行都顯示。
 
 ## 標題與設定
-- 開始畫面的標題是深色金屬銘牌（兩側各一顆螺絲），齒輪是圓形旋鈕，難度是三格深色開關。
+- 開始畫面的標題是深色金屬銘牌（兩側各一顆螺絲），齒輪和「?」是圓形旋鈕，難度是三格深色開關。
 - 設定面板：頂端深色標題條；每一排選項是一排深色開關，選中的那格是亮起來的琥珀色；排與排之間用虛線隔開。早上、下午、晚上三種配色都有對應（晚上是深藍配金色）。
 - 已檢查設定面板與開始畫面在三種時段、三種拼音／注音設定下的文字對比度。
 
@@ -133,6 +133,7 @@
 | 標題 | 練習時間 | Practica la hora y la fecha | Practice time and dates |
 | 副標 | 一起練習時間的中文！ | ¡Practiquemos juntos la hora en chino! | Let's practice time in Chinese together! |
 | 綜合挑戰 | 綜合挑戰／50 題，四個單元混合 | Desafío mixto／50 preguntas de las cuatro unidades | Mixed challenge／50 questions from all four units |
+| 說明視窗 | 遊戲說明（五段：這個遊戲在練什麼、四個單元和綜合挑戰、難度、怎麼玩、分數和設定） | Cómo jugar（Qué se practica、Cuatro unidades…、Nivel、Cómo jugar、Puntos y ajustes） | How to play（What you practice、Four units…、Level、How to play、Score and settings） |
 | 設定各列 | 字形、介面語言、拼音／注音、語速、音效（開／關） | Escritura、Idioma、Pinyin / Zhuyin、Voz、Sonidos（Activado／Apagado） | Script、Language、Pinyin / Zhuyin、Voice、Sound（On／Off） |
 | 開始畫面難度 | 難度：簡單／普通／困難 | Nivel：Fácil／Normal／Difícil | Level：Easy／Medium／Hard |
 | 離開確認（作答中按「回主選單」） | 要離開嗎？這一回的進度不會保留。／繼續玩／離開 | ¿Salir? El progreso de esta ronda no se guardará.／Seguir／Salir | Leave? Progress in this round will not be saved.／Keep playing／Leave |
